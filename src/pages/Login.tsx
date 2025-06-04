@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, RefreshCw } from 'lucide-react';
@@ -16,6 +15,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [usedUsernames, setUsedUsernames] = useState<string[]>([]);
   const [usedCodes, setUsedCodes] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -36,12 +36,15 @@ const Login = () => {
     console.log('Generate password clicked');
     console.log('Username:', username);
     
+    setIsGenerating(true);
+    
     if (!username.trim()) {
       toast({
         title: "Error",
         description: "Please enter a username first",
         variant: "destructive",
       });
+      setIsGenerating(false);
       return;
     }
 
@@ -51,6 +54,7 @@ const Login = () => {
         description: "This username has already been used. Please choose a different username.",
         variant: "destructive",
       });
+      setIsGenerating(false);
       return;
     }
 
@@ -69,12 +73,14 @@ const Login = () => {
           description: "Unable to generate a unique code. Please try again later.",
           variant: "destructive",
         });
+        setIsGenerating(false);
         return;
       }
     } while (usedCodes.includes(newPassword));
 
     console.log('Generated password:', newPassword);
     setGeneratedPassword(newPassword);
+    setIsGenerating(false);
     
     toast({
       title: "Code Generated",
@@ -170,6 +176,16 @@ const Login = () => {
     navigate('/products-table');
   };
 
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Username input changed:', e.target.value);
+    setUsername(e.target.value);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Password input changed:', e.target.value);
+    setEnteredPassword(e.target.value);
+  };
+
   return (
     <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4 py-8">
       <motion.div
@@ -201,9 +217,10 @@ const Login = () => {
                   id="username"
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={handleUsernameChange}
                   placeholder="Enter your username"
                   className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
+                  autoComplete="off"
                 />
                 {usedUsernames.includes(username.trim()) && username.trim() && (
                   <p className="text-red-400 text-sm">This username has already been used</p>
@@ -226,9 +243,9 @@ const Login = () => {
                     variant="outline"
                     size="icon"
                     className="h-12 w-12 border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10 hover:border-cyber-blue/50"
-                    disabled={!username.trim() || usedUsernames.includes(username.trim())}
+                    disabled={!username.trim() || usedUsernames.includes(username.trim()) || isGenerating}
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
               </div>
@@ -243,9 +260,10 @@ const Login = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={enteredPassword}
-                      onChange={(e) => setEnteredPassword(e.target.value)}
+                      onChange={handlePasswordChange}
                       placeholder="Enter the generated code"
                       className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light font-mono pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
+                      autoComplete="off"
                     />
                     <Button
                       type="button"
