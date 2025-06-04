@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -83,8 +82,8 @@ const Navbar = () => {
                 <span>Logout</span>
               </button>
             ) : (
-              <Link to="/login" className="cyber-button">
-                <span>Login</span>
+              <Link to="/get-started" className="cyber-button">
+                <span>Get Started</span>
               </Link>
             )}
           </div>
@@ -137,11 +136,11 @@ const Navbar = () => {
                   </button>
                 ) : (
                   <Link 
-                    to="/login" 
+                    to="/get-started" 
                     onClick={() => setIsOpen(false)}
                     className="cyber-button w-full block text-center"
                   >
-                    <span>Login</span>
+                    <span>Get Started</span>
                   </Link>
                 )}
               </div>
