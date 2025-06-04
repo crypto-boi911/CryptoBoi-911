@@ -96,7 +96,24 @@ const Dashboard = () => {
           <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <SidebarTrigger className="text-cyber-blue hover:text-cyber-light" />
+                <SidebarTrigger className="
+                  bg-cyber-blue/20 
+                  border-2 
+                  border-cyber-blue 
+                  text-cyber-blue 
+                  hover:bg-cyber-blue 
+                  hover:text-cyber-dark 
+                  transition-all 
+                  duration-300 
+                  w-12 
+                  h-12 
+                  rounded-lg 
+                  shadow-lg 
+                  shadow-cyber-blue/30
+                  hover:shadow-cyber-blue/50
+                  hover:scale-105
+                  active:scale-95
+                " />
                 <div>
                   <h1 className="text-2xl font-cyber font-bold text-cyber-light mb-2">
                     Welcome to Cyberkrypt
