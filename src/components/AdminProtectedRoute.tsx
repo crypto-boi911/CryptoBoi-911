@@ -11,10 +11,19 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   const adminToken = localStorage.getItem('adminToken');
   const expectedToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
   
+  console.log('AdminProtectedRoute check:', {
+    isAdminAuthenticated,
+    adminToken,
+    expectedToken,
+    tokenMatch: adminToken === expectedToken
+  });
+  
   if (!isAdminAuthenticated || adminToken !== expectedToken) {
+    console.log('Admin access denied, redirecting to login');
     return <Navigate to="/admin/login" replace />;
   }
   
+  console.log('Admin access granted');
   return <>{children}</>;
 };
 

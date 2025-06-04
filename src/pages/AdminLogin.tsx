@@ -20,19 +20,34 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('Admin login attempt with password:', password);
+
     // Check against environment variables
     const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
     const adminToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
 
+    console.log('Expected admin password:', adminPassword);
+    console.log('Expected admin token:', adminToken);
+
     if (password === adminPassword) {
+      console.log('Password match - setting localStorage items');
       localStorage.setItem('adminToken', adminToken);
       localStorage.setItem('isAdminAuthenticated', 'true');
+      
+      console.log('localStorage items set:', {
+        adminToken: localStorage.getItem('adminToken'),
+        isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated')
+      });
+
       toast({
         title: "Access Granted",
         description: "Welcome to the admin dashboard",
       });
+      
+      console.log('Navigating to admin dashboard');
       navigate('/admin/dashboard');
     } else {
+      console.log('Password mismatch');
       toast({
         title: "Access Denied",
         description: "Invalid admin password",
@@ -106,6 +121,7 @@ const AdminLogin = () => {
             </form>
 
             <div className="text-center text-sm text-yellow-500">
+              <p>Default password: admin123</p>
               <p>Admin access required for dashboard management</p>
             </div>
           </CardContent>
