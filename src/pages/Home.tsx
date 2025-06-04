@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Zap, Lock, Eye, ArrowRight } from 'lucide-react';
@@ -53,7 +52,7 @@ const Home = () => {
             transition={{ duration: 0.8 }}
           >
             <GlitchText 
-              text="CYBERKRYPT"
+              text="CRYPTOBOI-911"
               className="text-6xl md:text-8xl font-cyber font-bold mb-6"
             />
             <motion.h2
