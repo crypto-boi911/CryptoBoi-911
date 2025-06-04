@@ -83,9 +83,9 @@ const Home = () => {
                   Explore Services <ArrowRight className="ml-2 h-4 w-4" />
                 </CyberButton>
               </Link>
-              <Link to="/contact">
+              <Link to="/get-started">
                 <CyberButton variant="secondary">
-                  Get Consultation
+                  Get Started
                 </CyberButton>
               </Link>
             </motion.div>
@@ -188,7 +188,7 @@ const Home = () => {
               Don't wait for a breach to happen. Contact our cybersecurity experts today
               and get a comprehensive security assessment.
             </p>
-            <Link to="/contact">
+            <Link to="/get-started">
               <CyberButton>
                 Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
               </CyberButton>
