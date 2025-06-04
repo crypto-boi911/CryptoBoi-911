@@ -58,7 +58,7 @@ export default function GetStarted() {
         
         {!submitted ? (
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-            <label className="text-cyber-light/70 font-tech">Email Address</label>
+            <label className="text-cyber-light/70 font-tech">Username</label>
             <input
               type="email"
               value={email}
