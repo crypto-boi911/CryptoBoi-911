@@ -21,6 +21,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   Home,
