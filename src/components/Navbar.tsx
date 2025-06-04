@@ -1,13 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Shield } from 'lucide-react';
+import { Menu, X, Shield, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +18,21 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
+    };
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    navigate('/');
+  };
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -56,9 +73,20 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-            <button className="cyber-button">
-              <span>Get Started</span>
-            </button>
+            
+            {isAuthenticated ? (
+              <button 
+                onClick={handleLogout}
+                className="cyber-button flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <Link to="/login" className="cyber-button">
+                <span>Login</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -96,9 +124,26 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                <button className="cyber-button w-full">
-                  <span>Get Started</span>
-                </button>
+                {isAuthenticated ? (
+                  <button 
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="cyber-button w-full flex items-center gap-2 justify-center"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
+                ) : (
+                  <Link 
+                    to="/login" 
+                    onClick={() => setIsOpen(false)}
+                    className="cyber-button w-full block text-center"
+                  >
+                    <span>Login</span>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>
