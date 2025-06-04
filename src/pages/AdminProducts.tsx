@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import ProductEditModal from '@/components/ProductEditModal';
+import AddProductModal from '@/components/AddProductModal';
 
 interface Product {
   id: number;
@@ -25,12 +27,23 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const [products, setProducts] = useState<Product[]>([
     { id: 1, name: 'Chase Bank Log', category: 'Bank Logs', type: 'Checking', balance: '$25,000', price: 500, status: 'active', stock: 15 },
     { id: 2, name: 'PayPal Business', category: 'PayPal Logs', type: 'Business', balance: '$45,000', price: 750, status: 'active', stock: 8 },
     { id: 3, name: 'Visa Platinum', category: 'Cards', type: 'Credit Card', balance: '$50,000', price: 800, status: 'active', stock: 12 },
     { id: 4, name: 'CashApp Premium', category: 'CashApp Logs', type: 'Verified', balance: '$15,000', price: 400, status: 'inactive', stock: 0 },
+    { id: 5, name: 'Bank of America', category: 'Bank Logs', type: 'Savings', balance: '$18,500', price: 400, status: 'active', stock: 6 },
+    { id: 6, name: 'Wells Fargo', category: 'Bank Logs', type: 'Business', balance: '$32,000', price: 650, status: 'active', stock: 9 },
+    { id: 7, name: 'Mastercard Gold', category: 'Cards', type: 'Debit Card', balance: '$25,000', price: 450, status: 'active', stock: 18 },
+    { id: 8, name: 'American Express', category: 'Cards', type: 'Virtual Card', balance: '$75,000', price: 1200, status: 'active', stock: 5 },
+    { id: 9, name: 'PayPal Personal Premium', category: 'PayPal Logs', type: 'Personal', balance: '$22,500', price: 500, status: 'active', stock: 11 },
+    { id: 10, name: 'CashApp Business', category: 'CashApp Logs', type: 'Business', balance: '$35,000', price: 650, status: 'active', stock: 7 },
+    { id: 11, name: 'VPN Tool', category: 'Tools', type: 'Security', balance: 'N/A', price: 50, status: 'active', stock: 25 },
+    { id: 12, name: 'Card Checker', category: 'Tools', type: 'Utility', balance: 'N/A', price: 75, status: 'active', stock: 20 },
   ]);
 
   const deleteProduct = (id: number) => {
@@ -43,13 +56,30 @@ const AdminProducts = () => {
     }
   };
 
-  const toggleStatus = (id: number) => {
+  const editProduct = (product: Product) => {
+    setEditingProduct(product);
+    setIsEditModalOpen(true);
+  };
+
+  const saveProduct = (updatedProduct: Product) => {
     setProducts(products.map(p => 
-      p.id === id ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' } : p
+      p.id === updatedProduct.id ? updatedProduct : p
     ));
     toast({
-      title: "Status Updated",
-      description: "Product status has been changed",
+      title: "Product Updated",
+      description: "Product details have been saved successfully",
+    });
+  };
+
+  const addProduct = (newProductData: Omit<Product, 'id'>) => {
+    const newProduct = {
+      ...newProductData,
+      id: Math.max(...products.map(p => p.id)) + 1,
+    };
+    setProducts([...products, newProduct]);
+    toast({
+      title: "Product Added",
+      description: "New product has been created successfully",
     });
   };
 
@@ -82,7 +112,10 @@ const AdminProducts = () => {
                 Manage all dashboard products and inventory
               </p>
             </div>
-            <Button className="bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80">
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
@@ -168,7 +201,7 @@ const AdminProducts = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => toggleStatus(product.id)}
+                              onClick={() => editProduct(product)}
                               className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
                             >
                               <Edit className="h-3 w-3" />
@@ -192,6 +225,24 @@ const AdminProducts = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Edit Product Modal */}
+      <ProductEditModal
+        product={editingProduct}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingProduct(null);
+        }}
+        onSave={saveProduct}
+      />
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={addProduct}
+      />
     </div>
   );
 };
