@@ -15,6 +15,21 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+  useSidebar,
+} from '@/components/ui/sidebar';
 
 const Dashboard = () => {
   const location = useLocation();
@@ -72,137 +87,165 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-cyber-gradient flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-cyber-darker/90 border-r border-cyber-blue/20 flex flex-col">
-        <div className="p-6 border-b border-cyber-blue/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
-              <span className="text-cyber-dark font-bold">C</span>
+    <SidebarProvider>
+      <div className="min-h-screen bg-cyber-gradient flex w-full">
+        <AppSidebar sidebarItems={sidebarItems} onLogout={handleLogout} />
+        
+        <SidebarInset className="flex-1">
+          {/* Header with Sidebar Toggle */}
+          <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className="text-cyber-blue hover:text-cyber-light" />
+                <div>
+                  <h1 className="text-2xl font-cyber font-bold text-cyber-light mb-2">
+                    Welcome to Cyberkrypt
+                  </h1>
+                  <p className="text-cyber-light/60">
+                    Purchase your logs with ease! The following categories are available.
+                  </p>
+                </div>
+              </div>
+              <div className="text-cyber-light/70 font-tech">
+                Welcome prebblep@gmail.com
+              </div>
             </div>
-            <span className="text-xl font-cyber font-bold text-cyber-blue">CYBERKRYPT</span>
-          </div>
-        </div>
+          </header>
 
-        <nav className="flex-1 p-4 space-y-2">
-          {sidebarItems.map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')
-                  ? 'bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30'
-                  : 'text-cyber-light/70 hover:bg-cyber-blue/10 hover:text-cyber-blue'
-              }`}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-tech">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-cyber-blue/20">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all w-full"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="font-tech">Logout</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-cyber font-bold text-cyber-light mb-2">
-                Welcome to Cyberkrypt
-              </h1>
-              <p className="text-cyber-light/60">
-                Purchase your logs with ease! The following categories are available.
-              </p>
-            </div>
-            <div className="text-cyber-light/70 font-tech">
-              Welcome prebblep@gmail.com
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="flex-1 p-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {/* Product Categories */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {productCategories.map((category, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="group cursor-pointer"
-                >
-                  <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 hover:border-cyber-blue/50 transition-all duration-300 h-full">
-                    <CardContent className="p-6">
-                      <div className={`h-16 w-16 rounded-lg ${category.color} mb-4 flex items-center justify-center`}>
-                        <CreditCard className="h-8 w-8 text-white" />
-                      </div>
-                      <h3 className="text-lg font-tech font-semibold text-cyber-light mb-2">
-                        {category.name}
-                      </h3>
-                      <p className="text-cyber-light/60 text-sm">
-                        {category.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Why Choose Our Platform */}
+          {/* Dashboard Content */}
+          <main className="flex-1 p-6">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="mb-8"
+              transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl font-cyber font-bold text-cyber-light mb-8 text-center">
-                Why Choose Our Platform?
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {features.map((feature, index) => (
+              {/* Product Categories */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {productCategories.map((category, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="group cursor-pointer"
                   >
-                    <Card className="glow-box bg-cyber-gray/30 border-cyber-blue/20 h-full">
-                      <CardContent className="p-6 text-center">
-                        <div className="text-4xl mb-4">{feature.icon}</div>
-                        <h3 className="text-xl font-tech font-semibold text-cyber-light mb-3">
-                          {feature.title}
+                    <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 hover:border-cyber-blue/50 transition-all duration-300 h-full">
+                      <CardContent className="p-6">
+                        <div className={`h-16 w-16 rounded-lg ${category.color} mb-4 flex items-center justify-center`}>
+                          <CreditCard className="h-8 w-8 text-white" />
+                        </div>
+                        <h3 className="text-lg font-tech font-semibold text-cyber-light mb-2">
+                          {category.name}
                         </h3>
-                        <p className="text-cyber-light/60 text-sm leading-relaxed">
-                          {feature.description}
+                        <p className="text-cyber-light/60 text-sm">
+                          {category.description}
                         </p>
                       </CardContent>
                     </Card>
                   </motion.div>
                 ))}
               </div>
+
+              {/* Why Choose Our Platform */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="mb-8"
+              >
+                <h2 className="text-3xl font-cyber font-bold text-cyber-light mb-8 text-center">
+                  Why Choose Our Platform?
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {features.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                    >
+                      <Card className="glow-box bg-cyber-gray/30 border-cyber-blue/20 h-full">
+                        <CardContent className="p-6 text-center">
+                          <div className="text-4xl mb-4">{feature.icon}</div>
+                          <h3 className="text-xl font-tech font-semibold text-cyber-light mb-3">
+                            {feature.title}
+                          </h3>
+                          <p className="text-cyber-light/60 text-sm leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </main>
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
+  );
+};
+
+const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout: () => void }) => {
+  const location = useLocation();
+  const { state } = useSidebar();
+
+  return (
+    <Sidebar className="bg-cyber-darker/90 border-r border-cyber-blue/20">
+      <SidebarHeader className="p-6 border-b border-cyber-blue/20">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
+            <span className="text-cyber-dark font-bold">C</span>
+          </div>
+          {state === 'expanded' && (
+            <span className="text-xl font-cyber font-bold text-cyber-blue">CYBERKRYPT</span>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-2">
+              {sidebarItems.map((item, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                      location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')
+                        ? 'bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30'
+                        : 'text-cyber-light/70 hover:bg-cyber-blue/10 hover:text-cyber-blue'
+                    }`}
+                  >
+                    <Link to={item.path} className="flex items-center space-x-3 w-full">
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-tech">{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t border-cyber-blue/20">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={onLogout}
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all w-full"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-tech">Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 };
 
