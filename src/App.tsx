@@ -10,7 +10,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
-import ProductsTable from "./pages/ProductsTable";
 import Dashboard from "./pages/Dashboard";
 import BankLogs from "./pages/BankLogs";
 import CardsLinkables from "./pages/CardsLinkables";
@@ -133,11 +132,6 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/services" element={<Services />} />
-                  <Route path="/products-table" element={
-                    <ProtectedRoute>
-                      <ProductsTable />
-                    </ProtectedRoute>
-                  } />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
