@@ -30,7 +30,7 @@ const AddProductModal = ({ isOpen, onClose, onAdd }: AddProductModalProps) => {
     type: '',
     balance: '',
     price: 0,
-    status: 'active' as const,
+    status: 'active' as 'active' | 'inactive',
     stock: 0,
   });
 
@@ -43,7 +43,7 @@ const AddProductModal = ({ isOpen, onClose, onAdd }: AddProductModalProps) => {
         type: '',
         balance: '',
         price: 0,
-        status: 'active',
+        status: 'active' as 'active' | 'inactive',
         stock: 0,
       });
       onClose();
