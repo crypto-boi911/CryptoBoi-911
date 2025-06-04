@@ -13,6 +13,13 @@ import Services from "./pages/Services";
 import Products from "./pages/Products";
 import ProductsTable from "./pages/ProductsTable";
 import Dashboard from "./pages/Dashboard";
+import BankLogs from "./pages/BankLogs";
+import CardsLinkables from "./pages/CardsLinkables";
+import PayPalLogs from "./pages/PayPalLogs";
+import CashAppLogs from "./pages/CashAppLogs";
+import Tools from "./pages/Tools";
+import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -36,6 +43,41 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/bank-logs" element={
+              <ProtectedRoute>
+                <BankLogs />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/cards" element={
+              <ProtectedRoute>
+                <CardsLinkables />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/paypal" element={
+              <ProtectedRoute>
+                <PayPalLogs />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/cashapp" element={
+              <ProtectedRoute>
+                <CashAppLogs />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/tools" element={
+              <ProtectedRoute>
+                <Tools />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/cart" element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/orders" element={
+              <ProtectedRoute>
+                <Orders />
               </ProtectedRoute>
             } />
             <Route path="/admin/dashboard" element={
