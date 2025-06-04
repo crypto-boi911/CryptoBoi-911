@@ -1,8 +1,13 @@
+
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [accessKey, setAccessKey] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,8 +18,13 @@ const Login = () => {
     }
 
     setError("");
-    alert(`Access granted for key: ${accessKey}`);
-    // Replace with actual validation logic or backend check
+    localStorage.setItem('isAuthenticated', 'true');
+    toast({
+      title: "Access Granted",
+      description: `Welcome! Redirecting to dashboard...`,
+    });
+    // Redirect to dashboard instead of alert
+    navigate('/dashboard');
   };
 
   return (
@@ -39,7 +49,7 @@ const Login = () => {
             type="submit"
             className="w-full py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded transition duration-200"
           >
-            Access
+            Access Dashboard
           </button>
         </form>
       </div>

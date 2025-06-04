@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Products from "./pages/Products";
 import ProductsTable from "./pages/ProductsTable";
+import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -29,20 +30,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <div className="min-h-screen bg-cyber-dark">
-          <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products-table" element={
+            {/* Routes without Navbar/Footer */}
+            <Route path="/dashboard" element={
               <ProtectedRoute>
-                <ProductsTable />
+                <Dashboard />
               </ProtectedRoute>
             } />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={
               <AdminProtectedRoute>
                 <AdminDashboard />
@@ -53,10 +47,31 @@ const App = () => (
                 <AdminUsers />
               </AdminProtectedRoute>
             } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            
+            {/* Routes with Navbar/Footer */}
+            <Route path="/*" element={
+              <>
+                <Navbar />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products-table" element={
+                    <ProtectedRoute>
+                      <ProductsTable />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Footer />
+              </>
+            } />
           </Routes>
-          <Footer />
         </div>
       </BrowserRouter>
     </TooltipProvider>
