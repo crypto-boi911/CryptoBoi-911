@@ -24,17 +24,12 @@ const Home = () => {
               Advanced cybersecurity solutions protecting your digital assets 
               with cutting-edge technology and uncompromising security.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link to="/get-started">
                 <CyberButton size="lg">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </CyberButton>
-              </Link>
-              <Link to="/services">
-                <button className="px-8 py-4 border-2 border-cyber-blue text-cyber-blue font-tech hover:bg-cyber-blue hover:text-cyber-dark transition-all duration-300">
-                  Learn More
-                </button>
               </Link>
             </div>
           </motion.div>
