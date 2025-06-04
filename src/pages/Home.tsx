@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Zap, Lock, Eye, ArrowRight } from 'lucide-react';
@@ -72,23 +71,6 @@ const Home = () => {
             >
               Providing premium logs and info for private individuals Globally. In the past years, the constant rise of phishing sites impersonating CRYPTOBOI-911 is on the rise in massive numbers, THIS is our only domain! order logs and infos only from this site to avoid being scammed.
             </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.3, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
-              <Link to="/services">
-                <CyberButton>
-                  Explore Services <ArrowRight className="ml-2 h-4 w-4" />
-                </CyberButton>
-              </Link>
-              <Link to="/get-started">
-                <CyberButton variant="secondary">
-                  Get Started
-                </CyberButton>
-              </Link>
-            </motion.div>
           </motion.div>
         </div>
 
@@ -188,11 +170,6 @@ const Home = () => {
               Don't wait for a breach to happen. Contact our cybersecurity experts today
               and get a comprehensive security assessment.
             </p>
-            <Link to="/get-started">
-              <CyberButton>
-                Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
-              </CyberButton>
-            </Link>
           </motion.div>
         </div>
       </section>
