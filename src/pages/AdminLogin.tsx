@@ -44,14 +44,14 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4">
+    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         className="w-full max-w-md"
       >
-        <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+        <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <UserCheck className="h-12 w-12 text-cyber-blue" />
@@ -67,7 +67,9 @@ const AdminLogin = () => {
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="admin-password" className="text-cyber-light">Admin Password</Label>
+                <Label htmlFor="admin-password" className="text-cyber-light text-sm font-medium">
+                  Admin Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="admin-password"
@@ -75,14 +77,14 @@ const AdminLogin = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter admin password"
-                    className="bg-cyber-darker border-cyber-blue/30 text-cyber-light pr-10"
+                    className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-cyber-light/70"
+                    className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent text-cyber-light/70 hover:text-cyber-light"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -96,7 +98,7 @@ const AdminLogin = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
+                className="w-full h-12 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold text-base"
                 disabled={!password || isLoading}
               >
                 {isLoading ? 'Authenticating...' : 'Access Dashboard'}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, RefreshCw } from 'lucide-react';
@@ -80,14 +81,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4">
+    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         className="w-full max-w-md"
       >
-        <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+        <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Shield className="h-12 w-12 text-cyber-blue" />
@@ -103,14 +104,16 @@ const Login = () => {
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-cyber-light">Username</Label>
+                <Label htmlFor="username" className="text-cyber-light text-sm font-medium">
+                  Username
+                </Label>
                 <Input
                   id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
-                  className="bg-cyber-darker border-cyber-blue/30 text-cyber-light"
+                  className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                   required
                 />
                 {usedUsernames.includes(username.trim()) && username.trim() && (
@@ -119,21 +122,21 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-cyber-light">Generate Access Code</Label>
+                <Label className="text-cyber-light text-sm font-medium">Generate Access Code</Label>
                 <div className="flex gap-2">
                   <Input
                     type="text"
                     value={generatedPassword}
                     readOnly
                     placeholder="Click generate to create unique code"
-                    className="bg-cyber-darker border-cyber-blue/30 text-cyber-light font-mono"
+                    className="flex-1 h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light font-mono placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                   />
                   <Button
                     type="button"
                     onClick={generatePassword}
                     variant="outline"
                     size="icon"
-                    className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
+                    className="h-12 w-12 border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10 hover:border-cyber-blue/50"
                     disabled={!username.trim() || usedUsernames.includes(username.trim())}
                   >
                     <RefreshCw className="h-4 w-4" />
@@ -143,7 +146,9 @@ const Login = () => {
 
               {generatedPassword && (
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-cyber-light">Enter Access Code</Label>
+                  <Label htmlFor="password" className="text-cyber-light text-sm font-medium">
+                    Enter Access Code
+                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -151,14 +156,14 @@ const Login = () => {
                       value={enteredPassword}
                       onChange={(e) => setEnteredPassword(e.target.value)}
                       placeholder="Enter the generated code"
-                      className="bg-cyber-darker border-cyber-blue/30 text-cyber-light font-mono pr-10"
+                      className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light font-mono pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                       required
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-cyber-light/70"
+                      className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent text-cyber-light/70 hover:text-cyber-light"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -173,14 +178,14 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
+                className="w-full h-12 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold text-base"
                 disabled={!username || !generatedPassword || !enteredPassword || usedUsernames.includes(username.trim())}
               >
                 Access Products
               </Button>
             </form>
 
-            <div className="text-center text-sm text-yellow-500">
+            <div className="text-center text-sm" style={{ color: 'gold' }}>
               <p>Use your username and Access code to access products. Each username can only be used once</p>
             </div>
           </CardContent>
