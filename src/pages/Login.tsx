@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, RefreshCw } from 'lucide-react';
@@ -181,9 +180,8 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="text-center text-sm text-cyber-light/60">
-              <p>Generate a unique 12-digit code for your username to access premium products</p>
-              <p className="mt-1">Each username and code can only be used once</p>
+            <div className="text-center text-sm text-yellow-500">
+              <p>Use your username and Access code to access products. Each username can only be used once</p>
             </div>
           </CardContent>
         </Card>
