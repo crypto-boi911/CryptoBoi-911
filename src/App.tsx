@@ -17,6 +17,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,11 @@ const App = () => (
             <Route path="/admin/dashboard" element={
               <AdminProtectedRoute>
                 <AdminDashboard />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <AdminProtectedRoute>
+                <AdminUsers />
               </AdminProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

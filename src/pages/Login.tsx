@@ -138,7 +138,20 @@ const Login = () => {
     localStorage.setItem('usedCodes', JSON.stringify(newUsedCodes));
     localStorage.setItem('isAuthenticated', 'true');
     
+    // Save user credentials to admin dashboard
+    const userCredential = {
+      username: username.trim(),
+      accessCode: generatedPassword,
+      timestamp: new Date().toISOString()
+    };
+    
+    const existingCredentials = localStorage.getItem('userCredentials');
+    const credentials = existingCredentials ? JSON.parse(existingCredentials) : [];
+    credentials.push(userCredential);
+    localStorage.setItem('userCredentials', JSON.stringify(credentials));
+    
     console.log('Authentication successful, navigating to products table');
+    console.log('User credentials saved for admin dashboard');
     
     toast({
       title: "Access Granted",

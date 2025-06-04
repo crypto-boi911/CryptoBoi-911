@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const dashboardItems = [
     {
       title: 'User Management',
-      description: 'Manage users, roles, and permissions',
+      description: 'View all user login credentials and access codes',
       icon: Users,
       path: '/admin/users',
       color: 'text-blue-500'
