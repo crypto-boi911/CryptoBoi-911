@@ -36,12 +36,22 @@ export default function GetStarted() {
     setAccessKey(key);
     setSubmitted(true);
     
+    // Store user registration data
+    const userRegistration = {
+      username: email,
+      accessKey: key,
+      joinDate: new Date().toISOString()
+    };
+    
+    const existingRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+    existingRegistrations.push(userRegistration);
+    localStorage.setItem('userRegistrations', JSON.stringify(existingRegistrations));
+    
     toast({
       title: "Access Key Generated",
       description: "Your 14-character access key has been created successfully!",
     });
     
-    // Optionally: Save user username and key to database here
     console.log("Generated access key for:", email, "Key:", key);
   };
 

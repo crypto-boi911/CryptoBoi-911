@@ -18,12 +18,35 @@ const Login = () => {
     }
 
     setError("");
+    
+    // Find the username associated with this access key
+    const registrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+    const user = registrations.find((reg: any) => reg.accessKey === accessKey);
+    const username = user ? user.username : `User_${accessKey.slice(0, 6)}`;
+    
+    // Update last login time for this user
+    if (user) {
+      user.lastLogin = new Date().toISOString();
+      localStorage.setItem('userRegistrations', JSON.stringify(registrations));
+    }
+    
+    // Store login credential
+    const loginCredential = {
+      username: username,
+      accessCode: accessKey,
+      timestamp: new Date().toISOString()
+    };
+    
+    const existingCredentials = JSON.parse(localStorage.getItem('userCredentials') || '[]');
+    existingCredentials.push(loginCredential);
+    localStorage.setItem('userCredentials', JSON.stringify(existingCredentials));
+    
     localStorage.setItem('isAuthenticated', 'true');
     toast({
       title: "Access Granted",
-      description: `Welcome! Redirecting to dashboard...`,
+      description: `Welcome ${username}! Redirecting to dashboard...`,
     });
-    // Redirect to dashboard instead of alert
+    
     navigate('/dashboard');
   };
 
