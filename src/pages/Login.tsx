@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, RefreshCw } from 'lucide-react';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [enteredPassword, setEnteredPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +22,7 @@ const Login = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && enteredPassword === generatedPassword && generatedPassword) {
+    if (username && enteredPassword === generatedPassword && generatedPassword) {
       setIsLoggedIn(true);
       localStorage.setItem('isAuthenticated', 'true');
       navigate('/products');
@@ -54,13 +53,13 @@ const Login = () => {
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-cyber-light">Email</Label>
+                <Label htmlFor="username" className="text-cyber-light">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
                   className="bg-cyber-darker border-cyber-blue/30 text-cyber-light"
                   required
                 />
@@ -121,7 +120,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
-                disabled={!email || !generatedPassword || !enteredPassword}
+                disabled={!username || !generatedPassword || !enteredPassword}
               >
                 Access Products
               </Button>
