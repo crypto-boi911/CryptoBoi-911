@@ -8,6 +8,7 @@ import {
   Wrench, 
   ShoppingCart, 
   ClipboardList, 
+  HelpCircle,
   LogOut 
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -72,6 +73,7 @@ const Dashboard = () => {
     { name: 'Tools', icon: Wrench, path: '/dashboard/tools' },
     { name: 'Cart', icon: ShoppingCart, path: '/dashboard/cart' },
     { name: 'Orders', icon: ClipboardList, path: '/dashboard/orders' },
+    { name: 'Support', icon: HelpCircle, path: '/dashboard/support' },
   ];
 
   const productCategories = [

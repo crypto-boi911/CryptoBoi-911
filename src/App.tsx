@@ -31,6 +31,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminContent from "./pages/AdminContent";
 import AdminLogs from "./pages/AdminLogs";
 import NotFound from "./pages/NotFound";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,11 @@ const App = () => (
             <Route path="/dashboard/orders" element={
               <ProtectedRoute>
                 <Orders />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/support" element={
+              <ProtectedRoute>
+                <Support />
               </ProtectedRoute>
             } />
             <Route path="/admin/dashboard" element={
