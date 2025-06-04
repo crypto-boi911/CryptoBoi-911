@@ -1,11 +1,14 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Smartphone, Shield, DollarSign } from 'lucide-react';
+import { Smartphone, Shield, DollarSign, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const PayPalLogs = () => {
+  const navigate = useNavigate();
+
   const paypalProducts = [
     { account: 'Business Verified', balance: '$45,000', status: 'Verified', price: '$750' },
     { account: 'Personal Premium', balance: '$22,500', status: 'Verified', price: '$500' },
@@ -23,6 +26,16 @@ const PayPalLogs = () => {
       >
         {/* Header */}
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              className="border-cyber-blue/30 text-cyber-light hover:bg-cyber-blue/10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
           <h1 className="text-3xl font-cyber font-bold text-cyber-light mb-4">
             PayPal Logs
           </h1>

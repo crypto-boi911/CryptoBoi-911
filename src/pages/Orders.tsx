@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardList, Eye, Download, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardList, Eye, Download, Clock, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 const Orders = () => {
+  const navigate = useNavigate();
+
   const orders = [
     {
       id: 'ORD-001',
@@ -78,6 +81,16 @@ const Orders = () => {
       >
         {/* Header */}
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              className="border-cyber-blue/30 text-cyber-light hover:bg-cyber-blue/10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
           <h1 className="text-3xl font-cyber font-bold text-cyber-light mb-4 flex items-center gap-3">
             <ClipboardList className="h-8 w-8" />
             Order History

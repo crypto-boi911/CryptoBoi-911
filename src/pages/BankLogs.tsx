@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, Filter, Search } from 'lucide-react';
+import { CreditCard, Filter, Search, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 const BankLogs = () => {
+  const navigate = useNavigate();
+
   const bankProducts = [
     { bank: 'Chase Bank', balance: '$25,000', type: 'Checking', price: '$500' },
     { bank: 'Bank of America', balance: '$18,500', type: 'Savings', price: '$400' },
@@ -24,6 +27,16 @@ const BankLogs = () => {
       >
         {/* Header */}
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              className="border-cyber-blue/30 text-cyber-light hover:bg-cyber-blue/10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
           <h1 className="text-3xl font-cyber font-bold text-cyber-light mb-4">
             Bank Logs
           </h1>
