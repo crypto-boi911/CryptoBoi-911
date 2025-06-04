@@ -17,52 +17,40 @@ const AdminLogin = () => {
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
-    console.log('Form submitted - handleLogin called');
+    e.preventDefault();
+    console.log('Login form submitted');
     
+    if (!password) {
+      toast({
+        title: "Error",
+        description: "Please enter a password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      e.preventDefault();
-      setIsLoading(true);
-
-      console.log('Admin login attempt with password:', password);
-
-      // Check against environment variables
       const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
       const adminToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
 
-      console.log('Expected admin password:', adminPassword);
-      console.log('Expected admin token:', adminToken);
+      console.log('Checking password:', password);
+      console.log('Expected password:', adminPassword);
 
       if (password === adminPassword) {
-        console.log('Password match - setting localStorage items');
-        
-        // Clear any existing items first
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('isAdminAuthenticated');
-        
-        // Set new items
         localStorage.setItem('adminToken', adminToken);
         localStorage.setItem('isAdminAuthenticated', 'true');
         
-        console.log('localStorage items set:', {
-          adminToken: localStorage.getItem('adminToken'),
-          isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated')
-        });
+        console.log('Authentication successful, navigating to dashboard');
 
         toast({
           title: "Access Granted",
           description: "Welcome to the admin dashboard",
         });
-        
-        console.log('About to navigate to admin dashboard');
-        
-        // Add a small delay to ensure localStorage is set
-        setTimeout(() => {
-          console.log('Navigating now...');
-          navigate('/admin/dashboard', { replace: true });
-        }, 100);
-        
+
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        console.log('Password mismatch');
         toast({
           title: "Access Denied",
           description: "Invalid admin password",
@@ -79,26 +67,6 @@ const AdminLogin = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleButtonClick = () => {
-    console.log('Button clicked directly');
-    if (!password) {
-      console.log('No password entered');
-      toast({
-        title: "Error",
-        description: "Please enter a password",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Create a synthetic form event
-    const syntheticEvent = {
-      preventDefault: () => {},
-    } as React.FormEvent;
-    
-    handleLogin(syntheticEvent);
   };
 
   return (
@@ -133,10 +101,7 @@ const AdminLogin = () => {
                     id="admin-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => {
-                      console.log('Password input changed:', e.target.value);
-                      setPassword(e.target.value);
-                    }}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter admin password"
                     className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                     required
@@ -146,10 +111,7 @@ const AdminLogin = () => {
                     variant="ghost"
                     size="icon"
                     className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent text-cyber-light/70 hover:text-cyber-light"
-                    onClick={() => {
-                      console.log('Toggle password visibility');
-                      setShowPassword(!showPassword);
-                    }}
+                    onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -164,7 +126,6 @@ const AdminLogin = () => {
                 type="submit"
                 className="w-full h-12 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold text-base"
                 disabled={!password || isLoading}
-                onClick={handleButtonClick}
               >
                 {isLoading ? 'Authenticating...' : 'Access Dashboard'}
               </Button>
@@ -173,9 +134,6 @@ const AdminLogin = () => {
             <div className="text-center text-sm text-yellow-500">
               <p>Default password: admin123</p>
               <p>Admin access required for dashboard management</p>
-              <p className="mt-2 text-xs text-gray-400">
-                Check browser console (F12) for debug info
-              </p>
             </div>
           </CardContent>
         </Card>
