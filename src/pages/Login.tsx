@@ -14,7 +14,6 @@ const Login = () => {
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [enteredPassword, setEnteredPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [usedUsernames, setUsedUsernames] = useState<string[]>([]);
   const [usedCodes, setUsedCodes] = useState<string[]>([]);
   const navigate = useNavigate();
@@ -86,11 +85,13 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login form submitted');
-    console.log('Username:', username);
+    console.log('Username:', username.trim());
     console.log('Generated password:', generatedPassword);
     console.log('Entered password:', enteredPassword);
     
+    // Clear validation - check all required fields
     if (!username.trim()) {
+      console.log('Username validation failed');
       toast({
         title: "Error",
         description: "Please enter a username",
@@ -100,6 +101,7 @@ const Login = () => {
     }
 
     if (!generatedPassword) {
+      console.log('Generated password validation failed');
       toast({
         title: "Error",
         description: "Please generate an access code first",
@@ -108,7 +110,8 @@ const Login = () => {
       return;
     }
 
-    if (!enteredPassword) {
+    if (!enteredPassword.trim()) {
+      console.log('Entered password validation failed');
       toast({
         title: "Error",
         description: "Please enter the access code",
@@ -117,7 +120,9 @@ const Login = () => {
       return;
     }
 
-    if (enteredPassword !== generatedPassword) {
+    // Check if entered password matches generated password
+    if (enteredPassword.trim() !== generatedPassword) {
+      console.log('Password mismatch:', enteredPassword.trim(), 'vs', generatedPassword);
       toast({
         title: "Access Denied",
         description: "The entered code does not match the generated code",
@@ -125,6 +130,8 @@ const Login = () => {
       });
       return;
     }
+
+    console.log('All validations passed, proceeding with login');
 
     // Add username and code to used lists
     const newUsedUsernames = [...usedUsernames, username.trim()];
@@ -150,20 +157,17 @@ const Login = () => {
     credentials.push(userCredential);
     localStorage.setItem('userCredentials', JSON.stringify(credentials));
     
-    console.log('Authentication successful, navigating to products table');
-    console.log('User credentials saved for admin dashboard');
+    console.log('Authentication successful, user credentials saved');
+    console.log('Stored credentials:', userCredential);
     
     toast({
       title: "Access Granted",
       description: "Welcome! Redirecting to products...",
     });
     
-    setIsLoggedIn(true);
-    
-    // Add a small delay to ensure the toast is visible
-    setTimeout(() => {
-      navigate('/products-table');
-    }, 1000);
+    // Navigate to products table
+    console.log('Navigating to /products-table');
+    navigate('/products-table');
   };
 
   return (
@@ -200,7 +204,6 @@ const Login = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
-                  required
                 />
                 {usedUsernames.includes(username.trim()) && username.trim() && (
                   <p className="text-red-400 text-sm">This username has already been used</p>
@@ -243,7 +246,6 @@ const Login = () => {
                       onChange={(e) => setEnteredPassword(e.target.value)}
                       placeholder="Enter the generated code"
                       className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light font-mono pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
-                      required
                     />
                     <Button
                       type="button"
@@ -265,7 +267,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full h-12 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold text-base"
-                disabled={!username || !generatedPassword || !enteredPassword || usedUsernames.includes(username.trim())}
+                disabled={!username.trim() || !generatedPassword || !enteredPassword.trim() || usedUsernames.includes(username.trim())}
               >
                 Access Products
               </Button>
