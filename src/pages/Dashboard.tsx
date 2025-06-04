@@ -143,9 +143,6 @@ const Dashboard = () => {
                   </p>
                 </div>
               </div>
-              <div className="text-cyber-light/70 font-tech">
-                Welcome {username}
-              </div>
             </div>
           </header>
 
