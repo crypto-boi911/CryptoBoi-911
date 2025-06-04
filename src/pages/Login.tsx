@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -17,6 +18,7 @@ const Login = () => {
   const [usedUsernames, setUsedUsernames] = useState<string[]>([]);
   const [usedCodes, setUsedCodes] = useState<string[]>([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Load used usernames and codes from localStorage on component mount
   useEffect(() => {
@@ -32,13 +34,24 @@ const Login = () => {
   }, []);
 
   const generatePassword = () => {
+    console.log('Generate password clicked');
+    console.log('Username:', username);
+    
     if (!username.trim()) {
-      alert('Please enter a username first');
+      toast({
+        title: "Error",
+        description: "Please enter a username first",
+        variant: "destructive",
+      });
       return;
     }
 
     if (usedUsernames.includes(username.trim())) {
-      alert('This username has already been used. Please choose a different username.');
+      toast({
+        title: "Username Already Used",
+        description: "This username has already been used. Please choose a different username.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -52,32 +65,92 @@ const Login = () => {
       
       // Prevent infinite loop in case of exhaustion (very unlikely)
       if (attempts > 1000) {
-        alert('Unable to generate a unique code. Please try again later.');
+        toast({
+          title: "Error",
+          description: "Unable to generate a unique code. Please try again later.",
+          variant: "destructive",
+        });
         return;
       }
     } while (usedCodes.includes(newPassword));
 
+    console.log('Generated password:', newPassword);
     setGeneratedPassword(newPassword);
+    
+    toast({
+      title: "Code Generated",
+      description: "Your unique access code has been generated. Please enter it below.",
+    });
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username && enteredPassword === generatedPassword && generatedPassword) {
-      // Add username and code to used lists
-      const newUsedUsernames = [...usedUsernames, username.trim()];
-      const newUsedCodes = [...usedCodes, generatedPassword];
-      
-      setUsedUsernames(newUsedUsernames);
-      setUsedCodes(newUsedCodes);
-      
-      // Store in localStorage
-      localStorage.setItem('usedUsernames', JSON.stringify(newUsedUsernames));
-      localStorage.setItem('usedCodes', JSON.stringify(newUsedCodes));
-      localStorage.setItem('isAuthenticated', 'true');
-      
-      setIsLoggedIn(true);
-      navigate('/products-table');
+    console.log('Login form submitted');
+    console.log('Username:', username);
+    console.log('Generated password:', generatedPassword);
+    console.log('Entered password:', enteredPassword);
+    
+    if (!username.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a username",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (!generatedPassword) {
+      toast({
+        title: "Error",
+        description: "Please generate an access code first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!enteredPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter the access code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (enteredPassword !== generatedPassword) {
+      toast({
+        title: "Access Denied",
+        description: "The entered code does not match the generated code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add username and code to used lists
+    const newUsedUsernames = [...usedUsernames, username.trim()];
+    const newUsedCodes = [...usedCodes, generatedPassword];
+    
+    setUsedUsernames(newUsedUsernames);
+    setUsedCodes(newUsedCodes);
+    
+    // Store in localStorage
+    localStorage.setItem('usedUsernames', JSON.stringify(newUsedUsernames));
+    localStorage.setItem('usedCodes', JSON.stringify(newUsedCodes));
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    console.log('Authentication successful, navigating to products table');
+    
+    toast({
+      title: "Access Granted",
+      description: "Welcome! Redirecting to products...",
+    });
+    
+    setIsLoggedIn(true);
+    
+    // Add a small delay to ensure the toast is visible
+    setTimeout(() => {
+      navigate('/products-table');
+    }, 1000);
   };
 
   return (
