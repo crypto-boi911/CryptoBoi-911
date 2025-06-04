@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -234,7 +235,7 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
             <span className="text-cyber-dark font-bold">C</span>
           </div>
           {state === 'expanded' && (
-            <span className="text-xl font-cyber font-bold text-cyber-blue">CYBERKRYPT</span>
+            <span className="text-xl font-cyber font-bold text-cyber-blue">CRYPTOBOI-911</span>
           )}
         </div>
       </SidebarHeader>
