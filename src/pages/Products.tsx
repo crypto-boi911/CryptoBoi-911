@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Monitor, Database, Cloud, Smartphone, Lock } from 'lucide-react';
@@ -8,16 +7,16 @@ const Products = () => {
   const products = [
     {
       icon: Shield,
-      name: 'CyberShield Pro',
-      category: 'Enterprise Security Suite',
-      description: 'Complete enterprise-grade security platform with advanced threat detection, real-time monitoring, and automated response capabilities.',
+      name: 'Premium Bank logs',
+      category: 'All country Suite',
+      description: 'Complete Business and Personal Bank logs with Full Login credentials and balances',
       features: [
-        'AI-powered threat detection',
-        'Real-time security monitoring',
-        'Automated incident response',
-        'Compliance reporting',
-        'Multi-platform support',
-        '24/7 expert support'
+        'Acc Balance',
+        'Username',
+        'Password',
+        'IP address',
+        'Country',
+        'Fullz Details'
       ],
       price: '$299/month',
       popular: true
