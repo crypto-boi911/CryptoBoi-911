@@ -1,9 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Monitor, Database, Cloud, Smartphone, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import CyberButton from '../components/CyberButton';
 
 const Products = () => {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (isAuthenticated) {
+      // User is authenticated, could show product details or redirect somewhere
+      console.log('User authenticated, showing product details');
+    } else {
+      // Redirect to login
+      navigate('/login');
+    }
+  };
+
   const products = [
     {
       icon: Shield,
@@ -182,9 +196,11 @@ const Products = () => {
                       per organization
                     </span>
                   </div>
-                  <CyberButton>
-                    Get Started
-                  </CyberButton>
+                  <button onClick={handleGetStarted}>
+                    <CyberButton>
+                      Get Started
+                    </CyberButton>
+                  </button>
                 </div>
               </motion.div>
             ))}
