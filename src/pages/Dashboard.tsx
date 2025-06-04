@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Home, 
@@ -32,9 +31,28 @@ import {
 } from '@/components/ui/sidebar';
 
 const Dashboard = () => {
+  const [username, setUsername] = useState<string>('');
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Get the stored username from when they registered
+    const storedCredentials = localStorage.getItem('userCredentials');
+    if (storedCredentials) {
+      const credentials = JSON.parse(storedCredentials);
+      if (credentials.length > 0) {
+        // Get the most recent user (last in array)
+        const recentUser = credentials[credentials.length - 1];
+        setUsername(recentUser.username);
+      }
+    }
+    
+    // Fallback: if no stored credentials, use a default
+    if (!username) {
+      setUsername('User');
+    }
+  }, [username]);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -116,7 +134,7 @@ const Dashboard = () => {
                 " />
                 <div>
                   <h1 className="text-2xl font-cyber font-bold text-cyber-light mb-2">
-                    Welcome to Cyberkrypt
+                    Welcome back, {username}!
                   </h1>
                   <p className="text-cyber-light/60">
                     Purchase your logs with ease! The following categories are available.
@@ -124,7 +142,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="text-cyber-light/70 font-tech">
-                Welcome prebblep@gmail.com
+                Welcome {username}
               </div>
             </div>
           </header>
