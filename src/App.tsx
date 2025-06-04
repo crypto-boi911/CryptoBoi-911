@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +31,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminContent from "./pages/AdminContent";
 import AdminLogs from "./pages/AdminLogs";
+import AdminMessages from "./pages/AdminMessages";
 import NotFound from "./pages/NotFound";
 import Support from "./pages/Support";
 
@@ -117,6 +119,11 @@ const App = () => (
             <Route path="/admin/logs" element={
               <AdminProtectedRoute>
                 <AdminLogs />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/messages" element={
+              <AdminProtectedRoute>
+                <AdminMessages />
               </AdminProtectedRoute>
             } />
             
