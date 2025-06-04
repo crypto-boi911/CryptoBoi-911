@@ -1,13 +1,15 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 export default function GetStarted() {
   const [email, setEmail] = useState("");
   const [accessKey, setAccessKey] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const generateAccessKey = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -54,6 +56,16 @@ export default function GetStarted() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-cyber-gradient">
       <div className="bg-cyber-darker/90 border border-cyber-blue/20 p-10 rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-cyber-blue hover:text-cyber-blue/80 transition-colors flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="font-tech">Back</span>
+          </button>
+        </div>
+        
         <h1 className="text-3xl font-cyber font-bold text-cyber-blue mb-6">Get Started</h1>
         
         {!submitted ? (

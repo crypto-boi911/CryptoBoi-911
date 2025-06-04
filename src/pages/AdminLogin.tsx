@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Eye, EyeOff, UserCheck } from 'lucide-react';
+import { Shield, Eye, EyeOff, UserCheck, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -79,8 +79,18 @@ const AdminLogin = () => {
       >
         <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 backdrop-blur-sm">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <UserCheck className="h-12 w-12 text-cyber-blue" />
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="text-cyber-blue hover:text-cyber-blue/80 transition-colors flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="font-tech">Back</span>
+              </button>
+              <div className="flex justify-center">
+                <UserCheck className="h-12 w-12 text-cyber-blue" />
+              </div>
+              <div className="w-16"></div>
             </div>
             <CardTitle className="text-2xl font-cyber text-cyber-light">
               Admin Access
