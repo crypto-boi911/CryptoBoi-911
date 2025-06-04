@@ -25,7 +25,7 @@ const Login = () => {
     if (username && enteredPassword === generatedPassword && generatedPassword) {
       setIsLoggedIn(true);
       localStorage.setItem('isAuthenticated', 'true');
-      navigate('/products');
+      navigate('/products-table');
     }
   };
 
