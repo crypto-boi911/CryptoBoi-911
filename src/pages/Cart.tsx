@@ -5,6 +5,7 @@ import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import CheckoutModal from '@/components/CheckoutModal';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([
@@ -12,6 +13,7 @@ const Cart = () => {
     { id: 2, name: 'PayPal Business', type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
     { id: 3, name: 'Visa Platinum', type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
   ]);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
@@ -143,6 +145,7 @@ const Cart = () => {
                 <Button 
                   className="w-full bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80 font-tech"
                   disabled={cartItems.length === 0}
+                  onClick={() => setIsCheckoutOpen(true)}
                 >
                   Proceed to Checkout
                 </Button>
@@ -151,6 +154,12 @@ const Cart = () => {
           </div>
         </div>
       </motion.div>
+
+      <CheckoutModal 
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        total={total}
+      />
     </div>
   );
 };
