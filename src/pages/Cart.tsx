@@ -35,6 +35,16 @@ const Cart = () => {
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + tax;
 
+  const handleProceedToCheckout = () => {
+    console.log('Proceeding to checkout with total:', total);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleCloseCheckout = () => {
+    console.log('Closing checkout modal');
+    setIsCheckoutOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-cyber-gradient p-6">
       <motion.div
@@ -157,7 +167,7 @@ const Cart = () => {
                 <Button 
                   className="w-full bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80 font-tech"
                   disabled={cartItems.length === 0}
-                  onClick={() => setIsCheckoutOpen(true)}
+                  onClick={handleProceedToCheckout}
                 >
                   Proceed to Checkout
                 </Button>
@@ -169,7 +179,7 @@ const Cart = () => {
 
       <CheckoutModal 
         isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
+        onClose={handleCloseCheckout}
         total={total}
       />
     </div>

@@ -53,9 +53,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
     }
   ];
 
+  // Reset modal state when it opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedCrypto(null);
+      setPaymentAddress('');
+      setTimeLeft(1800);
+      setPaymentScreenshot(null);
+    }
+  }, [isOpen]);
+
   // Generate mock payment address when crypto is selected
   useEffect(() => {
-    if (selectedCrypto) {
+    if (selectedCrypto && isOpen) {
       const generateAddress = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -67,17 +77,23 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
       setPaymentAddress(generateAddress());
       setTimeLeft(1800); // Reset timer
     }
-  }, [selectedCrypto]);
+  }, [selectedCrypto, isOpen]);
 
   // Countdown timer
   useEffect(() => {
-    if (selectedCrypto && timeLeft > 0) {
+    if (selectedCrypto && timeLeft > 0 && isOpen) {
       const timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [selectedCrypto, timeLeft]);
+  }, [selectedCrypto, timeLeft, isOpen]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -85,12 +101,20 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText(paymentAddress);
-    toast({
-      title: "Address copied",
-      description: "Payment address copied to clipboard",
-    });
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(paymentAddress);
+      toast({
+        title: "Address copied",
+        description: "Payment address copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy address to clipboard",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,6 +138,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
       return;
     }
 
+    if (timeLeft === 0) {
+      toast({
+        title: "Payment expired",
+        description: "Payment session has expired. Please start a new payment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Payment submitted",
       description: "Your payment is being verified. You will receive confirmation shortly.",
@@ -123,7 +156,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
 
   const getCryptoAmount = (cryptoId: string) => {
     const crypto = cryptoOptions.find(c => c.id === cryptoId);
-    if (!crypto) return 0;
+    if (!crypto) return '0.00000000';
     return (total / crypto.rate).toFixed(8);
   };
 
