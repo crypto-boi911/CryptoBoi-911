@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Zap, Lock, Eye, ArrowRight } from 'lucide-react';
@@ -61,7 +62,7 @@ const Home = () => {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-2xl md:text-4xl font-tech font-light text-cyber-light mb-8"
             >
-              Advanced Cybersecurity Solutions
+              Advanced Webdata Solutions
             </motion.h2>
             <motion.p
               initial={{ opacity: 0 }}
@@ -69,8 +70,7 @@ const Home = () => {
               transition={{ delay: 1, duration: 0.8 }}
               className="text-lg md:text-xl text-cyber-light/70 mb-12 max-w-3xl mx-auto"
             >
-              Protecting your digital assets with cutting-edge security technologies and expert analysis.
-              Stay ahead of cyber threats with our comprehensive protection suite.
+              Providing premium logs and info for private individuals Globally. In the past years, the constant rise of phishing sites impersonating CRYPTOBOI-911 is on the rise in massive numbers, THIS is our only domain! order logs and infos only from this site to avoid being scammed.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
