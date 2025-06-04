@@ -18,7 +18,7 @@ const Home = () => {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-5xl md:text-7xl font-cyber font-bold text-cyber-blue mb-6">
-              <GlitchText text="CYBERGUARD" />
+              <GlitchText text="CRYPTOBOI-911" />
             </h1>
             <p className="text-xl md:text-2xl text-cyber-light/80 mb-8 max-w-3xl mx-auto">
               Advanced cybersecurity solutions protecting your digital assets 
@@ -47,7 +47,7 @@ const Home = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-cyber font-bold text-cyber-blue mb-6">
-              Why Choose CyberGuard?
+              Why Choose CRYPTOBOI-911?
             </h2>
             <p className="text-xl text-cyber-light/70 max-w-3xl mx-auto">
               We provide comprehensive cybersecurity solutions that adapt to the 
@@ -149,7 +149,7 @@ const Home = () => {
               Ready to Secure Your Future?
             </h2>
             <p className="text-xl text-cyber-light/70 mb-8 max-w-3xl mx-auto">
-              Join thousands of organizations that trust CyberGuard to protect 
+              Join thousands of organizations that trust CRYPTOBOI-911 to protect 
               their most valuable digital assets.
             </p>
             <Link to="/get-started">
