@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +63,7 @@ export default function GetStarted() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email address"
+              placeholder="Enter your username"
               className="p-3 rounded-md bg-cyber-gray/50 border border-cyber-blue/20 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue transition-all"
             />
             <button
