@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -20,10 +21,10 @@ export default function GetStarted() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    if (!email || email.trim().length < 3) {
       toast({
         title: "Error",
-        description: "Please enter a valid email address.",
+        description: "Please enter a valid username (at least 3 characters).",
         variant: "destructive"
       });
       return;
@@ -38,7 +39,7 @@ export default function GetStarted() {
       description: "Your 14-character access key has been created successfully!",
     });
     
-    // Optionally: Save user email and key to database here
+    // Optionally: Save user username and key to database here
     console.log("Generated access key for:", email, "Key:", key);
   };
 
@@ -59,7 +60,7 @@ export default function GetStarted() {
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <label className="text-cyber-light/70 font-tech">Username</label>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
