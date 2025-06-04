@@ -282,7 +282,7 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
             <span className="text-cyber-dark font-bold">C</span>
           </div>
           {state === 'expanded' && (
-            <span className="text-xl font-cyber font-bold text-cyber-blue">CYBERKRYPT</span>
+            <span className="text-xl font-cyber font-bold text-cyber-blue">Cryptoboi-911</span>
           )}
         </div>
       </SidebarHeader>
