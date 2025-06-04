@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,18 +14,68 @@ const Login = () => {
   const [enteredPassword, setEnteredPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [usedUsernames, setUsedUsernames] = useState<string[]>([]);
+  const [usedCodes, setUsedCodes] = useState<string[]>([]);
   const navigate = useNavigate();
 
+  // Load used usernames and codes from localStorage on component mount
+  useEffect(() => {
+    const storedUsernames = localStorage.getItem('usedUsernames');
+    const storedCodes = localStorage.getItem('usedCodes');
+    
+    if (storedUsernames) {
+      setUsedUsernames(JSON.parse(storedUsernames));
+    }
+    if (storedCodes) {
+      setUsedCodes(JSON.parse(storedCodes));
+    }
+  }, []);
+
   const generatePassword = () => {
-    const password = Math.random().toString().slice(2, 14);
-    setGeneratedPassword(password);
+    if (!username.trim()) {
+      alert('Please enter a username first');
+      return;
+    }
+
+    if (usedUsernames.includes(username.trim())) {
+      alert('This username has already been used. Please choose a different username.');
+      return;
+    }
+
+    let newPassword;
+    let attempts = 0;
+    
+    // Generate a unique code that hasn't been used before
+    do {
+      newPassword = Math.random().toString().slice(2, 14);
+      attempts++;
+      
+      // Prevent infinite loop in case of exhaustion (very unlikely)
+      if (attempts > 1000) {
+        alert('Unable to generate a unique code. Please try again later.');
+        return;
+      }
+    } while (usedCodes.includes(newPassword));
+
+    setGeneratedPassword(newPassword);
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username && enteredPassword === generatedPassword && generatedPassword) {
-      setIsLoggedIn(true);
+      // Add username and code to used lists
+      const newUsedUsernames = [...usedUsernames, username.trim()];
+      const newUsedCodes = [...usedCodes, generatedPassword];
+      
+      setUsedUsernames(newUsedUsernames);
+      setUsedCodes(newUsedCodes);
+      
+      // Store in localStorage
+      localStorage.setItem('usedUsernames', JSON.stringify(newUsedUsernames));
+      localStorage.setItem('usedCodes', JSON.stringify(newUsedCodes));
       localStorage.setItem('isAuthenticated', 'true');
+      
+      setIsLoggedIn(true);
       navigate('/products-table');
     }
   };
@@ -46,7 +97,7 @@ const Login = () => {
               CRYPTOBOI-911 Access
             </CardTitle>
             <CardDescription className="text-cyber-light/70">
-              Generate and use your 12-digit access code
+              Generate and use your unique 12-digit access code
             </CardDescription>
           </CardHeader>
           
@@ -63,6 +114,9 @@ const Login = () => {
                   className="bg-cyber-darker border-cyber-blue/30 text-cyber-light"
                   required
                 />
+                {usedUsernames.includes(username.trim()) && username.trim() && (
+                  <p className="text-red-400 text-sm">This username has already been used</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -72,7 +126,7 @@ const Login = () => {
                     type="text"
                     value={generatedPassword}
                     readOnly
-                    placeholder="Click generate to create code"
+                    placeholder="Click generate to create unique code"
                     className="bg-cyber-darker border-cyber-blue/30 text-cyber-light font-mono"
                   />
                   <Button
@@ -81,6 +135,7 @@ const Login = () => {
                     variant="outline"
                     size="icon"
                     className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
+                    disabled={!username.trim() || usedUsernames.includes(username.trim())}
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -120,14 +175,15 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
-                disabled={!username || !generatedPassword || !enteredPassword}
+                disabled={!username || !generatedPassword || !enteredPassword || usedUsernames.includes(username.trim())}
               >
                 Access Products
               </Button>
             </form>
 
             <div className="text-center text-sm text-cyber-light/60">
-              <p>Generate a 12-digit code and enter it to access premium products</p>
+              <p>Generate a unique 12-digit code for your username to access premium products</p>
+              <p className="mt-1">Each username and code can only be used once</p>
             </div>
           </CardContent>
         </Card>
