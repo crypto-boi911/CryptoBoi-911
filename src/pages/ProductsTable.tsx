@@ -87,12 +87,12 @@ const ProductsTable = () => {
               </p>
             </div>
             <Button
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/')}
               variant="outline"
               className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Products
+              Back to Home
             </Button>
           </div>
 
