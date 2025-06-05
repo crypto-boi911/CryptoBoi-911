@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 interface UserProfile {
   id: string;
@@ -28,10 +29,8 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Get users from Supabase Auth (admin function)
+      const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
 
       if (error) {
         console.error('Error fetching users:', error);
@@ -43,7 +42,16 @@ const AdminUsers = () => {
         return;
       }
 
-      setUsers(data || []);
+      // Transform auth users to our UserProfile format
+      const userProfiles: UserProfile[] = authUsers.map((user: User) => ({
+        id: user.id,
+        username: user.user_metadata?.username || user.email?.split('@')[0] || 'Unknown',
+        role: user.user_metadata?.role || 'user',
+        created_at: user.created_at,
+        email: user.email
+      }));
+
+      setUsers(userProfiles);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -58,10 +66,13 @@ const AdminUsers = () => {
 
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+      // Update user metadata using Supabase Auth admin function
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { 
+          ...users.find(u => u.id === userId),
+          role: newRole 
+        }
+      });
 
       if (error) {
         console.error('Error updating user role:', error);
