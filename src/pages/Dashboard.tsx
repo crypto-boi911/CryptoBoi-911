@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -9,7 +10,11 @@ import {
   ShoppingCart, 
   ClipboardList, 
   HelpCircle,
-  LogOut 
+  LogOut,
+  Lock,
+  Settings,
+  User,
+  LifeBuoy
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,6 +95,29 @@ const Dashboard = () => {
     "-After buying the goods, you will have a countdown on the return time, at the moment it is 2 hours, which is enough to check your account. Please specify the correct gills and always attach screenshots, otherwise the return will be denied-Clients ' personal data is stored in a database with non-standard encryption and guaranteed security."
   ];
 
+  const platformFeatures = [
+    {
+      icon: Lock,
+      title: "Fast & Secure",
+      description: "Your data is secure with us. We ensure fast log purchase and secure access."
+    },
+    {
+      icon: Settings,
+      title: "Customizable Options",
+      description: "Tailor logs to meet your specific needs, with a variety of categories."
+    },
+    {
+      icon: User,
+      title: "User-Friendly",
+      description: "Enjoy an intuitive dashboard that's easy to navigate and operate."
+    },
+    {
+      icon: LifeBuoy,
+      title: "24/7 Support",
+      description: "Get support anytime you need it with our reliable customer service."
+    }
+  ];
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-cyber-gradient flex w-full">
@@ -143,7 +171,7 @@ const Dashboard = () => {
               </div>
 
               {/* FAQ Content */}
-              <div className="space-y-6">
+              <div className="space-y-6 mb-16">
                 {faqContent.map((item, index) => (
                   <motion.div
                     key={index}
@@ -156,6 +184,47 @@ const Dashboard = () => {
                   </motion.div>
                 ))}
               </div>
+
+              {/* Why Choose Our Platform Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+                className="space-y-8"
+              >
+                <h2 className="text-3xl font-cyber font-bold text-center text-cyber-blue mb-12">
+                  Why Choose Our Platform?
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {platformFeatures.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
+                    >
+                      <Card className="bg-cyber-darker/60 border-cyber-blue/30 hover:border-cyber-blue/60 transition-all duration-300 h-full">
+                        <CardHeader className="text-center pb-4">
+                          <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-cyber-blue/20 rounded-lg flex items-center justify-center">
+                              <feature.icon className="h-8 w-8 text-cyber-blue" />
+                            </div>
+                          </div>
+                          <CardTitle className="text-xl font-cyber text-cyber-light">
+                            {feature.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center">
+                          <p className="text-cyber-light/80 leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </motion.div>
           </main>
         </SidebarInset>
