@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Home, 
@@ -20,6 +19,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -38,43 +38,15 @@ import {
 import UserTierSystem from '@/components/UserTierSystem';
 
 const Dashboard = () => {
-  const [username, setUsername] = useState<string>('');
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    // Get the stored username from when they registered
-    const storedRegistrations = localStorage.getItem('userRegistrations');
-    if (storedRegistrations) {
-      const registrations = JSON.parse(storedRegistrations);
-      if (registrations.length > 0) {
-        // Get the most recent user (last in array)
-        const recentUser = registrations[registrations.length - 1];
-        setUsername(recentUser.username);
-      }
-    }
-    
-    // Fallback: if no stored registrations, check credentials
-    if (!username) {
-      const storedCredentials = localStorage.getItem('userCredentials');
-      if (storedCredentials) {
-        const credentials = JSON.parse(storedCredentials);
-        if (credentials.length > 0) {
-          const recentUser = credentials[credentials.length - 1];
-          setUsername(recentUser.username);
-        }
-      }
-    }
-    
-    // Final fallback: if no stored data, use a default
-    if (!username) {
-      setUsername('User');
-    }
-  }, [username]);
+  const username = user?.user_metadata?.username || 'User';
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+  const handleLogout = async () => {
+    await signOut();
     toast({
       title: "Logged Out",
       description: "You have been logged out successfully",

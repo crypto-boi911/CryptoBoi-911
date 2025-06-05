@@ -3,13 +3,16 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function GetStarted() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [accessKey, setAccessKey] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const generateAccessKey = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -20,10 +23,10 @@ export default function GetStarted() {
     return key;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || email.trim().length < 3) {
+    if (!username || username.trim().length < 3) {
       toast({
         title: "Error",
         description: "Please enter a valid username (at least 3 characters).",
@@ -32,27 +35,49 @@ export default function GetStarted() {
       return;
     }
 
+    setIsLoading(true);
     const key = generateAccessKey();
-    setAccessKey(key);
-    setSubmitted(true);
     
-    // Store user registration data
-    const userRegistration = {
-      username: email,
-      accessKey: key,
-      joinDate: new Date().toISOString()
-    };
-    
-    const existingRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-    existingRegistrations.push(userRegistration);
-    localStorage.setItem('userRegistrations', JSON.stringify(existingRegistrations));
-    
-    toast({
-      title: "Access Key Generated",
-      description: "Your 14-character access key has been created successfully!",
-    });
-    
-    console.log("Generated access key for:", email, "Key:", key);
+    try {
+      const { error } = await signUp(username, key);
+      
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "Error",
+            description: "Username already exists. Please choose a different one.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to create account",
+            variant: "destructive"
+          });
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      setAccessKey(key);
+      setSubmitted(true);
+      
+      toast({
+        title: "Account Created",
+        description: "Your account has been created successfully!",
+      });
+      
+      console.log("Account created for:", username, "Key:", key);
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const copyToClipboard = () => {
@@ -83,17 +108,19 @@ export default function GetStarted() {
             <label className="text-cyber-light/70 font-tech">Username</label>
             <input
               type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               placeholder="Enter your username"
               className="p-3 rounded-md bg-cyber-gray/50 border border-cyber-blue/20 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue transition-all"
+              disabled={isLoading}
             />
             <button
               type="submit"
-              className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105"
+              disabled={isLoading}
+              className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Generate Access Key
+              {isLoading ? 'Creating Account...' : 'Generate Access Key'}
             </button>
           </form>
         ) : (

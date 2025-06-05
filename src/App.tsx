@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -35,114 +36,116 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BrowserRouter>
-        <div className="min-h-screen bg-cyber-dark">
-          <Routes>
-            {/* Routes without Navbar/Footer */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/get-started" element={<GetStarted />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/bank-logs" element={
-              <ProtectedRoute>
-                <BankLogs />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/cards" element={
-              <ProtectedRoute>
-                <CardsLinkables />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/paypal" element={
-              <ProtectedRoute>
-                <PayPalLogs />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/cashapp" element={
-              <ProtectedRoute>
-                <CashAppLogs />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/tools" element={
-              <ProtectedRoute>
-                <Tools />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/cart" element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/orders" element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/support" element={
-              <ProtectedRoute>
-                <Support />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/dashboard" element={
-              <AdminProtectedRoute>
-                <AdminDashboard />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/users" element={
-              <AdminProtectedRoute>
-                <AdminUsers />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/products" element={
-              <AdminProtectedRoute>
-                <AdminProducts />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/orders" element={
-              <AdminProtectedRoute>
-                <AdminOrders />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/content" element={
-              <AdminProtectedRoute>
-                <AdminContent />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/logs" element={
-              <AdminProtectedRoute>
-                <AdminLogs />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/messages" element={
-              <AdminProtectedRoute>
-                <AdminMessages />
-              </AdminProtectedRoute>
-            } />
-            <Route path="/admin/settings" element={
-              <AdminProtectedRoute>
-                <AdminSettings />
-              </AdminProtectedRoute>
-            } />
-            
-            {/* Routes with Navbar/Footer */}
-            <Route path="/*" element={
-              <>
-                <Navbar />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Footer />
-              </>
-            } />
-          </Routes>
-        </div>
-        <Toaster />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-cyber-dark">
+            <Routes>
+              {/* Routes without Navbar/Footer */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/get-started" element={<GetStarted />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/bank-logs" element={
+                <ProtectedRoute>
+                  <BankLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/cards" element={
+                <ProtectedRoute>
+                  <CardsLinkables />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/paypal" element={
+                <ProtectedRoute>
+                  <PayPalLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/cashapp" element={
+                <ProtectedRoute>
+                  <CashAppLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/tools" element={
+                <ProtectedRoute>
+                  <Tools />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/cart" element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/orders" element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/support" element={
+                <ProtectedRoute>
+                  <Support />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/dashboard" element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/users" element={
+                <AdminProtectedRoute>
+                  <AdminUsers />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/products" element={
+                <AdminProtectedRoute>
+                  <AdminProducts />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/orders" element={
+                <AdminProtectedRoute>
+                  <AdminOrders />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/content" element={
+                <AdminProtectedRoute>
+                  <AdminContent />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/logs" element={
+                <AdminProtectedRoute>
+                  <AdminLogs />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/messages" element={
+                <AdminProtectedRoute>
+                  <AdminMessages />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/settings" element={
+                <AdminProtectedRoute>
+                  <AdminSettings />
+                </AdminProtectedRoute>
+              } />
+              
+              {/* Routes with Navbar/Footer */}
+              <Route path="/*" element={
+                <>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Footer />
+                </>
+              } />
+            </Routes>
+          </div>
+          <Toaster />
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

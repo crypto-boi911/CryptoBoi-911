@@ -3,14 +3,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
+  const [username, setUsername] = useState("");
   const [accessKey, setAccessKey] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (accessKey.length !== 14) {
@@ -18,37 +22,38 @@ const Login = () => {
       return;
     }
 
-    setError("");
-    
-    // Find the username associated with this access key
-    const registrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-    const user = registrations.find((reg: any) => reg.accessKey === accessKey);
-    const username = user ? user.username : `User_${accessKey.slice(0, 6)}`;
-    
-    // Update last login time for this user
-    if (user) {
-      user.lastLogin = new Date().toISOString();
-      localStorage.setItem('userRegistrations', JSON.stringify(registrations));
+    if (!username || username.trim().length < 3) {
+      setError("Please enter a valid username.");
+      return;
     }
+
+    setError("");
+    setIsLoading(true);
     
-    // Store login credential
-    const loginCredential = {
-      username: username,
-      accessCode: accessKey,
-      timestamp: new Date().toISOString()
-    };
-    
-    const existingCredentials = JSON.parse(localStorage.getItem('userCredentials') || '[]');
-    existingCredentials.push(loginCredential);
-    localStorage.setItem('userCredentials', JSON.stringify(existingCredentials));
-    
-    localStorage.setItem('isAuthenticated', 'true');
-    toast({
-      title: "Access Granted",
-      description: `Welcome ${username}! Redirecting to dashboard...`,
-    });
-    
-    navigate('/dashboard');
+    try {
+      const { error } = await signIn(username, accessKey);
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          setError("Invalid username or access key.");
+        } else {
+          setError(error.message || "Login failed");
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Access Granted",
+        description: `Welcome ${username}! Redirecting to dashboard...`,
+      });
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError("An unexpected error occurred");
+      setIsLoading(false);
+    }
   };
 
   const handleGoBack = () => {
@@ -70,6 +75,18 @@ const Login = () => {
         
         <form onSubmit={handleLogin}>
           <div className="mb-4">
+            <label className="block mb-2 text-sm text-cyber-light">Username</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="mb-4">
             <label className="block mb-2 text-sm text-cyber-light">Access Key</label>
             <input
               type="text"
@@ -77,6 +94,7 @@ const Login = () => {
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               placeholder="Enter your 14-char access key"
+              disabled={isLoading}
             />
           </div>
 
@@ -84,9 +102,10 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-2 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-semibold rounded transition duration-200"
+            disabled={isLoading}
+            className="w-full py-2 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-semibold rounded transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Access Dashboard
+            {isLoading ? 'Logging in...' : 'Access Dashboard'}
           </button>
         </form>
 
