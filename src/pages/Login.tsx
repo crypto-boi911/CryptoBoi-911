@@ -51,15 +51,15 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-black text-white">
-      <div className="bg-[#121212] border border-[#1f1f1f] rounded-xl p-8 w-full max-w-md shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-cyan-400">Login with Access Key</h2>
+    <div className="min-h-screen flex justify-center items-center bg-cyber-dark">
+      <div className="bg-cyber-darker border border-cyber-blue/20 rounded-xl p-8 w-full max-w-md shadow-lg">
+        <h2 className="text-2xl font-bold mb-6 text-cyber-blue text-center">Login with Access Key</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block mb-2 text-sm text-gray-300">Access Key</label>
+            <label className="block mb-2 text-sm text-cyber-light">Access Key</label>
             <input
               type="text"
-              className="w-full px-4 py-2 rounded bg-[#1e1e1e] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               placeholder="Enter your 14-char access key"
@@ -70,7 +70,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded transition duration-200"
+            className="w-full py-2 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-semibold rounded transition duration-200"
           >
             Access Dashboard
           </button>
