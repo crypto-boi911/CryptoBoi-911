@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function InsertTransaction() {
   const [status, setStatus] = useState<string | null>(null);
@@ -14,10 +15,10 @@ export default function InsertTransaction() {
       status: 'pending',
     });
 
-if (error) {
-  console.error('Insert error:', error); // 👈 This is key
-  setStatus(`❌ ${JSON.stringify(error)}`); // Show full raw error
-} else {
+    if (error) {
+      console.error('Insert error:', error);
+      setStatus(`❌ ${JSON.stringify(error)}`);
+    } else {
       setStatus('✅ Transaction inserted!');
     }
   };
