@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
@@ -37,6 +36,7 @@ const Cart = () => {
 
   const handleProceedToCheckout = () => {
     console.log('Proceeding to checkout with total:', total);
+    console.log('Setting checkout modal to open...');
     setIsCheckoutOpen(true);
   };
 
@@ -177,6 +177,7 @@ const Cart = () => {
         </div>
       </motion.div>
 
+      {console.log('Rendering CheckoutModal with isOpen:', isCheckoutOpen)}
       <CheckoutModal 
         isOpen={isCheckoutOpen}
         onClose={handleCloseCheckout}
