@@ -15,3 +15,13 @@ export default function Home() {
     </main>
   );
 }
+import SetAdminRole from '@/components/SetAdminRole';
+
+export default function Home() {
+  return (
+    <main className="p-4">
+      <h1>Welcome</h1>
+      <SetAdminRole />
+    </main>
+  );
+}
