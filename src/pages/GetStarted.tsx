@@ -42,10 +42,18 @@ export default function GetStarted() {
       const { error } = await signUp(username, key);
       
       if (error) {
-        if (error.message.includes('User already registered')) {
+        console.error('Signup error:', error);
+        
+        if (error.message.includes('User already registered') || error.message.includes('already been registered')) {
           toast({
             title: "Error",
             description: "Username already exists. Please choose a different one.",
+            variant: "destructive"
+          });
+        } else if (error.message.includes('invalid format')) {
+          toast({
+            title: "Error", 
+            description: "Please try a different username format.",
             variant: "destructive"
           });
         } else {
@@ -61,11 +69,6 @@ export default function GetStarted() {
 
       setAccessKey(key);
       setSubmitted(true);
-      
-      toast({
-        title: "Account Created",
-        description: "Your account has been created successfully!",
-      });
       
       console.log("Account created for:", username, "Key:", key);
     } catch (error) {
@@ -95,6 +98,7 @@ export default function GetStarted() {
           <button
             onClick={() => navigate(-1)}
             className="text-cyber-blue hover:text-cyber-blue/80 transition-colors flex items-center gap-2"
+            disabled={isLoading}
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="font-tech">Back</span>
@@ -114,13 +118,23 @@ export default function GetStarted() {
               placeholder="Enter your username"
               className="p-3 rounded-md bg-cyber-gray/50 border border-cyber-blue/20 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue transition-all"
               disabled={isLoading}
+              maxLength={20}
+              pattern="[a-zA-Z0-9_-]+"
+              title="Username can only contain letters, numbers, underscores, and hyphens"
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {isLoading ? 'Creating Account...' : 'Generate Access Key'}
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyber-dark"></div>
+                  Creating Account...
+                </div>
+              ) : (
+                'Generate Access Key'
+              )}
             </button>
           </form>
         ) : (

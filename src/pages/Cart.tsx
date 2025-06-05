@@ -10,11 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTierSystem } from '@/hooks/useTierSystem';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CartItem {
-  id: number;
-  name: string;
-  type: string;
+  id: string;
+  product_name: string;
+  product_type: string;
   balance: string;
   price: number;
   quantity: number;
@@ -29,11 +30,12 @@ interface DiscountedItem extends CartItem {
 const Cart = () => {
   const navigate = useNavigate();
   const { applyDiscount, currentTier } = useTierSystem();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logActivity } = useAuth();
   const { toast } = useToast();
   
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartLoading, setIsCartLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -43,44 +45,89 @@ const Cart = () => {
     }
   }, [user, isLoading, navigate]);
 
-  // Load cart data
+  // Load cart data from Supabase
   useEffect(() => {
-    const loadCartData = () => {
+    const loadCartData = async () => {
+      if (!user) return;
+      
       try {
-        const savedCart = localStorage.getItem('cartItems');
-        if (savedCart) {
-          setCartItems(JSON.parse(savedCart));
-        } else {
-          // Default items for demo purposes
-          setCartItems([
-            { id: 1, name: 'Chase Bank Log', type: 'Bank Account', balance: '$25,000', price: 500, quantity: 1 },
-            { id: 2, name: 'PayPal Business', type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
-            { id: 3, name: 'Visa Platinum', type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
-          ]);
-        }
+        const { data, error } = await supabase
+          .from('cart_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setCartItems(data || []);
+        
+        // Log cart view activity
+        await logActivity('CART_VIEW', { itemCount: data?.length || 0 });
       } catch (error) {
-        console.error('Error loading cart data:', error);
+        console.error('Error loading cart:', error);
         toast({
           title: "Error",
           description: "Failed to load cart data",
           variant: "destructive"
         });
+        
+        // Fallback to demo data
+        const demoItems = [
+          { id: 'demo-1', product_name: 'Chase Bank Log', product_type: 'Bank Account', balance: '$25,000', price: 500, quantity: 1 },
+          { id: 'demo-2', product_name: 'PayPal Business', product_type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
+          { id: 'demo-3', product_name: 'Visa Platinum', product_type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
+        ];
+        setCartItems(demoItems);
       } finally {
         setIsCartLoading(false);
       }
     };
 
-    if (user) {
+    if (user && !isLoading) {
       loadCartData();
     }
-  }, [user, toast]);
+  }, [user, isLoading, toast, logActivity]);
 
-  // Save cart to localStorage whenever it changes
+  // Set up real-time subscription for cart changes
   useEffect(() => {
-    if (!isCartLoading && cartItems.length >= 0) {
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    }
-  }, [cartItems, isCartLoading]);
+    if (!user) return;
+
+    const channel = supabase
+      .channel('cart-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cart_items',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Cart change detected:', payload);
+          // Reload cart data when changes occur
+          loadCartData();
+        }
+      )
+      .subscribe();
+
+    const loadCartData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cart_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setCartItems(data || []);
+      } catch (error) {
+        console.error('Error reloading cart:', error);
+      }
+    };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   // Calculate discounts for each item
   const discountedItems: DiscountedItem[] = cartItems.map(item => {
@@ -91,7 +138,7 @@ const Cart = () => {
       'Credit Card': 'cards'
     };
     
-    const category = categoryMap[item.type] || '';
+    const category = categoryMap[item.product_type] || '';
     const discountInfo = applyDiscount(item.price, category);
     
     return {
@@ -102,26 +149,76 @@ const Cart = () => {
     };
   });
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      setCartItems(cartItems.filter(item => item.id !== id));
+  const updateQuantity = async (id: string, newQuantity: number) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+
+    try {
+      if (newQuantity === 0) {
+        await removeItem(id);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('cart_items')
+        .update({ quantity: newQuantity, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Update local state immediately for better UX
+      setCartItems(items => 
+        items.map(item => 
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
+
+      await logActivity('CART_UPDATE_QUANTITY', { itemId: id, newQuantity });
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update item quantity",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const removeItem = async (id: string) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Update local state immediately
+      setCartItems(items => items.filter(item => item.id !== id));
+      
+      await logActivity('CART_REMOVE_ITEM', { itemId: id });
+      
       toast({
         title: "Item Removed",
         description: "Item has been removed from your cart",
       });
-    } else {
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      ));
+    } catch (error) {
+      console.error('Error removing item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove item from cart",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
     }
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    toast({
-      title: "Item Removed",
-      description: "Item has been removed from your cart",
-    });
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -130,7 +227,7 @@ const Cart = () => {
   const tax = discountedSubtotal * 0.1;
   const total = discountedSubtotal + tax;
 
-  const handleProceedToCheckout = () => {
+  const handleProceedToCheckout = async () => {
     if (cartItems.length === 0) {
       toast({
         title: "Cart Empty",
@@ -140,18 +237,42 @@ const Cart = () => {
       return;
     }
 
-    // Save total to localStorage for checkout page
-    localStorage.setItem('cartTotal', total.toString());
-    
-    console.log('Proceeding to checkout with total:', total);
-    navigate('/dashboard/checkout');
+    if (isUpdating) {
+      toast({
+        title: "Please wait",
+        description: "Cart is being updated, please try again in a moment",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await logActivity('CHECKOUT_INITIATED', { 
+        itemCount: cartItems.length, 
+        total: total,
+        discountApplied: totalSavings 
+      });
+      
+      console.log('Proceeding to checkout with total:', total);
+      navigate('/dashboard/checkout');
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to proceed to checkout",
+        variant: "destructive"
+      });
+    }
   };
 
   // Show loading state
   if (isLoading || isCartLoading) {
     return (
       <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
-        <div className="text-cyber-light">Loading cart...</div>
+        <div className="text-cyber-light flex items-center gap-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyber-blue"></div>
+          Loading cart...
+        </div>
       </div>
     );
   }
@@ -171,6 +292,7 @@ const Cart = () => {
               variant="outline"
               onClick={() => navigate('/dashboard')}
               className="border-cyber-blue/30 text-cyber-light hover:bg-cyber-blue/10"
+              disabled={isUpdating}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
@@ -232,8 +354,8 @@ const Cart = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3 className="text-cyber-light font-tech font-semibold">{item.name}</h3>
-                          <p className="text-cyber-light/60 text-sm">{item.type}</p>
+                          <h3 className="text-cyber-light font-tech font-semibold">{item.product_name}</h3>
+                          <p className="text-cyber-light/60 text-sm">{item.product_type}</p>
                           <p className="text-cyber-blue text-sm">Balance: {item.balance}</p>
                         </div>
                         
@@ -244,6 +366,7 @@ const Cart = () => {
                               variant="outline"
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="h-8 w-8 p-0 border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
+                              disabled={isUpdating}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -253,6 +376,7 @@ const Cart = () => {
                               variant="outline"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="h-8 w-8 p-0 border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
+                              disabled={isUpdating}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -284,6 +408,7 @@ const Cart = () => {
                             variant="outline"
                             onClick={() => removeItem(item.id)}
                             className="text-red-400 border-red-400/30 hover:bg-red-400 hover:text-white"
+                            disabled={isUpdating}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -328,10 +453,17 @@ const Cart = () => {
                 </div>
                 <Button 
                   className="w-full bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80 font-tech"
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems.length === 0 || isUpdating}
                   onClick={handleProceedToCheckout}
                 >
-                  Proceed to Checkout
+                  {isUpdating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyber-dark mr-2"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    'Proceed to Checkout'
+                  )}
                 </Button>
               </CardContent>
             </Card>

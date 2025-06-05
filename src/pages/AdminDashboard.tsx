@@ -6,98 +6,174 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+
+interface DashboardStats {
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+  activeOrders: number;
+  recentActivity: any[];
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [dashboardStats, setDashboardStats] = useState({
+  const { user, profile, signOut } = useAuth();
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalUsers: 0,
-    activeUsers: 0,
-    totalProducts: 0,
-    totalOrders: 4,
-    totalRevenue: 12450,
+    totalOrders: 0,
+    totalRevenue: 0,
+    activeOrders: 0,
     recentActivity: []
   });
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check admin access
   useEffect(() => {
-    // Load real-time data from localStorage
-    const loadDashboardData = () => {
-      // Get user registrations
-      const registrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-      const credentials = JSON.parse(localStorage.getItem('userCredentials') || '[]');
-      
-      // Count products from all pages
-      let totalProducts = 0;
-      
-      // Get products from bank logs (estimated)
-      totalProducts += 50; // Bank logs base count
-      
-      // Get products from other pages (100 each as we added)
-      totalProducts += 100; // PayPal logs
-      totalProducts += 100; // CashApp logs
-      totalProducts += 100; // Cards
-      totalProducts += 10;  // Tools (estimated)
-      
-      // Get recent admin activity
-      const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
-      const recentActivity = adminLogs.slice(-10).reverse();
-      
-      setDashboardStats({
-        totalUsers: registrations.length,
-        activeUsers: credentials.length,
-        totalProducts,
-        totalOrders: 4,
-        totalRevenue: 12450,
-        recentActivity
+    if (profile && profile.role !== 'admin') {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access the admin dashboard.",
+        variant: "destructive"
       });
+      navigate('/dashboard');
+      return;
+    }
+  }, [profile, navigate, toast]);
+
+  // Load dashboard data
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!user || profile?.role !== 'admin') return;
+      
+      try {
+        // Get total users
+        const { count: userCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Get total orders and revenue
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('total, status, created_at');
+
+        const totalOrders = orders?.length || 0;
+        const totalRevenue = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
+        const activeOrders = orders?.filter(order => order.status === 'pending' || order.status === 'processing').length || 0;
+
+        // Get recent activity
+        const { data: recentActivity } = await supabase
+          .from('user_activity')
+          .select('*, profiles!inner(username)')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        setDashboardStats({
+          totalUsers: userCount || 0,
+          totalOrders,
+          totalRevenue,
+          activeOrders,
+          recentActivity: recentActivity || []
+        });
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadDashboardData();
+    if (user && profile?.role === 'admin') {
+      loadDashboardData();
+    }
+  }, [user, profile, toast]);
 
-    // Update admin activity
-    const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
-    adminLogs.push({
-      id: crypto.randomUUID(),
-      action: 'DASHBOARD_VIEW',
-      timestamp: new Date().toISOString(),
-      details: 'Admin accessed dashboard',
-      sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
-    });
-    localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+  // Set up real-time subscriptions for live updates
+  useEffect(() => {
+    if (!user || profile?.role !== 'admin') return;
 
-    // Set up real-time polling for updates
-    const interval = setInterval(loadDashboardData, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    // Subscribe to profiles changes
+    const profilesChannel = supabase
+      .channel('profiles-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        console.log('Profiles updated');
+        // Reload data when profiles change
+        loadDashboardData();
+      })
+      .subscribe();
 
-  const handleLogout = () => {
-    // Log admin logout
-    const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
-    adminLogs.push({
-      id: crypto.randomUUID(),
-      action: 'LOGOUT',
-      timestamp: new Date().toISOString(),
-      details: 'Admin logged out',
-      sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
-    });
-    localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+    // Subscribe to orders changes
+    const ordersChannel = supabase
+      .channel('orders-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        console.log('Orders updated');
+        loadDashboardData();
+      })
+      .subscribe();
 
-    // Clear admin session
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('isAdminAuthenticated');
-    localStorage.removeItem('adminSession');
-    
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out of the admin dashboard",
-    });
+    // Subscribe to activity changes
+    const activityChannel = supabase
+      .channel('activity-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_activity' }, () => {
+        console.log('New activity logged');
+        loadDashboardData();
+      })
+      .subscribe();
+
+    const loadDashboardData = async () => {
+      try {
+        const { count: userCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('total, status, created_at');
+
+        const totalOrders = orders?.length || 0;
+        const totalRevenue = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
+        const activeOrders = orders?.filter(order => order.status === 'pending' || order.status === 'processing').length || 0;
+
+        const { data: recentActivity } = await supabase
+          .from('user_activity')
+          .select('*, profiles!inner(username)')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        setDashboardStats({
+          totalUsers: userCount || 0,
+          totalOrders,
+          totalRevenue,
+          activeOrders,
+          recentActivity: recentActivity || []
+        });
+      } catch (error) {
+        console.error('Error reloading dashboard data:', error);
+      }
+    };
+
+    return () => {
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(activityChannel);
+    };
+  }, [user, profile]);
+
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
   const dashboardItems = [
     {
       title: 'User Management',
-      description: `View all ${dashboardStats.totalUsers} registered users and ${dashboardStats.activeUsers} active sessions`,
+      description: `View all ${dashboardStats.totalUsers} registered users and manage their accounts`,
       icon: Users,
       path: '/admin/users',
       color: 'text-blue-500',
@@ -105,11 +181,11 @@ const AdminDashboard = () => {
     },
     {
       title: 'Product Management',
-      description: `Manage all ${dashboardStats.totalProducts} products across all categories`,
+      description: 'Manage all products across all categories',
       icon: Package,
       path: '/admin/products',
       color: 'text-green-500',
-      count: dashboardStats.totalProducts
+      count: 360 // Static for demo
     },
     {
       title: 'Order Management',
@@ -150,6 +226,17 @@ const AdminDashboard = () => {
     }
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+        <div className="text-cyber-light flex items-center gap-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyber-blue"></div>
+          Loading admin dashboard...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cyber-gradient pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -177,7 +264,62 @@ const AdminDashboard = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Live Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Total Users</p>
+                    <p className="text-2xl font-bold text-cyber-blue">{dashboardStats.totalUsers}</p>
+                    <p className="text-xs text-green-400 mt-1">↗ Live count</p>
+                  </div>
+                  <Users className="h-8 w-8 text-cyber-blue" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Total Orders</p>
+                    <p className="text-2xl font-bold text-purple-400">{dashboardStats.totalOrders}</p>
+                    <p className="text-xs text-purple-400 mt-1">↗ {dashboardStats.activeOrders} active</p>
+                  </div>
+                  <ShoppingCart className="h-8 w-8 text-purple-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Revenue</p>
+                    <p className="text-2xl font-bold text-green-400">${dashboardStats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-xs text-green-400 mt-1">↗ Total earned</p>
+                  </div>
+                  <DollarSign className="h-8 w-8 text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Active Orders</p>
+                    <p className="text-2xl font-bold text-orange-400">{dashboardStats.activeOrders}</p>
+                    <p className="text-xs text-orange-400 mt-1">↗ Processing</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-orange-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {dashboardItems.map((item, index) => (
               <motion.div
                 key={index}
@@ -217,82 +359,28 @@ const AdminDashboard = () => {
             ))}
           </div>
 
-          {/* Enhanced Stats */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-cyber font-bold text-cyber-light mb-6">Live Statistics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-cyber-light/60 text-sm">Total Users</p>
-                      <p className="text-2xl font-bold text-cyber-blue">{dashboardStats.totalUsers}</p>
-                      <p className="text-xs text-green-400 mt-1">↗ {dashboardStats.activeUsers} active</p>
-                    </div>
-                    <Users className="h-8 w-8 text-cyber-blue" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-cyber-light/60 text-sm">Total Products</p>
-                      <p className="text-2xl font-bold text-green-400">{dashboardStats.totalProducts}</p>
-                      <p className="text-xs text-green-400 mt-1">↗ All categories</p>
-                    </div>
-                    <Package className="h-8 w-8 text-green-400" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-cyber-light/60 text-sm">Orders Today</p>
-                      <p className="text-2xl font-bold text-purple-400">{dashboardStats.totalOrders}</p>
-                      <p className="text-xs text-purple-400 mt-1">↗ Active orders</p>
-                    </div>
-                    <ShoppingCart className="h-8 w-8 text-purple-400" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-cyber-light/60 text-sm">Revenue</p>
-                      <p className="text-2xl font-bold text-green-400">${dashboardStats.totalRevenue.toLocaleString()}</p>
-                      <p className="text-xs text-green-400 mt-1">↗ Total earned</p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-green-400" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
           {/* Recent Activity */}
           {dashboardStats.recentActivity.length > 0 && (
             <div className="mt-12">
-              <h2 className="text-2xl font-cyber font-bold text-cyber-light mb-6">Recent Admin Activity</h2>
+              <h2 className="text-2xl font-cyber font-bold text-cyber-light mb-6">Live Activity Feed</h2>
               <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    {dashboardStats.recentActivity.slice(0, 5).map((activity: any, index) => (
+                    {dashboardStats.recentActivity.slice(0, 8).map((activity: any, index) => (
                       <div key={index} className="flex items-center justify-between py-2 border-b border-cyber-blue/10 last:border-b-0">
                         <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-cyber-blue rounded-full"></div>
+                          <div className="w-2 h-2 bg-cyber-blue rounded-full animate-pulse"></div>
                           <div>
-                            <p className="text-cyber-light font-medium">{activity.action}</p>
-                            <p className="text-cyber-light/60 text-sm">{activity.details}</p>
+                            <p className="text-cyber-light font-medium">
+                              {activity.profiles?.username || 'Unknown User'} • {activity.action}
+                            </p>
+                            <p className="text-cyber-light/60 text-sm">
+                              {activity.details ? JSON.stringify(activity.details).slice(0, 50) + '...' : 'No details'}
+                            </p>
                           </div>
                         </div>
                         <p className="text-cyber-light/60 text-sm">
-                          {new Date(activity.timestamp).toLocaleTimeString()}
+                          {new Date(activity.created_at).toLocaleTimeString()}
                         </p>
                       </div>
                     ))}
