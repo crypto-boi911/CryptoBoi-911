@@ -45,6 +45,8 @@ const Cart = () => {
     setIsCheckoutOpen(false);
   };
 
+  console.log('Rendering CheckoutModal with isOpen:', isCheckoutOpen);
+
   return (
     <div className="min-h-screen bg-cyber-gradient p-6">
       <motion.div
@@ -177,7 +179,6 @@ const Cart = () => {
         </div>
       </motion.div>
 
-      {console.log('Rendering CheckoutModal with isOpen:', isCheckoutOpen)}
       <CheckoutModal 
         isOpen={isCheckoutOpen}
         onClose={handleCloseCheckout}
