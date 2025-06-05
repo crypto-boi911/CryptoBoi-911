@@ -44,17 +44,29 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Get the stored username from when they registered
-    const storedCredentials = localStorage.getItem('userCredentials');
-    if (storedCredentials) {
-      const credentials = JSON.parse(storedCredentials);
-      if (credentials.length > 0) {
+    const storedRegistrations = localStorage.getItem('userRegistrations');
+    if (storedRegistrations) {
+      const registrations = JSON.parse(storedRegistrations);
+      if (registrations.length > 0) {
         // Get the most recent user (last in array)
-        const recentUser = credentials[credentials.length - 1];
+        const recentUser = registrations[registrations.length - 1];
         setUsername(recentUser.username);
       }
     }
     
-    // Fallback: if no stored credentials, use a default
+    // Fallback: if no stored registrations, check credentials
+    if (!username) {
+      const storedCredentials = localStorage.getItem('userCredentials');
+      if (storedCredentials) {
+        const credentials = JSON.parse(storedCredentials);
+        if (credentials.length > 0) {
+          const recentUser = credentials[credentials.length - 1];
+          setUsername(recentUser.username);
+        }
+      }
+    }
+    
+    // Final fallback: if no stored data, use a default
     if (!username) {
       setUsername('User');
     }
@@ -148,7 +160,7 @@ const Dashboard = () => {
                 " />
                 <div>
                   <h1 className="text-2xl font-cyber font-bold text-cyber-blue mb-2">
-                    Home
+                    Welcome back, {username}!
                   </h1>
                 </div>
               </div>
