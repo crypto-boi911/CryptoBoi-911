@@ -16,6 +16,7 @@ import PayPalLogs from "./pages/PayPalLogs";
 import CashAppLogs from "./pages/CashAppLogs";
 import Tools from "./pages/Tools";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Login from "./pages/Login";
 import GetStarted from "./pages/GetStarted";
@@ -76,6 +77,11 @@ const App = () => (
               <Route path="/dashboard/cart" element={
                 <ProtectedRoute>
                   <Cart />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/checkout" element={
+                <ProtectedRoute>
+                  <Checkout />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/orders" element={

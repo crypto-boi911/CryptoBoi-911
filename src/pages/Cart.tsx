@@ -1,28 +1,89 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import CheckoutModal from '@/components/CheckoutModal';
 import { useNavigate } from 'react-router-dom';
 import { useTierSystem } from '@/hooks/useTierSystem';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+interface CartItem {
+  id: number;
+  name: string;
+  type: string;
+  balance: string;
+  price: number;
+  quantity: number;
+}
+
+interface DiscountedItem extends CartItem {
+  originalPrice: number;
+  discountedPrice: number;
+  discount: number;
+}
 
 const Cart = () => {
   const navigate = useNavigate();
   const { applyDiscount, currentTier } = useTierSystem();
+  const { user, isLoading } = useAuth();
+  const { toast } = useToast();
   
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Chase Bank Log', type: 'Bank Account', balance: '$25,000', price: 500, quantity: 1 },
-    { id: 2, name: 'PayPal Business', type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
-    { id: 3, name: 'Visa Platinum', type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
-  ]);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartLoading, setIsCartLoading] = useState(true);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/login');
+      return;
+    }
+  }, [user, isLoading, navigate]);
+
+  // Load cart data
+  useEffect(() => {
+    const loadCartData = () => {
+      try {
+        const savedCart = localStorage.getItem('cartItems');
+        if (savedCart) {
+          setCartItems(JSON.parse(savedCart));
+        } else {
+          // Default items for demo purposes
+          setCartItems([
+            { id: 1, name: 'Chase Bank Log', type: 'Bank Account', balance: '$25,000', price: 500, quantity: 1 },
+            { id: 2, name: 'PayPal Business', type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
+            { id: 3, name: 'Visa Platinum', type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading cart data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load cart data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsCartLoading(false);
+      }
+    };
+
+    if (user) {
+      loadCartData();
+    }
+  }, [user, toast]);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (!isCartLoading && cartItems.length >= 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    }
+  }, [cartItems, isCartLoading]);
 
   // Calculate discounts for each item
-  const discountedItems = cartItems.map(item => {
+  const discountedItems: DiscountedItem[] = cartItems.map(item => {
     const categoryMap: { [key: string]: string } = {
       'Bank Account': 'banklogs',
       'PayPal Account': 'paypallogs', 
@@ -44,6 +105,10 @@ const Cart = () => {
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
       setCartItems(cartItems.filter(item => item.id !== id));
+      toast({
+        title: "Item Removed",
+        description: "Item has been removed from your cart",
+      });
     } else {
       setCartItems(cartItems.map(item => 
         item.id === id ? { ...item, quantity: newQuantity } : item
@@ -53,6 +118,10 @@ const Cart = () => {
 
   const removeItem = (id: number) => {
     setCartItems(cartItems.filter(item => item.id !== id));
+    toast({
+      title: "Item Removed",
+      description: "Item has been removed from your cart",
+    });
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -62,17 +131,30 @@ const Cart = () => {
   const total = discountedSubtotal + tax;
 
   const handleProceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Cart Empty",
+        description: "Please add items to your cart before proceeding to checkout",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Save total to localStorage for checkout page
+    localStorage.setItem('cartTotal', total.toString());
+    
     console.log('Proceeding to checkout with total:', total);
-    console.log('Setting checkout modal to open...');
-    setIsCheckoutOpen(true);
+    navigate('/dashboard/checkout');
   };
 
-  const handleCloseCheckout = () => {
-    console.log('Closing checkout modal');
-    setIsCheckoutOpen(false);
-  };
-
-  console.log('Rendering CheckoutModal with isOpen:', isCheckoutOpen);
+  // Show loading state
+  if (isLoading || isCartLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+        <div className="text-cyber-light">Loading cart...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cyber-gradient p-6">
@@ -130,6 +212,12 @@ const Cart = () => {
                 <CardContent className="p-8 text-center">
                   <ShoppingCart className="h-16 w-16 text-cyber-light/30 mx-auto mb-4" />
                   <p className="text-cyber-light/60">Your cart is empty</p>
+                  <Button 
+                    onClick={() => navigate('/dashboard')}
+                    className="mt-4 bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80"
+                  >
+                    Continue Shopping
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -250,13 +338,6 @@ const Cart = () => {
           </div>
         </div>
       </motion.div>
-
-      <CheckoutModal 
-        isOpen={isCheckoutOpen}
-        onClose={handleCloseCheckout}
-        total={subtotal + (subtotal * 0.1)}
-        items={cartItems}
-      />
     </div>
   );
 };
