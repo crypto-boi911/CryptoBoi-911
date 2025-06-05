@@ -30,21 +30,6 @@ const Footer = () => {
                   Home
                 </Link>
               </li>
-              <li>
-                <Link to="/services" className="text-cyber-light/70 hover:text-cyber-blue transition-colors duration-300">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link to="/products" className="text-cyber-light/70 hover:text-cyber-blue transition-colors duration-300">
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-cyber-light/70 hover:text-cyber-blue transition-colors duration-300">
-                  About
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -52,10 +37,10 @@ const Footer = () => {
           <div>
             <h3 className="font-tech font-semibold text-cyber-blue mb-4">Services</h3>
             <ul className="space-y-2">
-              <li className="text-cyber-light/70">Penetration Testing</li>
-              <li className="text-cyber-light/70">Security Audits</li>
-              <li className="text-cyber-light/70">Threat Intelligence</li>
-              <li className="text-cyber-light/70">Incident Response</li>
+              <li className="text-cyber-light/70">Bank Logs</li>
+              <li className="text-cyber-light/70">Cards & Linkables</li>
+              <li className="text-cyber-light/70">PayPal Logs</li>
+              <li className="text-cyber-light/70">CashApp Logs</li>
             </ul>
           </div>
 

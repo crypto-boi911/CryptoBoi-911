@@ -9,7 +9,6 @@ import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Home from "./pages/Home";
-import Services from "./pages/Services";
 import Dashboard from "./pages/Dashboard";
 import BankLogs from "./pages/BankLogs";
 import CardsLinkables from "./pages/CardsLinkables";
@@ -18,8 +17,6 @@ import CashAppLogs from "./pages/CashAppLogs";
 import Tools from "./pages/Tools";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import GetStarted from "./pages/GetStarted";
 import AdminLogin from "./pages/AdminLogin";
@@ -131,9 +128,6 @@ const App = () => (
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
