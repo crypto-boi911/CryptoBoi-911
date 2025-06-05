@@ -67,6 +67,7 @@ const Dashboard = () => {
 
   const sidebarItems = [
     { name: 'Home', icon: Home, path: '/dashboard', active: true },
+    { name: 'FAQ', icon: HelpCircle, path: '/dashboard/faq', active: true },
     { name: 'Bank Logs', icon: CreditCard, path: '/dashboard/bank-logs' },
     { name: 'Cards/Linkables', icon: CreditCard, path: '/dashboard/cards' },
     { name: 'PayPal Logs', icon: Database, path: '/dashboard/paypal' },
@@ -77,34 +78,17 @@ const Dashboard = () => {
     { name: 'Support', icon: HelpCircle, path: '/dashboard/support' },
   ];
 
-  const productCategories = [
-    { name: 'Bank Logs', description: 'Premium bank account credentials', color: 'bg-gradient-to-r from-purple-500 to-blue-500' },
-    { name: 'PayPal Logs', description: 'Verified PayPal account access', color: 'bg-gradient-to-r from-blue-500 to-cyan-500' },
-    { name: 'CashApp Logs', description: 'Mobile payment platform logs', color: 'bg-gradient-to-r from-green-500 to-emerald-500' },
-    { name: 'Cards/Linkables', description: 'Credit card and linkable accounts', color: 'bg-gradient-to-r from-orange-500 to-red-500' },
-  ];
-
-  const features = [
-    {
-      title: 'Fast & Secure',
-      description: 'Your data is secure with us. We ensure fast log purchase and secure access.',
-      icon: '🔒'
-    },
-    {
-      title: 'Customizable Options',
-      description: 'Tailor logs to meet your specific needs, with a variety of categories.',
-      icon: '⚙️'
-    },
-    {
-      title: 'User-Friendly',
-      description: 'Enjoy an intuitive dashboard that\'s easy to navigate and operate.',
-      icon: '👤'
-    },
-    {
-      title: '24/7 Support',
-      description: 'Get support anytime you need it with our reliable customer service.',
-      icon: '🛟'
-    }
+  const faqContent = [
+    "Our store embodies a self-written engine, anti-DDoS system and a bulletproof server.",
+    "Logs are re-checked and updated after each occurrence of issuing bulk purchases.",
+    "Please do not hesitate to contact the support team if you encounter any issue.",
+    "-Warning : Any inconsistency or tampering of the system will result in a temporary closure of your account immediately.",
+    "-Kindly take sometime to go through our rules, (T & C's apply) :",
+    "-Funds sent through bitcoin for top-ups will be credited to your account after 2 confirmations.",
+    "-CYBERKRYPT disclaims any liability for any further actions you do with the purchased log in your possession.",
+    "-All accounts left inactive for six (6) months will be deactivated automatically.",
+    "-A token would be issued to any account after making three instant purchases or issuing a deposit of balance higher than $1000",
+    "-After buying the goods, you will have a countdown on the return time, at the moment it is 2 hours, which is enough to check your account. Please specify the correct gills and always attach screenshots, otherwise the return will be denied-Clients ' personal data is stored in a database with non-standard encryption and guaranteed security."
   ];
 
   return (
@@ -136,12 +120,9 @@ const Dashboard = () => {
                   active:scale-95
                 " />
                 <div>
-                  <h1 className="text-2xl font-cyber font-bold text-cyber-light mb-2">
-                    Welcome back, {username}!
+                  <h1 className="text-2xl font-cyber font-bold text-cyber-blue mb-2">
+                    Home
                   </h1>
-                  <p className="text-cyber-light/60">
-                    Purchase your logs with ease! The following categories are available.
-                  </p>
                 </div>
               </div>
             </div>
@@ -153,68 +134,32 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              className="max-w-4xl"
             >
-              {/* Product Categories */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                {productCategories.map((category, index) => (
+              {/* Navigation Pills */}
+              <div className="flex gap-4 mb-8">
+                <div className="bg-cyber-blue text-cyber-dark px-4 py-2 rounded-lg font-tech cursor-pointer">
+                  Home
+                </div>
+                <div className="text-red-400 px-4 py-2 rounded-lg font-tech cursor-pointer hover:bg-red-500/10">
+                  FAQ
+                </div>
+              </div>
+
+              {/* FAQ Content */}
+              <div className="space-y-6">
+                {faqContent.map((item, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.5 }}
-                    className="group cursor-pointer"
+                    className="text-cyber-light leading-relaxed"
                   >
-                    <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 hover:border-cyber-blue/50 transition-all duration-300 h-full">
-                      <CardContent className="p-6">
-                        <div className={`h-16 w-16 rounded-lg ${category.color} mb-4 flex items-center justify-center`}>
-                          <CreditCard className="h-8 w-8 text-white" />
-                        </div>
-                        <h3 className="text-lg font-tech font-semibold text-cyber-light mb-2">
-                          {category.name}
-                        </h3>
-                        <p className="text-cyber-light/60 text-sm">
-                          {category.description}
-                        </p>
-                      </CardContent>
-                    </Card>
+                    <p className="text-lg">{item}</p>
                   </motion.div>
                 ))}
               </div>
-
-              {/* Why Choose Our Platform */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="mb-8"
-              >
-                <h2 className="text-3xl font-cyber font-bold text-cyber-light mb-8 text-center">
-                  Why Choose Our Platform?
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {features.map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                    >
-                      <Card className="glow-box bg-cyber-gray/30 border-cyber-blue/20 h-full">
-                        <CardContent className="p-6 text-center">
-                          <div className="text-4xl mb-4">{feature.icon}</div>
-                          <h3 className="text-xl font-tech font-semibold text-cyber-light mb-3">
-                            {feature.title}
-                          </h3>
-                          <p className="text-cyber-light/60 text-sm leading-relaxed">
-                            {feature.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
             </motion.div>
           </main>
         </SidebarInset>
