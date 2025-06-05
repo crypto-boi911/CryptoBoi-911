@@ -1,6 +1,5 @@
 
 import React from 'react';
-import SetAdminRole from '@/components/SetAdminRole';
 
 export default function Home() {
   return (
@@ -12,9 +11,6 @@ export default function Home() {
         <p className="text-cyber-light text-lg">
           Your secure platform for financial services
         </p>
-      </div>
-      <div className="mt-8">
-        <SetAdminRole />
       </div>
     </main>
   );
