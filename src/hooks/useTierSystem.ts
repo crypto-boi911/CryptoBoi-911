@@ -19,7 +19,7 @@ const tiers: TierInfo[] = [
   {
     level: 1,
     name: "Beginner",
-    minOrders: 0,
+    minOrders: 5,
     maxOrders: 14,
     discounts: { bankLogs: 10 }
   },

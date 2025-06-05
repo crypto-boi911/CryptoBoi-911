@@ -25,7 +25,7 @@ const tiers: TierInfo[] = [
     name: "Beginner",
     icon: <Star className="h-4 w-4" />,
     color: "text-yellow-400",
-    minOrders: 0,
+    minOrders: 5,
     maxOrders: 14,
     discounts: { bankLogs: 10 }
   },
