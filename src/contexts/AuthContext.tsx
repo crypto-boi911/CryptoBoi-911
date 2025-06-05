@@ -48,7 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -72,9 +75,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
@@ -82,7 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           await fetchUserProfile(session.user.id);
           if (event === 'SIGNED_IN') {
-            await logActivity('LOGIN', { timestamp: new Date().toISOString() });
+            // Use setTimeout to avoid potential recursion
+            setTimeout(() => {
+              logActivity('LOGIN', { timestamp: new Date().toISOString() });
+            }, 0);
           }
         } else {
           setProfile(null);
@@ -93,6 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -101,7 +113,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (username: string, accessKey: string) => {
@@ -151,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await logActivity('LOGOUT', { timestamp: new Date().toISOString() });
     }
     await supabase.auth.signOut();
+    setProfile(null);
     toast({
       title: "Logged out",
       description: "You have been logged out successfully.",

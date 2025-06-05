@@ -15,12 +15,28 @@ export default function GetStarted() {
   const { signUp } = useAuth();
 
   const generateAccessKey = () => {
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    // Generate a strong access key that meets Supabase requirements
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const special = "!@#$%^&*";
+    
     let key = "";
-    for (let i = 0; i < 14; i++) {
-      key += characters.charAt(Math.floor(Math.random() * characters.length));
+    
+    // Ensure at least one character from each required category
+    key += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    key += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    key += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    key += special.charAt(Math.floor(Math.random() * special.length));
+    
+    // Fill the rest with random characters from all categories
+    const allChars = lowercase + uppercase + numbers + special;
+    for (let i = 4; i < 16; i++) {
+      key += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
-    return key;
+    
+    // Shuffle the key to randomize the order
+    return key.split('').sort(() => Math.random() - 0.5).join('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,6 +46,16 @@ export default function GetStarted() {
       toast({
         title: "Error",
         description: "Please enter a valid username (at least 3 characters).",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate username format
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      toast({
+        title: "Error",
+        description: "Username can only contain letters, numbers, underscores, and hyphens.",
         variant: "destructive"
       });
       return;
@@ -70,7 +96,12 @@ export default function GetStarted() {
       setAccessKey(key);
       setSubmitted(true);
       
-      console.log("Account created for:", username, "Key:", key);
+      toast({
+        title: "Success!",
+        description: "Your account has been created successfully.",
+      });
+      
+      console.log("Account created for:", username, "Access key generated successfully");
     } catch (error) {
       console.error('Signup error:', error);
       toast({
@@ -122,6 +153,9 @@ export default function GetStarted() {
               pattern="[a-zA-Z0-9_-]+"
               title="Username can only contain letters, numbers, underscores, and hyphens"
             />
+            <p className="text-sm text-cyber-light/60 font-tech">
+              Choose a unique username (3-20 characters, letters, numbers, _, -)
+            </p>
             <button
               type="submit"
               disabled={isLoading}
@@ -140,7 +174,7 @@ export default function GetStarted() {
         ) : (
           <div className="space-y-6">
             <p className="text-green-400 font-tech font-medium">
-              Welcome! Your digital access key is:
+              Welcome <span className="text-cyber-blue">{username}</span>! Your secure access key is:
             </p>
             <div className="bg-cyber-gray/30 border border-cyber-blue/20 p-4 rounded-md">
               <div className="text-lg font-mono text-cyber-blue break-words mb-3">
@@ -153,9 +187,11 @@ export default function GetStarted() {
                 Copy to Clipboard
               </button>
             </div>
-            <p className="text-sm text-cyber-light/60 font-tech">
-              Please save this key securely. It will be used as your login credential.
-            </p>
+            <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md">
+              <p className="text-sm text-amber-300 font-tech">
+                ⚠️ <strong>Important:</strong> Save this access key securely. You'll need it to log in, and it cannot be recovered if lost.
+              </p>
+            </div>
             <div className="pt-4">
               <Link
                 to="/login"
