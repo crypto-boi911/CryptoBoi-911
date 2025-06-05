@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, Eye, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import ContentResponseModal from '@/components/ContentResponseModal';
 
 interface ContentItem {
   id: number;
@@ -21,6 +21,8 @@ interface ContentItem {
 
 const AdminContent = () => {
   const { toast } = useToast();
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   
   const [content, setContent] = useState<ContentItem[]>([
     { id: 1, title: 'Welcome Banner', type: 'banner', status: 'published', lastModified: '2024-06-04 10:30', author: 'Admin' },
@@ -47,6 +49,11 @@ const AdminContent = () => {
       title: "Status Updated",
       description: "Content status has been changed",
     });
+  };
+
+  const handleRespond = (contentItem: ContentItem) => {
+    setSelectedContent(contentItem);
+    setIsResponseModalOpen(true);
   };
 
   return (
@@ -188,6 +195,14 @@ const AdminContent = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => handleRespond(item)}
+                              className="border-purple-400/30 text-purple-400 hover:bg-purple-400 hover:text-white"
+                            >
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => deleteContent(item.id)}
                               className="border-red-400/30 text-red-400 hover:bg-red-400 hover:text-white"
                             >
@@ -204,6 +219,12 @@ const AdminContent = () => {
           </Card>
         </motion.div>
       </div>
+
+      <ContentResponseModal
+        isOpen={isResponseModalOpen}
+        onClose={() => setIsResponseModalOpen(false)}
+        contentItem={selectedContent}
+      />
     </div>
   );
 };
