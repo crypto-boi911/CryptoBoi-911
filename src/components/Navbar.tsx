@@ -34,9 +34,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const navItems = [
-    { name: 'Home', path: '/' },
-  ];
+  const navItems: { name: string; path: string }[] = [];
 
   return (
     <motion.nav

@@ -41,6 +41,7 @@ const App = () => (
         <div className="min-h-screen bg-cyber-dark">
           <Routes>
             {/* Routes without Navbar/Footer */}
+            <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
@@ -128,7 +129,6 @@ const App = () => (
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
