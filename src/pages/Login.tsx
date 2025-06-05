@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const [accessKey, setAccessKey] = useState("");
@@ -50,10 +51,22 @@ const Login = () => {
     navigate('/dashboard');
   };
 
+  const handleGoBack = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center bg-cyber-dark">
       <div className="bg-cyber-darker border border-cyber-blue/20 rounded-xl p-8 w-full max-w-md shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-cyber-blue text-center">Login with Access Key</h2>
+        <div className="flex items-center mb-6">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center text-cyber-light hover:text-cyber-blue transition-colors duration-300 mr-4"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h2 className="text-2xl font-bold text-cyber-blue flex-1 text-center">Login with Access Key</h2>
+        </div>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block mb-2 text-sm text-cyber-light">Access Key</label>
