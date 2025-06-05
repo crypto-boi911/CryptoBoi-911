@@ -1,210 +1,38 @@
-
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Shield, Eye, EyeOff, UserCheck, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 
-const AdminLogin = () => {
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    // Check if admin is already logged in
-    const isAdminAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
-    const adminToken = localStorage.getItem('adminToken');
-    const expectedToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
-    
-    if (isAdminAuthenticated && adminToken === expectedToken) {
-      navigate('/admin/dashboard', { replace: true });
-    }
-  }, [navigate]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Admin login form submitted with password:', password);
-    
-    if (!password) {
-      console.log('No password provided');
-      toast({
-        title: "Error",
-        description: "Please enter a password",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
-      const adminToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
-
-      console.log('Checking password against expected:', adminPassword);
-      console.log('Using admin token:', adminToken);
-
-      if (password === adminPassword) {
-        console.log('Password match! Setting authentication...');
-        
-        const sessionData = {
-          loginTime: new Date().toISOString(),
-          lastActivity: new Date().toISOString(),
-          permissions: ['read', 'write', 'delete', 'manage_users', 'manage_products'],
-          sessionId: crypto.randomUUID()
-        };
-        
-        // Set authentication data
-        localStorage.setItem('adminToken', adminToken);
-        localStorage.setItem('isAdminAuthenticated', 'true');
-        localStorage.setItem('adminSession', JSON.stringify(sessionData));
-        
-        // Log admin activity
-        const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
-        adminLogs.push({
-          id: crypto.randomUUID(),
-          action: 'LOGIN',
-          timestamp: new Date().toISOString(),
-          details: 'Admin logged in successfully',
-          sessionId: sessionData.sessionId
-        });
-        localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
-        
-        console.log('localStorage after setting:', {
-          adminToken: localStorage.getItem('adminToken'),
-          isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated'),
-          session: localStorage.getItem('adminSession')
-        });
-
-        toast({
-          title: "Access Granted",
-          description: "Welcome to the admin dashboard",
-        });
-
-        console.log('Navigating to admin dashboard...');
-        setTimeout(() => {
-          navigate('/admin/dashboard', { replace: true });
-        }, 100);
-      } else {
-        console.log('Password mismatch!');
-        
-        // Log failed attempt
-        const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
-        adminLogs.push({
-          id: crypto.randomUUID(),
-          action: 'LOGIN_FAILED',
-          timestamp: new Date().toISOString(),
-          details: 'Failed login attempt',
-          ip: 'Unknown'
-        });
-        localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
-        
-        toast({
-          title: "Access Denied",
-          description: "Invalid admin password",
-          variant: "destructive",
-        });
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        navigate('/login'); // 🚫 Not logged in
+        return;
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast({
-        title: "Error",
-        description: "An error occurred during login",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+      // Optional: Check if user is marked as admin in user_metadata
+      if (user.user_metadata.role !== 'admin') {
+        navigate('/unauthorized'); // 🚫 Logged in but not admin
+        return;
+      }
+
+      setAuthorized(true); // ✅ All checks passed
+    };
+
+    checkUser();
+  }, []);
+
+  if (!authorized) return <p>Checking access...</p>;
 
   return (
-    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="w-full max-w-md"
-      >
-        <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="text-cyber-blue hover:text-cyber-blue/80 transition-colors flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="font-tech">Back</span>
-              </button>
-              <div className="flex justify-center">
-                <UserCheck className="h-12 w-12 text-cyber-blue" />
-              </div>
-              <div className="w-16"></div>
-            </div>
-            <CardTitle className="text-2xl font-cyber text-cyber-light">
-              Admin Access
-            </CardTitle>
-            <CardDescription className="text-cyber-light/70">
-              Enter admin credentials to access the dashboard
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-password" className="text-cyber-light text-sm font-medium">
-                  Admin Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="admin-password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter admin password"
-                    className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
-                    required
-                    autoComplete="current-password"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent text-cyber-light/70 hover:text-cyber-light"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-12 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech font-semibold text-base"
-                disabled={!password || isLoading}
-              >
-                {isLoading ? 'Authenticating...' : 'Access Dashboard'}
-              </Button>
-            </form>
-
-            <div className="text-center text-sm text-yellow-500">
-              <p>Default password: admin123</p>
-              <p>Admin access required for dashboard management</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+      {/* Insert form and transaction list here */}
+    </main>
   );
-};
-
-export default AdminLogin;
+}
