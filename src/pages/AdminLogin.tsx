@@ -18,9 +18,10 @@ const AdminLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login form submitted');
+    console.log('Admin login form submitted with password:', password);
     
     if (!password) {
+      console.log('No password provided');
       toast({
         title: "Error",
         description: "Please enter a password",
@@ -35,22 +36,32 @@ const AdminLogin = () => {
       const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
       const adminToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
 
-      console.log('Checking password:', password);
-      console.log('Expected password:', adminPassword);
+      console.log('Checking password against expected:', adminPassword);
+      console.log('Using admin token:', adminToken);
 
       if (password === adminPassword) {
+        console.log('Password match! Setting authentication...');
+        
+        // Set both items in localStorage
         localStorage.setItem('adminToken', adminToken);
         localStorage.setItem('isAdminAuthenticated', 'true');
         
-        console.log('Authentication successful, navigating to dashboard');
+        console.log('localStorage after setting:', {
+          adminToken: localStorage.getItem('adminToken'),
+          isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated')
+        });
 
         toast({
           title: "Access Granted",
           description: "Welcome to the admin dashboard",
         });
 
-        navigate('/admin/dashboard', { replace: true });
+        console.log('Navigating to admin dashboard...');
+        setTimeout(() => {
+          navigate('/admin/dashboard', { replace: true });
+        }, 100);
       } else {
+        console.log('Password mismatch!');
         toast({
           title: "Access Denied",
           description: "Invalid admin password",
@@ -115,6 +126,7 @@ const AdminLogin = () => {
                     placeholder="Enter admin password"
                     className="w-full h-12 bg-cyber-darker/80 border-cyber-blue/30 text-cyber-light pr-12 placeholder:text-cyber-light/50 focus:border-cyber-blue focus:ring-cyber-blue/20"
                     required
+                    autoComplete="current-password"
                   />
                   <Button
                     type="button"
