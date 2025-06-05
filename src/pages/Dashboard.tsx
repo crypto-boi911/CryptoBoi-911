@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -138,9 +137,6 @@ const Dashboard = () => {
             >
               {/* Navigation Pills */}
               <div className="flex gap-4 mb-8">
-                <div className="bg-cyber-blue text-cyber-dark px-4 py-2 rounded-lg font-tech cursor-pointer">
-                  Home
-                </div>
                 <div className="text-red-400 px-4 py-2 rounded-lg font-tech cursor-pointer hover:bg-red-500/10">
                   FAQ
                 </div>
