@@ -1,14 +1,13 @@
-
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, Shield, Smartphone, ArrowLeft, Search, SlidersHorizontal } from 'lucide-react';
+import { CreditCard, ArrowLeft, Search, SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,60 +18,22 @@ const CardsLinkables = () => {
   const [sortBy, setSortBy] = useState('name');
   const [minLimit, setMinLimit] = useState('');
   const [maxLimit, setMaxLimit] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedCardTypes, setSelectedCardTypes] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 12;
 
   const cardProducts = [
-    { 
-      id: 1,
-      type: 'Credit Card', 
-      brand: 'Visa Platinum', 
-      limit: '$50,000', 
-      price: '$800',
-      features: ['High Limit', 'Verified', 'Premium']
-    },
-    { 
-      id: 2,
-      type: 'Debit Card', 
-      brand: 'Mastercard Gold', 
-      limit: '$25,000', 
-      price: '$450',
-      features: ['Instant Access', 'Verified']
-    },
-    { 
-      id: 3,
-      type: 'Virtual Card', 
-      brand: 'American Express', 
-      limit: '$75,000', 
-      price: '$1200',
-      features: ['Virtual', 'High Limit', 'Premium', 'Verified']
-    },
-    { 
-      id: 4,
-      type: 'Prepaid Card', 
-      brand: 'Visa Green', 
-      limit: '$10,000', 
-      price: '$200',
-      features: ['Prepaid', 'Safe']
-    },
-    { 
-      id: 5,
-      type: 'Credit Card', 
-      brand: 'Mastercard Black', 
-      limit: '$100,000', 
-      price: '$1500',
-      features: ['Ultra High Limit', 'Premium', 'Verified']
-    },
-    { 
-      id: 6,
-      type: 'Debit Card', 
-      brand: 'Visa Business', 
-      limit: '$35,000', 
-      price: '$650',
-      features: ['Business', 'High Limit', 'Verified']
-    },
+    { id: 1, card: 'Platinum Visa', limit: '$50,000', type: 'Credit', features: 'Rewards, Low APR', price: '$800' },
+    { id: 2, card: 'Gold Mastercard', limit: '$25,000', type: 'Debit', features: 'Cashback, Travel', price: '$450' },
+    { id: 3, card: 'Amex Black Card', limit: '$75,000', type: 'Credit', features: 'Exclusive, Concierge', price: '$1200' },
+    { id: 4, card: 'Virtual Visa Card', limit: '$15,000', type: 'Virtual', features: 'Online Use', price: '$350' },
+    { id: 5, card: 'Prepaid Mastercard', limit: '$5,000', type: 'Prepaid', features: 'Reloadable', price: '$180' },
+    { id: 6, card: 'Business Platinum', limit: '$60,000', type: 'Credit', features: 'Business Rewards', price: '$950' },
+    { id: 7, card: 'Student Debit Card', limit: '$2,500', type: 'Debit', features: 'No Fees', price: '$100' },
+    { id: 8, card: 'Travel Rewards Visa', limit: '$40,000', type: 'Credit', features: 'Travel Points', price: '$700' },
   ];
 
-  const cardTypes = ['Credit Card', 'Debit Card', 'Virtual Card', 'Prepaid Card'];
+  const cardTypes = ['Credit', 'Debit', 'Virtual', 'Prepaid'];
 
   // Helper function to convert limit string to number
   const parseLimit = (limitStr: string) => {
@@ -82,8 +43,8 @@ const CardsLinkables = () => {
   // Filter and sort products
   const filteredProducts = useMemo(() => {
     let filtered = cardProducts.filter(product => {
-      // Search by brand name
-      const matchesSearch = product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+      // Search by card name
+      const matchesSearch = product.card.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Filter by limit range
       const limit = parseLimit(product.limit);
@@ -92,14 +53,14 @@ const CardsLinkables = () => {
       const matchesLimit = limit >= min && limit <= max;
       
       // Filter by card type
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(product.type);
+      const matchesType = selectedCardTypes.length === 0 || selectedCardTypes.includes(product.type);
       
       return matchesSearch && matchesLimit && matchesType;
     });
 
     // Sort products
     if (sortBy === 'name') {
-      filtered.sort((a, b) => a.brand.localeCompare(b.brand));
+      filtered.sort((a, b) => a.card.localeCompare(b.card));
     } else if (sortBy === 'limit-low') {
       filtered.sort((a, b) => parseLimit(a.limit) - parseLimit(b.limit));
     } else if (sortBy === 'limit-high') {
@@ -107,21 +68,32 @@ const CardsLinkables = () => {
     }
 
     return filtered;
-  }, [searchTerm, minLimit, maxLimit, selectedTypes, sortBy]);
+  }, [searchTerm, minLimit, maxLimit, selectedCardTypes, sortBy]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, minLimit, maxLimit, selectedCardTypes, sortBy]);
 
   const handleAddToCart = (product: any) => {
     toast({
       title: "Added to Cart",
-      description: `${product.brand} ${product.type} has been added to your cart.`,
+      description: `${product.card} has been added to your cart.`,
     });
     console.log('Added to cart:', product);
   };
 
-  const handleTypeChange = (type: string, checked: boolean) => {
+  const handleCardTypeChange = (type: string, checked: boolean) => {
     if (checked) {
-      setSelectedTypes([...selectedTypes, type]);
+      setSelectedCardTypes([...selectedCardTypes, type]);
     } else {
-      setSelectedTypes(selectedTypes.filter(t => t !== type));
+      setSelectedCardTypes(selectedCardTypes.filter(t => t !== type));
     }
   };
 
@@ -129,7 +101,7 @@ const CardsLinkables = () => {
     setSearchTerm('');
     setMinLimit('');
     setMaxLimit('');
-    setSelectedTypes([]);
+    setSelectedCardTypes([]);
     setSortBy('name');
   };
 
@@ -157,7 +129,7 @@ const CardsLinkables = () => {
             Cards & Linkables
           </h1>
           <p className="text-cyber-light/60">
-            Credit cards, debit cards, and linkable payment methods ({filteredProducts.length} available)
+            Premium credit and debit cards with high limits and instant activation ({filteredProducts.length} available)
           </p>
         </div>
 
@@ -167,7 +139,7 @@ const CardsLinkables = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyber-light/50 h-4 w-4" />
             <Input 
-              placeholder="Search by brand name..."
+              placeholder="Search by card name..."
               className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -227,8 +199,8 @@ const CardsLinkables = () => {
                       <div key={type} className="flex items-center space-x-2">
                         <Checkbox
                           id={type}
-                          checked={selectedTypes.includes(type)}
-                          onCheckedChange={(checked) => handleTypeChange(type, checked as boolean)}
+                          checked={selectedCardTypes.includes(type)}
+                          onCheckedChange={(checked) => handleCardTypeChange(type, checked as boolean)}
                           className="border-cyber-blue/30"
                         />
                         <label htmlFor={type} className="text-sm text-cyber-light">
@@ -262,8 +234,8 @@ const CardsLinkables = () => {
         )}
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+          {currentProducts.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -273,11 +245,11 @@ const CardsLinkables = () => {
               <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20 hover:border-cyber-blue/50 transition-all duration-300">
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
                       <CreditCard className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-cyber-light font-tech">{product.brand}</CardTitle>
+                      <CardTitle className="text-cyber-light font-tech">{product.card}</CardTitle>
                       <p className="text-cyber-light/60 text-sm">{product.type}</p>
                     </div>
                   </div>
@@ -292,17 +264,6 @@ const CardsLinkables = () => {
                       <span className="text-cyber-light/60">Price:</span>
                       <span className="text-green-400 font-bold">{product.price}</span>
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {product.features.map((feature, idx) => (
-                        <Badge 
-                          key={idx} 
-                          variant="outline" 
-                          className="text-xs border-cyber-blue/30 text-cyber-blue"
-                        >
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
                     <Button 
                       className="w-full bg-cyber-blue/20 border border-cyber-blue text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
                       onClick={() => handleAddToCart(product)}
@@ -315,6 +276,45 @@ const CardsLinkables = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center">
+            <Pagination>
+              <PaginationContent className="bg-cyber-gray/30 border border-cyber-blue/20 rounded-lg p-2">
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={`text-cyber-light hover:bg-cyber-blue/10 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className={`cursor-pointer ${
+                        currentPage === page 
+                          ? 'bg-cyber-blue text-cyber-dark' 
+                          : 'text-cyber-light hover:bg-cyber-blue/10'
+                      }`}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    className={`text-cyber-light hover:bg-cyber-blue/10 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </motion.div>
     </div>
   );
