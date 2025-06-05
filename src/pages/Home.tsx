@@ -1,5 +1,6 @@
 
 import React from 'react';
+import SetAdminRole from '@/components/SetAdminRole';
 
 export default function Home() {
   return (
@@ -12,16 +13,9 @@ export default function Home() {
           Your secure platform for financial services
         </p>
       </div>
-    </main>
-  );
-}
-import SetAdminRole from '@/components/SetAdminRole';
-
-export default function Home() {
-  return (
-    <main className="p-4">
-      <h1>Welcome</h1>
-      <SetAdminRole />
+      <div className="mt-8">
+        <SetAdminRole />
+      </div>
     </main>
   );
 }
