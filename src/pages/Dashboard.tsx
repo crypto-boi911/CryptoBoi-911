@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -92,39 +93,33 @@ const Dashboard = () => {
     { name: 'Support', icon: HelpCircle, path: '/dashboard/support' },
   ];
 
-  const faqContent = [
-    "Our store embodies a self-written engine, anti-DDoS system and a bulletproof server.",
-    "Logs are re-checked and updated after each occurrence of issuing bulk purchases.",
-    "Please do not hesitate to contact the support team if you encounter any issue.",
-    "-Warning : Any inconsistency or tampering of the system will result in a temporary closure of your account immediately.",
-    "-Kindly take sometime to go through our rules, (T & C's apply) :",
-    "-Funds sent through bitcoin for top-ups will be credited to your account after 2 confirmations.",
-    "-CYBERKRYPT disclaims any liability for any further actions you do with the purchased log in your possession.",
-    "-All accounts left inactive for six (6) months will be deactivated automatically.",
-    "-A token would be issued to any account after making three instant purchases or issuing a deposit of balance higher than $1000",
-    "-After buying the goods, you will have a countdown on the return time, at the moment it is 2 hours, which is enough to check your account. Please specify the correct gills and always attach screenshots, otherwise the return will be denied-Clients ' personal data is stored in a database with non-standard encryption and guaranteed security."
+  const quickTips = [
+    "Secure platform with bulletproof servers",
+    "Re-checked logs after bulk purchases", 
+    "2-hour return window with screenshots",
+    "24/7 support available"
   ];
 
   const platformFeatures = [
     {
       icon: Lock,
-      title: "Fast & Secure",
-      description: "Your data is secure with us. We ensure fast log purchase and secure access."
+      title: "Secure",
+      description: "Fast & secure log purchases"
     },
     {
       icon: Settings,
-      title: "Customizable Options",
-      description: "Tailor logs to meet your specific needs, with a variety of categories."
+      title: "Customizable",
+      description: "Tailored to your needs"
     },
     {
       icon: User,
       title: "User-Friendly",
-      description: "Enjoy an intuitive dashboard that's easy to navigate and operate."
+      description: "Easy to navigate"
     },
     {
       icon: LifeBuoy,
       title: "24/7 Support",
-      description: "Get support anytime you need it with our reliable customer service."
+      description: "Always here to help"
     }
   ];
 
@@ -135,9 +130,9 @@ const Dashboard = () => {
         
         <SidebarInset className="flex-1">
           {/* Header with Sidebar Toggle */}
-          <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+          <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-3 sm:p-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <SidebarTrigger className="
                   bg-cyber-blue/20 
                   border-2 
@@ -147,8 +142,7 @@ const Dashboard = () => {
                   hover:text-cyber-dark 
                   transition-all 
                   duration-300 
-                  w-12 
-                  h-12 
+                  w-10 h-10 sm:w-12 sm:h-12
                   rounded-lg 
                   shadow-lg 
                   shadow-cyber-blue/30
@@ -157,86 +151,89 @@ const Dashboard = () => {
                   active:scale-95
                 " />
                 <div>
-                  <h1 className="text-2xl font-cyber font-bold text-cyber-blue mb-2">
-                    Welcome back, {username}!
+                  <h1 className="text-lg sm:text-2xl font-cyber font-bold text-cyber-blue">
+                    Welcome, {username}!
                   </h1>
                 </div>
               </div>
               
               {/* Tier Progress Bar - Top Right */}
-              <div className="w-80">
+              <div className="w-full sm:w-80">
                 <UserTierSystem compact={true} />
               </div>
             </div>
           </header>
 
           {/* Dashboard Content */}
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 sm:p-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-4xl"
+              className="max-w-6xl space-y-4 sm:space-y-8"
             >
-              {/* Navigation Pills */}
-              <div className="flex gap-4 mb-8">
-                <div className="text-red-400 px-4 py-2 rounded-lg font-tech cursor-pointer hover:bg-red-500/10">
-                  FAQ
-                </div>
-              </div>
-
-              {/* Tier System Details */}
-              <div className="mb-8">
+              {/* Tier System Details - Mobile First */}
+              <div className="block sm:hidden">
                 <UserTierSystem />
               </div>
 
-              {/* FAQ Content */}
-              <div className="space-y-6 mb-16">
-                {faqContent.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                    className="text-cyber-light leading-relaxed"
-                  >
-                    <p className="text-lg">{item}</p>
-                  </motion.div>
-                ))}
+              {/* Quick Tips - Condensed */}
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">
+                  Quick Info
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+                  {quickTips.map((tip, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1, duration: 0.5 }}
+                      className="text-cyber-light/80 text-sm sm:text-base p-2 sm:p-3 bg-cyber-darker/40 rounded-lg border border-cyber-blue/20"
+                    >
+                      • {tip}
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
-              {/* Why Choose Our Platform Section */}
+              {/* Tier System Details - Desktop */}
+              <div className="hidden sm:block">
+                <UserTierSystem />
+              </div>
+
+              {/* Platform Features - Compact */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="space-y-8"
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="space-y-4 sm:space-y-6"
               >
-                <h2 className="text-3xl font-cyber font-bold text-center text-cyber-blue mb-12">
-                  Why Choose Our Platform?
+                <h2 className="text-lg sm:text-2xl font-cyber font-bold text-center text-cyber-blue">
+                  Why Choose Us?
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                   {platformFeatures.map((feature, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
+                      transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
                     >
                       <Card className="bg-cyber-darker/60 border-cyber-blue/30 hover:border-cyber-blue/60 transition-all duration-300 h-full">
-                        <CardHeader className="text-center pb-4">
-                          <div className="flex justify-center mb-4">
-                            <div className="w-16 h-16 bg-cyber-blue/20 rounded-lg flex items-center justify-center">
-                              <feature.icon className="h-8 w-8 text-cyber-blue" />
+                        <CardHeader className="text-center pb-2 sm:pb-4 p-3 sm:p-6">
+                          <div className="flex justify-center mb-2 sm:mb-4">
+                            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-cyber-blue/20 rounded-lg flex items-center justify-center">
+                              <feature.icon className="h-4 w-4 sm:h-6 sm:w-6 text-cyber-blue" />
                             </div>
                           </div>
-                          <CardTitle className="text-xl font-cyber text-cyber-light">
+                          <CardTitle className="text-sm sm:text-lg font-cyber text-cyber-light">
                             {feature.title}
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-center">
-                          <p className="text-cyber-light/80 leading-relaxed">
+                        <CardContent className="text-center p-3 sm:p-6 pt-0">
+                          <p className="text-cyber-light/80 text-xs sm:text-sm leading-relaxed">
                             {feature.description}
                           </p>
                         </CardContent>
@@ -259,13 +256,13 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
 
   return (
     <Sidebar className="bg-cyber-darker/90 border-r border-cyber-blue/20">
-      <SidebarHeader className="p-6 border-b border-cyber-blue/20">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
-            <span className="text-cyber-dark font-bold">C</span>
+      <SidebarHeader className="p-4 sm:p-6 border-b border-cyber-blue/20">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
+            <span className="text-cyber-dark font-bold text-sm sm:text-base">C</span>
           </div>
           {state === 'expanded' && (
-            <span className="text-xl font-cyber font-bold text-cyber-blue">CRYPTOBOI-911</span>
+            <span className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">CRYPTOBOI-911</span>
           )}
         </div>
       </SidebarHeader>
@@ -273,21 +270,21 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-1 sm:space-y-2">
               {sidebarItems.map((item, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton
                     asChild
                     isActive={location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                    className={`flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
                       location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')
                         ? 'bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30'
                         : 'text-cyber-light/70 hover:bg-cyber-blue/10 hover:text-cyber-blue'
                     }`}
                   >
-                    <Link to={item.path} className="flex items-center space-x-3 w-full">
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-tech">{item.name}</span>
+                    <Link to={item.path} className="flex items-center space-x-2 sm:space-x-3 w-full">
+                      <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="font-tech text-sm sm:text-base">{item.name}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -297,15 +294,15 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-cyber-blue/20">
+      <SidebarFooter className="p-3 sm:p-4 border-t border-cyber-blue/20">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={onLogout}
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all w-full"
+              className="flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all w-full"
             >
-              <LogOut className="h-5 w-5" />
-              <span className="font-tech">Logout</span>
+              <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="font-tech text-sm sm:text-base">Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
