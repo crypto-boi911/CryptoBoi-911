@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
@@ -21,6 +20,8 @@ interface Product {
   price: number;
   status: 'active' | 'inactive';
   stock: number;
+  country?: string;
+  flag?: string;
 }
 
 const AdminProducts = () => {
@@ -32,18 +33,61 @@ const AdminProducts = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: 'Chase Bank Log', category: 'Bank Logs', type: 'Checking', balance: '$25,000', price: 500, status: 'active', stock: 15 },
-    { id: 2, name: 'PayPal Business', category: 'PayPal Logs', type: 'Business', balance: '$45,000', price: 750, status: 'active', stock: 8 },
-    { id: 3, name: 'Visa Platinum', category: 'Cards', type: 'Credit Card', balance: '$50,000', price: 800, status: 'active', stock: 12 },
-    { id: 4, name: 'CashApp Premium', category: 'CashApp Logs', type: 'Verified', balance: '$15,000', price: 400, status: 'inactive', stock: 0 },
-    { id: 5, name: 'Bank of America', category: 'Bank Logs', type: 'Savings', balance: '$18,500', price: 400, status: 'active', stock: 6 },
-    { id: 6, name: 'Wells Fargo', category: 'Bank Logs', type: 'Business', balance: '$32,000', price: 650, status: 'active', stock: 9 },
-    { id: 7, name: 'Mastercard Gold', category: 'Cards', type: 'Debit Card', balance: '$25,000', price: 450, status: 'active', stock: 18 },
-    { id: 8, name: 'American Express', category: 'Cards', type: 'Virtual Card', balance: '$75,000', price: 1200, status: 'active', stock: 5 },
-    { id: 9, name: 'PayPal Personal Premium', category: 'PayPal Logs', type: 'Personal', balance: '$22,500', price: 500, status: 'active', stock: 11 },
-    { id: 10, name: 'CashApp Business', category: 'CashApp Logs', type: 'Business', balance: '$35,000', price: 650, status: 'active', stock: 7 },
-    { id: 11, name: 'VPN Tool', category: 'Tools', type: 'Security', balance: 'N/A', price: 50, status: 'active', stock: 25 },
-    { id: 12, name: 'Card Checker', category: 'Tools', type: 'Utility', balance: 'N/A', price: 75, status: 'active', stock: 20 },
+    // Bank Logs Products
+    { id: 1, name: 'Chase Bank', category: 'Bank Logs', type: 'Checking', balance: '$25,000', price: 250, status: 'active', stock: 15, country: 'USA', flag: '🇺🇸' },
+    { id: 2, name: 'Bank of America', category: 'Bank Logs', type: 'Savings', balance: '$18,500', price: 320, status: 'active', stock: 8, country: 'USA', flag: '🇺🇸' },
+    { id: 3, name: 'Wells Fargo', category: 'Bank Logs', type: 'Business', balance: '$32,000', price: 480, status: 'active', stock: 12, country: 'USA', flag: '🇺🇸' },
+    { id: 4, name: 'Citibank', category: 'Bank Logs', type: 'Checking', balance: '$15,750', price: 280, status: 'active', stock: 6, country: 'USA', flag: '🇺🇸' },
+    { id: 5, name: 'TD Bank', category: 'Bank Logs', type: 'Business', balance: '$42,000', price: 620, status: 'active', stock: 9, country: 'CAD', flag: '🇨🇦' },
+    { id: 6, name: 'PNC Bank', category: 'Bank Logs', type: 'Savings', balance: '$28,300', price: 420, status: 'active', stock: 18, country: 'USA', flag: '🇺🇸' },
+    { id: 7, name: 'US Bank', category: 'Bank Logs', type: 'Checking', balance: '$19,800', price: 340, status: 'active', stock: 5, country: 'USA', flag: '🇺🇸' },
+    { id: 8, name: 'Capital One', category: 'Bank Logs', type: 'Business', balance: '$36,500', price: 540, status: 'active', stock: 11, country: 'USA', flag: '🇺🇸' },
+    { id: 9, name: 'Truist Bank', category: 'Bank Logs', type: 'Savings', balance: '$21,200', price: 380, status: 'active', stock: 7, country: 'USA', flag: '🇺🇸' },
+    { id: 10, name: 'Fifth Third Bank', category: 'Bank Logs', type: 'Checking', balance: '$33,700', price: 460, status: 'active', stock: 20, country: 'USA', flag: '🇺🇸' },
+    { id: 11, name: 'Regions Bank', category: 'Bank Logs', type: 'Business', balance: '$27,900', price: 420, status: 'active', stock: 13, country: 'USA', flag: '🇺🇸' },
+    { id: 12, name: 'KeyBank', category: 'Bank Logs', type: 'Savings', balance: '$16,400', price: 300, status: 'active', stock: 8, country: 'USA', flag: '🇺🇸' },
+    { id: 13, name: 'M&T Bank', category: 'Bank Logs', type: 'Checking', balance: '$38,600', price: 520, status: 'active', stock: 14, country: 'USA', flag: '🇺🇸' },
+    { id: 14, name: 'Huntington Bank', category: 'Bank Logs', type: 'Business', balance: '$22,800', price: 390, status: 'active', stock: 9, country: 'USA', flag: '🇺🇸' },
+    { id: 15, name: 'Comerica Bank', category: 'Bank Logs', type: 'Savings', balance: '$31,500', price: 450, status: 'active', stock: 16, country: 'USA', flag: '🇺🇸' },
+    { id: 16, name: 'Zions Bank', category: 'Bank Logs', type: 'Checking', balance: '$24,300', price: 400, status: 'active', stock: 12, country: 'USA', flag: '🇺🇸' },
+    { id: 17, name: 'Santander Bank', category: 'Bank Logs', type: 'Savings', balance: '$20,400', price: 360, status: 'active', stock: 10, country: 'UK', flag: '🇬🇧' },
+    { id: 18, name: 'BMO Harris Bank', category: 'Bank Logs', type: 'Checking', balance: '$34,100', price: 470, status: 'active', stock: 7, country: 'CAD', flag: '🇨🇦' },
+    { id: 19, name: 'Barclays', category: 'Bank Logs', type: 'Business', balance: '$45,900', price: 580, status: 'active', stock: 11, country: 'UK', flag: '🇬🇧' },
+    { id: 20, name: 'HSBC', category: 'Bank Logs', type: 'Savings', balance: '$38,200', price: 520, status: 'active', stock: 9, country: 'UK', flag: '🇬🇧' },
+    { id: 21, name: 'Lloyds Bank', category: 'Bank Logs', type: 'Checking', balance: '$31,700', price: 460, status: 'active', stock: 13, country: 'UK', flag: '🇬🇧' },
+    { id: 22, name: 'NatWest', category: 'Bank Logs', type: 'Savings', balance: '$27,300', price: 420, status: 'active', stock: 15, country: 'UK', flag: '🇬🇧' },
+    { id: 23, name: 'Royal Bank of Canada', category: 'Bank Logs', type: 'Business', balance: '$56,100', price: 660, status: 'active', stock: 6, country: 'CAD', flag: '🇨🇦' },
+    { id: 24, name: 'Scotiabank', category: 'Bank Logs', type: 'Checking', balance: '$42,800', price: 540, status: 'active', stock: 8, country: 'CAD', flag: '🇨🇦' },
+    { id: 25, name: 'CIBC', category: 'Bank Logs', type: 'Savings', balance: '$35,600', price: 480, status: 'active', stock: 12, country: 'CAD', flag: '🇨🇦' },
+    { id: 26, name: 'Bank of Montreal', category: 'Bank Logs', type: 'Business', balance: '$49,400', price: 580, status: 'active', stock: 10, country: 'CAD', flag: '🇨🇦' },
+    { id: 27, name: 'Commonwealth Bank', category: 'Bank Logs', type: 'Checking', balance: '$41,200', price: 540, status: 'active', stock: 14, country: 'AUS', flag: '🇦🇺' },
+    { id: 28, name: 'ANZ Bank', category: 'Bank Logs', type: 'Savings', balance: '$33,800', price: 460, status: 'active', stock: 11, country: 'AUS', flag: '🇦🇺' },
+    { id: 29, name: 'Westpac', category: 'Bank Logs', type: 'Business', balance: '$52,600', price: 620, status: 'active', stock: 7, country: 'AUS', flag: '🇦🇺' },
+    { id: 30, name: 'National Australia Bank', category: 'Bank Logs', type: 'Checking', balance: '$28,400', price: 420, status: 'active', stock: 16, country: 'AUS', flag: '🇦🇺' },
+    
+    // PayPal Logs
+    { id: 31, name: 'PayPal Business Premium', category: 'PayPal Logs', type: 'Business', balance: '$45,000', price: 750, status: 'active', stock: 8 },
+    { id: 32, name: 'PayPal Personal Verified', category: 'PayPal Logs', type: 'Personal', balance: '$22,500', price: 500, status: 'active', stock: 15 },
+    { id: 33, name: 'PayPal Merchant Account', category: 'PayPal Logs', type: 'Business', balance: '$68,000', price: 850, status: 'active', stock: 5 },
+    { id: 34, name: 'PayPal Student Account', category: 'PayPal Logs', type: 'Personal', balance: '$8,500', price: 280, status: 'active', stock: 20 },
+    
+    // Cards
+    { id: 35, name: 'Visa Platinum Credit', category: 'Cards', type: 'Credit Card', balance: '$50,000', price: 800, status: 'active', stock: 12 },
+    { id: 36, name: 'Mastercard Gold', category: 'Cards', type: 'Debit Card', balance: '$25,000', price: 450, status: 'active', stock: 18 },
+    { id: 37, name: 'American Express Black', category: 'Cards', type: 'Credit Card', balance: '$75,000', price: 1200, status: 'active', stock: 3 },
+    { id: 38, name: 'Visa Virtual Card', category: 'Cards', type: 'Virtual Card', balance: '$15,000', price: 350, status: 'active', stock: 25 },
+    { id: 39, name: 'Mastercard Prepaid', category: 'Cards', type: 'Prepaid Card', balance: '$5,000', price: 180, status: 'active', stock: 30 },
+    
+    // CashApp Logs
+    { id: 40, name: 'CashApp Business Verified', category: 'CashApp Logs', type: 'Business', balance: '$35,000', price: 650, status: 'active', stock: 7 },
+    { id: 41, name: 'CashApp Personal Premium', category: 'CashApp Logs', type: 'Personal', balance: '$15,000', price: 400, status: 'inactive', stock: 0 },
+    { id: 42, name: 'CashApp Student', category: 'CashApp Logs', type: 'Personal', balance: '$3,500', price: 200, status: 'active', stock: 22 },
+    
+    // Tools
+    { id: 43, name: 'Premium VPN Access', category: 'Tools', type: 'Security', balance: 'N/A', price: 150, status: 'active', stock: 25 },
+    { id: 44, name: 'Card Checker Pro', category: 'Tools', type: 'Utility', balance: 'N/A', price: 120, status: 'active', stock: 40 },
+    { id: 45, name: 'Bank Validator Tool', category: 'Tools', type: 'Utility', balance: 'N/A', price: 200, status: 'active', stock: 15 },
+    { id: 46, name: 'Proxy Generator', category: 'Tools', type: 'Security', balance: 'N/A', price: 180, status: 'active', stock: 35 },
   ]);
 
   const deleteProduct = (id: number) => {
@@ -109,7 +153,7 @@ const AdminProducts = () => {
                 Product Management
               </h1>
               <p className="text-xl text-cyber-light/70">
-                Manage all dashboard products and inventory
+                Manage all dashboard products and inventory ({filteredProducts.length} products)
               </p>
             </div>
             <Button 
@@ -168,6 +212,7 @@ const AdminProducts = () => {
                     <TableRow className="border-cyber-blue/20">
                       <TableHead className="text-cyber-light">Product</TableHead>
                       <TableHead className="text-cyber-light">Category</TableHead>
+                      <TableHead className="text-cyber-light">Country</TableHead>
                       <TableHead className="text-cyber-light">Balance</TableHead>
                       <TableHead className="text-cyber-light">Price</TableHead>
                       <TableHead className="text-cyber-light">Stock</TableHead>
@@ -185,6 +230,15 @@ const AdminProducts = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-cyber-blue">{product.category}</TableCell>
+                        <TableCell className="text-cyber-light">
+                          {product.country ? (
+                            <span className="flex items-center gap-1">
+                              {product.flag} {product.country}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </TableCell>
                         <TableCell className="text-cyber-light font-mono">{product.balance}</TableCell>
                         <TableCell className="text-green-400 font-bold">${product.price}</TableCell>
                         <TableCell className="text-cyber-light">{product.stock}</TableCell>
