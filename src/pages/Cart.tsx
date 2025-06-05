@@ -1,20 +1,45 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import CheckoutModal from '@/components/CheckoutModal';
 import { useNavigate } from 'react-router-dom';
+import { useTierSystem } from '@/hooks/useTierSystem';
 
 const Cart = () => {
   const navigate = useNavigate();
+  const { applyDiscount, currentTier } = useTierSystem();
+  
   const [cartItems, setCartItems] = useState([
     { id: 1, name: 'Chase Bank Log', type: 'Bank Account', balance: '$25,000', price: 500, quantity: 1 },
     { id: 2, name: 'PayPal Business', type: 'PayPal Account', balance: '$45,000', price: 750, quantity: 2 },
     { id: 3, name: 'Visa Platinum', type: 'Credit Card', balance: '$50,000', price: 800, quantity: 1 },
   ]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Calculate discounts for each item
+  const discountedItems = cartItems.map(item => {
+    const categoryMap: { [key: string]: string } = {
+      'Bank Account': 'banklogs',
+      'PayPal Account': 'paypallogs', 
+      'CashApp Account': 'cashapplogs',
+      'Credit Card': 'cards'
+    };
+    
+    const category = categoryMap[item.type] || '';
+    const discountInfo = applyDiscount(item.price, category);
+    
+    return {
+      ...item,
+      originalPrice: discountInfo.originalPrice,
+      discountedPrice: discountInfo.discountedPrice,
+      discount: discountInfo.discount
+    };
+  });
 
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity === 0) {
@@ -31,8 +56,10 @@ const Cart = () => {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + tax;
+  const discountedSubtotal = discountedItems.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
+  const totalSavings = subtotal - discountedSubtotal;
+  const tax = discountedSubtotal * 0.1;
+  const total = discountedSubtotal + tax;
 
   const handleProceedToCheckout = () => {
     console.log('Proceeding to checkout with total:', total);
@@ -74,6 +101,25 @@ const Cart = () => {
           <p className="text-cyber-light/60">
             Review your selected items and proceed to checkout
           </p>
+          
+          {/* Tier Benefits Display */}
+          {totalSavings > 0 && (
+            <Card className="mt-4 bg-green-500/20 border-green-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-green-400">
+                  <Percent className="h-5 w-5" />
+                  <div>
+                    <div className="font-tech">
+                      {currentTier.name} Tier Benefits Active!
+                    </div>
+                    <div className="text-sm">
+                      You're saving ${totalSavings.toFixed(2)} with your current tier
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -87,7 +133,7 @@ const Cart = () => {
                 </CardContent>
               </Card>
             ) : (
-              cartItems.map((item, index) => (
+              discountedItems.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -125,8 +171,24 @@ const Cart = () => {
                           </div>
                           
                           <div className="text-right">
-                            <p className="text-green-400 font-bold">${item.price * item.quantity}</p>
-                            <p className="text-cyber-light/60 text-xs">${item.price} each</p>
+                            {item.discount > 0 && (
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="text-green-400 border-green-400/30 text-xs">
+                                  {item.discount}% off
+                                </Badge>
+                              </div>
+                            )}
+                            {item.discount > 0 && (
+                              <p className="text-cyber-light/40 line-through text-xs">
+                                ${(item.originalPrice * item.quantity).toFixed(2)}
+                              </p>
+                            )}
+                            <p className="text-green-400 font-bold">
+                              ${(item.discountedPrice * item.quantity).toFixed(2)}
+                            </p>
+                            <p className="text-cyber-light/60 text-xs">
+                              ${item.discountedPrice.toFixed(2)} each
+                            </p>
                           </div>
                           
                           <Button
@@ -154,8 +216,18 @@ const Cart = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
+                  <span className="text-cyber-light/60">Original Subtotal</span>
+                  <span className="text-cyber-light/60 line-through">${subtotal.toFixed(2)}</span>
+                </div>
+                {totalSavings > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-green-400">Tier Discount</span>
+                    <span className="text-green-400">-${totalSavings.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
                   <span className="text-cyber-light/60">Subtotal</span>
-                  <span className="text-cyber-light">${subtotal}</span>
+                  <span className="text-cyber-light">${discountedSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-cyber-light/60">Processing Fee</span>
@@ -182,7 +254,8 @@ const Cart = () => {
       <CheckoutModal 
         isOpen={isCheckoutOpen}
         onClose={handleCloseCheckout}
-        total={total}
+        total={subtotal + (subtotal * 0.1)}
+        items={cartItems}
       />
     </div>
   );

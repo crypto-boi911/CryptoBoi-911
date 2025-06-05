@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -35,6 +34,7 @@ import {
   SidebarInset,
   useSidebar,
 } from '@/components/ui/sidebar';
+import UserTierSystem from '@/components/UserTierSystem';
 
 const Dashboard = () => {
   const [username, setUsername] = useState<string>('');
@@ -162,6 +162,11 @@ const Dashboard = () => {
                   </h1>
                 </div>
               </div>
+              
+              {/* Tier Progress Bar - Top Right */}
+              <div className="w-80">
+                <UserTierSystem compact={true} />
+              </div>
             </div>
           </header>
 
@@ -178,6 +183,11 @@ const Dashboard = () => {
                 <div className="text-red-400 px-4 py-2 rounded-lg font-tech cursor-pointer hover:bg-red-500/10">
                   FAQ
                 </div>
+              </div>
+
+              {/* Tier System Details */}
+              <div className="mb-8">
+                <UserTierSystem />
               </div>
 
               {/* FAQ Content */}

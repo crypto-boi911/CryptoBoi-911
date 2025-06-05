@@ -6,23 +6,53 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, Copy, Clock } from 'lucide-react';
+import { Upload, Copy, Clock, Percent } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTierSystem } from '@/hooks/useTierSystem';
+import { Badge } from '@/components/ui/badge';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   total: number;
+  items?: Array<{ name: string; type: string; price: number; quantity: number }>;
 }
 
-const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total }) => {
+const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total, items = [] }) => {
   const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
   const [paymentAddress, setPaymentAddress] = useState<string>('');
-  const [timeLeft, setTimeLeft] = useState<number>(1800); // 30 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState<number>(1800);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const { toast } = useToast();
+  const { applyDiscount, incrementCompletedOrders, currentTier } = useTierSystem();
 
   console.log('CheckoutModal render - isOpen:', isOpen, 'total:', total);
+
+  // Calculate discounted totals
+  const discountedItems = items.map(item => {
+    const categoryMap: { [key: string]: string } = {
+      'Bank Account': 'banklogs',
+      'PayPal Account': 'paypallogs', 
+      'CashApp Account': 'cashapplogs',
+      'Credit Card': 'cards'
+    };
+    
+    const category = categoryMap[item.type] || '';
+    const discountInfo = applyDiscount(item.price, category);
+    
+    return {
+      ...item,
+      originalPrice: discountInfo.originalPrice,
+      discountedPrice: discountInfo.discountedPrice,
+      discount: discountInfo.discount
+    };
+  });
+
+  const discountedTotal = discountedItems.reduce((sum, item) => 
+    sum + (item.discountedPrice * item.quantity), 0
+  );
+  
+  const totalSavings = total - discountedTotal;
 
   const cryptoOptions = [
     { 
@@ -149,6 +179,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
       return;
     }
 
+    // Increment completed orders
+    incrementCompletedOrders();
+
     toast({
       title: "Payment submitted",
       description: "Your payment is being verified. You will receive confirmation shortly.",
@@ -159,7 +192,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
   const getCryptoAmount = (cryptoId: string) => {
     const crypto = cryptoOptions.find(c => c.id === cryptoId);
     if (!crypto) return '0.00000000';
-    return (total / crypto.rate).toFixed(8);
+    return (discountedTotal / crypto.rate).toFixed(8);
   };
 
   return (
@@ -178,6 +211,67 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
 
         {!selectedCrypto ? (
           <div className="space-y-4">
+            {/* Tier Discount Summary */}
+            {totalSavings > 0 && (
+              <Card className="bg-green-500/20 border-green-500/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-green-400">
+                    <Percent className="h-5 w-5" />
+                    <div>
+                      <div className="font-tech">
+                        {currentTier.name} Tier Discount Applied!
+                      </div>
+                      <div className="text-sm">
+                        You saved ${totalSavings.toFixed(2)} on this order
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Order Summary with Discounts */}
+            {discountedItems.length > 0 && (
+              <Card className="bg-cyber-gray/30 border-cyber-blue/20">
+                <CardHeader>
+                  <CardTitle className="text-cyber-light font-tech text-sm">
+                    Order Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {discountedItems.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span className="text-cyber-light/70">
+                        {item.name} x{item.quantity}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {item.discount > 0 && (
+                          <Badge variant="outline" className="text-green-400 border-green-400/30 text-xs">
+                            {item.discount}% off
+                          </Badge>
+                        )}
+                        <div className="text-right">
+                          {item.discount > 0 && (
+                            <div className="text-cyber-light/40 line-through text-xs">
+                              ${(item.originalPrice * item.quantity).toFixed(2)}
+                            </div>
+                          )}
+                          <div className="text-green-400">
+                            ${(item.discountedPrice * item.quantity).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <Separator className="bg-cyber-blue/20" />
+                  <div className="flex justify-between font-bold">
+                    <span className="text-cyber-light">Total:</span>
+                    <span className="text-green-400">${discountedTotal.toFixed(2)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <p className="text-cyber-light/60">
               Select your preferred cryptocurrency for payment:
             </p>
@@ -231,8 +325,18 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-cyber-light/60">Amount (USD):</span>
-                  <span className="text-cyber-light">${total.toFixed(2)}</span>
+                  <span className="text-cyber-light/60">Original Amount:</span>
+                  <span className="text-cyber-light/60 line-through">${total.toFixed(2)}</span>
+                </div>
+                {totalSavings > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-green-400">Tier Discount:</span>
+                    <span className="text-green-400">-${totalSavings.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold">
+                  <span className="text-cyber-light">Final Amount (USD):</span>
+                  <span className="text-cyber-light">${discountedTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-cyber-light/60">
