@@ -65,6 +65,7 @@ export default function GetStarted() {
     const key = generateAccessKey();
     
     try {
+      // Sign up with username stored in user_metadata
       const { error } = await signUp(username, key);
       
       if (error) {
@@ -98,10 +99,10 @@ export default function GetStarted() {
       
       toast({
         title: "Success!",
-        description: "Your account has been created successfully.",
+        description: "Your account has been created successfully with username stored in Supabase.",
       });
       
-      console.log("Account created for:", username, "Access key generated successfully");
+      console.log("Account created for:", username, "with access key generated and stored in Supabase Auth");
     } catch (error) {
       console.error('Signup error:', error);
       toast({
@@ -156,6 +157,9 @@ export default function GetStarted() {
             <p className="text-sm text-cyber-light/60 font-tech">
               Choose a unique username (3-20 characters, letters, numbers, _, -)
             </p>
+            <p className="text-xs text-cyber-light/50 font-tech">
+              ℹ️ Username will be stored in Supabase user metadata with role 'user'
+            </p>
             <button
               type="submit"
               disabled={isLoading}
@@ -190,6 +194,11 @@ export default function GetStarted() {
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md">
               <p className="text-sm text-amber-300 font-tech">
                 ⚠️ <strong>Important:</strong> Save this access key securely. You'll need it to log in, and it cannot be recovered if lost.
+              </p>
+            </div>
+            <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-md">
+              <p className="text-sm text-green-300 font-tech">
+                ✅ <strong>Account Created:</strong> Username and role stored in Supabase Auth metadata. Session will persist automatically.
               </p>
             </div>
             <div className="pt-4">

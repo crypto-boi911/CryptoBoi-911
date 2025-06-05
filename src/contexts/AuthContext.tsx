@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           action,
           details: details || {}
         });
+      console.log('Activity logged:', action, details);
     } catch (error) {
       console.error('Error logging activity:', error);
     }
@@ -77,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
@@ -89,9 +90,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           await fetchUserProfile(session.user.id);
           if (event === 'SIGNED_IN') {
-            // Use setTimeout to avoid potential recursion
+            // Use setTimeout to avoid potential recursion in auth callback
             setTimeout(() => {
-              logActivity('LOGIN', { timestamp: new Date().toISOString() });
+              logActivity('LOGIN', { 
+                timestamp: new Date().toISOString(),
+                username: session.user.user_metadata?.username || 'unknown'
+              });
             }, 0);
           }
         } else {
@@ -138,6 +142,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Success",
         description: "Account created successfully!",
       });
+      
+      // Log signup activity
+      setTimeout(() => {
+        logActivity('SIGNUP', { 
+          timestamp: new Date().toISOString(),
+          username: username
+        });
+      }, 100);
     }
 
     return { error };
@@ -146,16 +158,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (username: string, accessKey: string) => {
     const email = `${username}@cryptoboi.fake`;
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password: accessKey
     });
 
-    if (!error) {
+    if (!error && data.session) {
       toast({
         title: "Welcome back!",
-        description: "You have been logged in successfully.",
+        description: `Logged in as ${username}`,
       });
+      
+      // Session persistence is handled automatically by Supabase
+      console.log('Login successful, session persisted:', data.session.access_token);
     }
 
     return { error };
@@ -163,7 +178,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     if (user) {
-      await logActivity('LOGOUT', { timestamp: new Date().toISOString() });
+      await logActivity('LOGOUT', { 
+        timestamp: new Date().toISOString(),
+        username: user.user_metadata?.username || 'unknown'
+      });
     }
     await supabase.auth.signOut();
     setProfile(null);

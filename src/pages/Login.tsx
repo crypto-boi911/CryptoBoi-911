@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
@@ -12,7 +12,14 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,12 +51,9 @@ const Login = () => {
         return;
       }
 
-      toast({
-        title: "Access Granted",
-        description: `Welcome back, ${username}! Redirecting to dashboard...`,
-      });
+      // Redirect will happen automatically when user state updates
+      // No need to manually navigate here as useEffect handles it
       
-      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
       setError("An unexpected error occurred");
