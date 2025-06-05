@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Filter, Search, ArrowLeft, SlidersHorizontal } from 'lucide-react';
@@ -18,85 +19,87 @@ const BankLogs = () => {
   const [minBalance, setMinBalance] = useState('');
   const [maxBalance, setMaxBalance] = useState('');
   const [selectedAccountTypes, setSelectedAccountTypes] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   const bankProducts = [
-    { id: 1, bank: 'Chase Bank', balance: '$25,000', type: 'Checking', price: '$500' },
-    { id: 2, bank: 'Bank of America', balance: '$18,500', type: 'Savings', price: '$400' },
-    { id: 3, bank: 'Wells Fargo', balance: '$32,000', type: 'Business', price: '$650' },
-    { id: 4, bank: 'Citibank', balance: '$15,750', type: 'Checking', price: '$350' },
-    { id: 5, bank: 'TD Bank', balance: '$42,000', type: 'Business', price: '$750' },
-    { id: 6, bank: 'PNC Bank', balance: '$28,300', type: 'Savings', price: '$550' },
-    { id: 7, bank: 'US Bank', balance: '$19,800', type: 'Checking', price: '$420' },
-    { id: 8, bank: 'Capital One', balance: '$36,500', type: 'Business', price: '$680' },
-    { id: 9, bank: 'Truist Bank', balance: '$21,200', type: 'Savings', price: '$480' },
-    { id: 10, bank: 'Fifth Third Bank', balance: '$33,700', type: 'Checking', price: '$620' },
-    { id: 11, bank: 'Regions Bank', balance: '$27,900', type: 'Business', price: '$540' },
-    { id: 12, bank: 'KeyBank', balance: '$16,400', type: 'Savings', price: '$380' },
-    { id: 13, bank: 'M&T Bank', balance: '$38,600', type: 'Checking', price: '$710' },
-    { id: 14, bank: 'Huntington Bank', balance: '$22,800', type: 'Business', price: '$490' },
-    { id: 15, bank: 'Comerica Bank', balance: '$31,500', type: 'Savings', price: '$590' },
-    { id: 16, bank: 'Zions Bank', balance: '$24,300', type: 'Checking', price: '$510' },
-    { id: 17, bank: 'First National Bank', balance: '$29,700', type: 'Business', price: '$570' },
-    { id: 18, bank: 'Synovus Bank', balance: '$17,600', type: 'Savings', price: '$390' },
-    { id: 19, bank: 'Associated Bank', balance: '$35,200', type: 'Checking', price: '$660' },
-    { id: 20, bank: 'Frost Bank', balance: '$26,800', type: 'Business', price: '$530' },
-    { id: 21, bank: 'Santander Bank', balance: '$20,400', type: 'Savings', price: '$450' },
-    { id: 22, bank: 'BMO Harris Bank', balance: '$34,100', type: 'Checking', price: '$640' },
-    { id: 23, bank: 'TCF Bank', balance: '$23,900', type: 'Business', price: '$500' },
-    { id: 24, bank: 'Webster Bank', balance: '$30,600', type: 'Savings', price: '$580' },
-    { id: 25, bank: 'Chase Bank', balance: '$45,800', type: 'Business', price: '$890' },
-    { id: 26, bank: 'Bank of America', balance: '$12,300', type: 'Checking', price: '$280' },
-    { id: 27, bank: 'Wells Fargo', balance: '$58,700', type: 'Savings', price: '$1,200' },
-    { id: 28, bank: 'Citibank', balance: '$67,900', type: 'Business', price: '$1,350' },
-    { id: 29, bank: 'TD Bank', balance: '$23,400', type: 'Checking', price: '$520' },
-    { id: 30, bank: 'PNC Bank', balance: '$41,200', type: 'Savings', price: '$780' },
-    { id: 31, bank: 'US Bank', balance: '$56,800', type: 'Business', price: '$1,100' },
-    { id: 32, bank: 'Capital One', balance: '$19,500', type: 'Checking', price: '$420' },
-    { id: 33, bank: 'Truist Bank', balance: '$73,200', type: 'Business', price: '$1,450' },
-    { id: 34, bank: 'Fifth Third Bank', balance: '$14,800', type: 'Savings', price: '$320' },
-    { id: 35, bank: 'Regions Bank', balance: '$48,600', type: 'Checking', price: '$950' },
-    { id: 36, bank: 'KeyBank', balance: '$52,100', type: 'Business', price: '$1,020' },
-    { id: 37, bank: 'M&T Bank', balance: '$26,700', type: 'Savings', price: '$560' },
-    { id: 38, bank: 'Huntington Bank', balance: '$39,400', type: 'Checking', price: '$750' },
-    { id: 39, bank: 'Comerica Bank', balance: '$64,300', type: 'Business', price: '$1,280' },
-    { id: 40, bank: 'Zions Bank', balance: '$18,900', type: 'Savings', price: '$410' },
-    { id: 41, bank: 'First National Bank', balance: '$44,600', type: 'Checking', price: '$870' },
-    { id: 42, bank: 'Synovus Bank', balance: '$71,500', type: 'Business', price: '$1,420' },
-    { id: 43, bank: 'Associated Bank', balance: '$22,100', type: 'Savings', price: '$480' },
-    { id: 44, bank: 'Frost Bank', balance: '$55,800', type: 'Checking', price: '$1,080' },
-    { id: 45, bank: 'Santander Bank', balance: '$37,200', type: 'Business', price: '$720' },
-    { id: 46, bank: 'BMO Harris Bank', balance: '$16,700', type: 'Savings', price: '$360' },
-    { id: 47, bank: 'TCF Bank', balance: '$49,900', type: 'Checking', price: '$980' },
-    { id: 48, bank: 'Webster Bank', balance: '$62,400', type: 'Business', price: '$1,240' },
-    { id: 49, bank: 'Chase Bank', balance: '$33,100', type: 'Savings', price: '$640' },
-    { id: 50, bank: 'Bank of America', balance: '$47,800', type: 'Checking', price: '$920' },
-    { id: 51, bank: 'Wells Fargo', balance: '$29,300', type: 'Business', price: '$580' },
-    { id: 52, bank: 'Citibank', balance: '$54,600', type: 'Savings', price: '$1,060' },
-    { id: 53, bank: 'TD Bank', balance: '$68,900', type: 'Checking', price: '$1,370' },
-    { id: 54, bank: 'PNC Bank', balance: '$21,500', type: 'Business', price: '$470' },
-    { id: 55, bank: 'US Bank', balance: '$43,200', type: 'Savings', price: '$830' },
-    { id: 56, bank: 'Capital One', balance: '$59,700', type: 'Checking', price: '$1,180' },
-    { id: 57, bank: 'Truist Bank', balance: '$25,800', type: 'Business', price: '$540' },
-    { id: 58, bank: 'Fifth Third Bank', balance: '$76,300', type: 'Savings', price: '$1,520' },
-    { id: 59, bank: 'Regions Bank', balance: '$32,600', type: 'Checking', price: '$630' },
-    { id: 60, bank: 'KeyBank', balance: '$46,100', type: 'Business', price: '$890' },
-    { id: 61, bank: 'M&T Bank', balance: '$19,400', type: 'Savings', price: '$420' },
-    { id: 62, bank: 'Huntington Bank', balance: '$65,700', type: 'Checking', price: '$1,300' },
-    { id: 63, bank: 'Comerica Bank', balance: '$28,200', type: 'Business', price: '$570' },
-    { id: 64, bank: 'Zions Bank', balance: '$51,900', type: 'Savings', price: '$1,010' },
-    { id: 65, bank: 'First National Bank', balance: '$74,600', type: 'Checking', price: '$1,480' },
-    { id: 66, bank: 'Synovus Bank', balance: '$23,700', type: 'Business', price: '$510' },
-    { id: 67, bank: 'Associated Bank', balance: '$42,400', type: 'Savings', price: '$810' },
-    { id: 68, bank: 'Frost Bank', balance: '$57,100', type: 'Checking', price: '$1,130' },
-    { id: 69, bank: 'Santander Bank', balance: '$31,800', type: 'Business', price: '$620' },
-    { id: 70, bank: 'BMO Harris Bank', balance: '$69,500', type: 'Savings', price: '$1,380' },
-    { id: 71, bank: 'TCF Bank', balance: '$24,900', type: 'Checking', price: '$530' },
-    { id: 72, bank: 'Webster Bank', balance: '$48,200', type: 'Business', price: '$930' },
-    { id: 73, bank: 'Chase Bank', balance: '$66,800', type: 'Savings', price: '$1,320' },
-    { id: 74, bank: 'Bank of America', balance: '$35,400', type: 'Checking', price: '$680' },
+    { id: 1, bank: 'Chase Bank', balance: '$25,000', type: 'Checking', price: '$500', country: 'USA' },
+    { id: 2, bank: 'Bank of America', balance: '$18,500', type: 'Savings', price: '$400', country: 'USA' },
+    { id: 3, bank: 'Wells Fargo', balance: '$32,000', type: 'Business', price: '$650', country: 'USA' },
+    { id: 4, bank: 'Citibank', balance: '$15,750', type: 'Checking', price: '$350', country: 'USA' },
+    { id: 5, bank: 'TD Bank', balance: '$42,000', type: 'Business', price: '$750', country: 'CAD' },
+    { id: 6, bank: 'PNC Bank', balance: '$28,300', type: 'Savings', price: '$550', country: 'USA' },
+    { id: 7, bank: 'US Bank', balance: '$19,800', type: 'Checking', price: '$420', country: 'USA' },
+    { id: 8, bank: 'Capital One', balance: '$36,500', type: 'Business', price: '$680', country: 'USA' },
+    { id: 9, bank: 'Truist Bank', balance: '$21,200', type: 'Savings', price: '$480', country: 'USA' },
+    { id: 10, bank: 'Fifth Third Bank', balance: '$33,700', type: 'Checking', price: '$620', country: 'USA' },
+    { id: 11, bank: 'Regions Bank', balance: '$27,900', type: 'Business', price: '$540', country: 'USA' },
+    { id: 12, bank: 'KeyBank', balance: '$16,400', type: 'Savings', price: '$380', country: 'USA' },
+    { id: 13, bank: 'M&T Bank', balance: '$38,600', type: 'Checking', price: '$710', country: 'USA' },
+    { id: 14, bank: 'Huntington Bank', balance: '$22,800', type: 'Business', price: '$490', country: 'USA' },
+    { id: 15, bank: 'Comerica Bank', balance: '$31,500', type: 'Savings', price: '$590', country: 'USA' },
+    { id: 16, bank: 'Zions Bank', balance: '$24,300', type: 'Checking', price: '$510', country: 'USA' },
+    { id: 17, bank: 'First National Bank', balance: '$29,700', type: 'Business', price: '$570', country: 'USA' },
+    { id: 18, bank: 'Synovus Bank', balance: '$17,600', type: 'Savings', price: '$390', country: 'USA' },
+    { id: 19, bank: 'Associated Bank', balance: '$35,200', type: 'Checking', price: '$660', country: 'USA' },
+    { id: 20, bank: 'Frost Bank', balance: '$26,800', type: 'Business', price: '$530', country: 'USA' },
+    { id: 21, bank: 'Santander Bank', balance: '$20,400', type: 'Savings', price: '$450', country: 'UK' },
+    { id: 22, bank: 'BMO Harris Bank', balance: '$34,100', type: 'Checking', price: '$640', country: 'CAD' },
+    { id: 23, bank: 'TCF Bank', balance: '$23,900', type: 'Business', price: '$500', country: 'USA' },
+    { id: 24, bank: 'Webster Bank', balance: '$30,600', type: 'Savings', price: '$580', country: 'USA' },
+    { id: 25, bank: 'Chase Bank', balance: '$45,800', type: 'Business', price: '$890', country: 'USA' },
+    { id: 26, bank: 'Bank of America', balance: '$12,300', type: 'Checking', price: '$280', country: 'USA' },
+    { id: 27, bank: 'Wells Fargo', balance: '$58,700', type: 'Savings', price: '$1,200', country: 'USA' },
+    { id: 28, bank: 'Citibank', balance: '$67,900', type: 'Business', price: '$1,350', country: 'UK' },
+    { id: 29, bank: 'TD Bank', balance: '$23,400', type: 'Checking', price: '$520', country: 'CAD' },
+    { id: 30, bank: 'PNC Bank', balance: '$41,200', type: 'Savings', price: '$780', country: 'USA' },
+    { id: 31, bank: 'US Bank', balance: '$56,800', type: 'Business', price: '$1,100', country: 'USA' },
+    { id: 32, bank: 'Capital One', balance: '$19,500', type: 'Checking', price: '$420', country: 'UK' },
+    { id: 33, bank: 'Truist Bank', balance: '$73,200', type: 'Business', price: '$1,450', country: 'USA' },
+    { id: 34, bank: 'Fifth Third Bank', balance: '$14,800', type: 'Savings', price: '$320', country: 'USA' },
+    { id: 35, bank: 'Regions Bank', balance: '$48,600', type: 'Checking', price: '$950', country: 'USA' },
+    { id: 36, bank: 'KeyBank', balance: '$52,100', type: 'Business', price: '$1,020', country: 'USA' },
+    { id: 37, bank: 'M&T Bank', balance: '$26,700', type: 'Savings', price: '$560', country: 'USA' },
+    { id: 38, bank: 'Huntington Bank', balance: '$39,400', type: 'Checking', price: '$750', country: 'USA' },
+    { id: 39, bank: 'Comerica Bank', balance: '$64,300', type: 'Business', price: '$1,280', country: 'USA' },
+    { id: 40, bank: 'Zions Bank', balance: '$18,900', type: 'Savings', price: '$410', country: 'USA' },
+    { id: 41, bank: 'First National Bank', balance: '$44,600', type: 'Checking', price: '$870', country: 'AUS' },
+    { id: 42, bank: 'Synovus Bank', balance: '$71,500', type: 'Business', price: '$1,420', country: 'USA' },
+    { id: 43, bank: 'Associated Bank', balance: '$22,100', type: 'Savings', price: '$480', country: 'USA' },
+    { id: 44, bank: 'Frost Bank', balance: '$55,800', type: 'Checking', price: '$1,080', country: 'USA' },
+    { id: 45, bank: 'Santander Bank', balance: '$37,200', type: 'Business', price: '$720', country: 'UK' },
+    { id: 46, bank: 'BMO Harris Bank', balance: '$16,700', type: 'Savings', price: '$360', country: 'CAD' },
+    { id: 47, bank: 'TCF Bank', balance: '$49,900', type: 'Checking', price: '$980', country: 'USA' },
+    { id: 48, bank: 'Webster Bank', balance: '$62,400', type: 'Business', price: '$1,240', country: 'USA' },
+    { id: 49, bank: 'Chase Bank', balance: '$33,100', type: 'Savings', price: '$640', country: 'UK' },
+    { id: 50, bank: 'Bank of America', balance: '$47,800', type: 'Checking', price: '$920', country: 'USA' },
+    { id: 51, bank: 'Wells Fargo', balance: '$29,300', type: 'Business', price: '$580', country: 'AUS' },
+    { id: 52, bank: 'Citibank', balance: '$54,600', type: 'Savings', price: '$1,060', country: 'UK' },
+    { id: 53, bank: 'TD Bank', balance: '$68,900', type: 'Checking', price: '$1,370', country: 'CAD' },
+    { id: 54, bank: 'PNC Bank', balance: '$21,500', type: 'Business', price: '$470', country: 'USA' },
+    { id: 55, bank: 'US Bank', balance: '$43,200', type: 'Savings', price: '$830', country: 'USA' },
+    { id: 56, bank: 'Capital One', balance: '$59,700', type: 'Checking', price: '$1,180', country: 'UK' },
+    { id: 57, bank: 'Truist Bank', balance: '$25,800', type: 'Business', price: '$540', country: 'USA' },
+    { id: 58, bank: 'Fifth Third Bank', balance: '$76,300', type: 'Savings', price: '$1,520', country: 'USA' },
+    { id: 59, bank: 'Regions Bank', balance: '$32,600', type: 'Checking', price: '$630', country: 'USA' },
+    { id: 60, bank: 'KeyBank', balance: '$46,100', type: 'Business', price: '$890', country: 'USA' },
+    { id: 61, bank: 'M&T Bank', balance: '$19,400', type: 'Savings', price: '$420', country: 'USA' },
+    { id: 62, bank: 'Huntington Bank', balance: '$65,700', type: 'Checking', price: '$1,300', country: 'USA' },
+    { id: 63, bank: 'Comerica Bank', balance: '$28,200', type: 'Business', price: '$570', country: 'USA' },
+    { id: 64, bank: 'Zions Bank', balance: '$51,900', type: 'Savings', price: '$1,010', country: 'USA' },
+    { id: 65, bank: 'First National Bank', balance: '$74,600', type: 'Checking', price: '$1,480', country: 'AUS' },
+    { id: 66, bank: 'Synovus Bank', balance: '$23,700', type: 'Business', price: '$510', country: 'USA' },
+    { id: 67, bank: 'Associated Bank', balance: '$42,400', type: 'Savings', price: '$810', country: 'USA' },
+    { id: 68, bank: 'Frost Bank', balance: '$57,100', type: 'Checking', price: '$1,130', country: 'USA' },
+    { id: 69, bank: 'Santander Bank', balance: '$31,800', type: 'Business', price: '$620', country: 'UK' },
+    { id: 70, bank: 'BMO Harris Bank', balance: '$69,500', type: 'Savings', price: '$1,380', country: 'CAD' },
+    { id: 71, bank: 'TCF Bank', balance: '$24,900', type: 'Checking', price: '$530', country: 'USA' },
+    { id: 72, bank: 'Webster Bank', balance: '$48,200', type: 'Business', price: '$930', country: 'USA' },
+    { id: 73, bank: 'Chase Bank', balance: '$66,800', type: 'Savings', price: '$1,320', country: 'AUS' },
+    { id: 74, bank: 'Bank of America', balance: '$35,400', type: 'Checking', price: '$680', country: 'UK' },
   ];
 
   const accountTypes = ['Checking', 'Savings', 'Business'];
+  const countries = ['USA', 'UK', 'CAD', 'AUS'];
 
   // Helper function to convert balance string to number
   const parseBalance = (balanceStr: string) => {
@@ -118,7 +121,10 @@ const BankLogs = () => {
       // Filter by account type
       const matchesType = selectedAccountTypes.length === 0 || selectedAccountTypes.includes(product.type);
       
-      return matchesSearch && matchesBalance && matchesType;
+      // Filter by country
+      const matchesCountry = selectedCountries.length === 0 || selectedCountries.includes(product.country);
+      
+      return matchesSearch && matchesBalance && matchesType && matchesCountry;
     });
 
     // Sort products
@@ -131,12 +137,12 @@ const BankLogs = () => {
     }
 
     return filtered;
-  }, [searchTerm, minBalance, maxBalance, selectedAccountTypes, sortBy]);
+  }, [searchTerm, minBalance, maxBalance, selectedAccountTypes, selectedCountries, sortBy]);
 
   const handleAddToCart = (product: any) => {
     toast({
       title: "Added to Cart",
-      description: `${product.bank} ${product.type} account has been added to your cart.`,
+      description: `${product.bank} ${product.type} account (${product.country}) has been added to your cart.`,
     });
     console.log('Added to cart:', product);
   };
@@ -149,11 +155,20 @@ const BankLogs = () => {
     }
   };
 
+  const handleCountryChange = (country: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCountries([...selectedCountries, country]);
+    } else {
+      setSelectedCountries(selectedCountries.filter(c => c !== country));
+    }
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setMinBalance('');
     setMaxBalance('');
     setSelectedAccountTypes([]);
+    setSelectedCountries([]);
     setSortBy('name');
   };
 
@@ -263,6 +278,26 @@ const BankLogs = () => {
                   </div>
                 </div>
 
+                {/* Countries */}
+                <div className="space-y-2">
+                  <label className="text-sm text-cyber-light/70">Countries</label>
+                  <div className="space-y-2">
+                    {countries.map((country) => (
+                      <div key={country} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={country}
+                          checked={selectedCountries.includes(country)}
+                          onCheckedChange={(checked) => handleCountryChange(country, checked as boolean)}
+                          className="border-cyber-blue/30"
+                        />
+                        <label htmlFor={country} className="text-sm text-cyber-light">
+                          {country}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Clear Filters */}
                 <Button
                   variant="outline"
@@ -302,7 +337,7 @@ const BankLogs = () => {
                     </div>
                     <div>
                       <CardTitle className="text-cyber-light font-tech">{product.bank}</CardTitle>
-                      <p className="text-cyber-light/60 text-sm">{product.type}</p>
+                      <p className="text-cyber-light/60 text-sm">{product.type} • {product.country}</p>
                     </div>
                   </div>
                 </CardHeader>
