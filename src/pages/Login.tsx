@@ -52,7 +52,7 @@ const Login = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/');
+    navigate('/get-started');
   };
 
   return (
