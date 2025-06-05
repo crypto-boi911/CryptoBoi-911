@@ -1,11 +1,17 @@
-import InsertTransaction from '@/components/InsertTransaction';
-import TransactionList from '@/components/TransactionList';
+
+import React from 'react';
 
 export default function Home() {
   return (
     <main className="p-6">
-      <InsertTransaction />
-      <TransactionList />
+      <div className="text-center">
+        <h1 className="text-4xl font-cyber font-bold text-cyber-blue mb-4">
+          Welcome to CRYPTOBOI-911
+        </h1>
+        <p className="text-cyber-light text-lg">
+          Your secure platform for financial services
+        </p>
+      </div>
     </main>
   );
 }

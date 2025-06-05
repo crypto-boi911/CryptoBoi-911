@@ -26,6 +26,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminContent from "./pages/AdminContent";
 import AdminLogs from "./pages/AdminLogs";
 import AdminMessages from "./pages/AdminMessages";
+import AdminSettings from "./pages/AdminSettings";
 import NotFound from "./pages/NotFound";
 import Support from "./pages/Support";
 
@@ -118,6 +119,11 @@ const App = () => (
             <Route path="/admin/messages" element={
               <AdminProtectedRoute>
                 <AdminMessages />
+              </AdminProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <AdminProtectedRoute>
+                <AdminSettings />
               </AdminProtectedRoute>
             } />
             
