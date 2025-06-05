@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, Filter, Search, ArrowLeft } from 'lucide-react';
+import { CreditCard, Filter, Search, ArrowLeft, SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,6 +14,10 @@ const BankLogs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [minBalance, setMinBalance] = useState('');
+  const [maxBalance, setMaxBalance] = useState('');
+  const [selectedAccountTypes, setSelectedAccountTypes] = useState<string[]>([]);
 
   const bankProducts = [
     { id: 1, bank: 'Chase Bank', balance: '$25,000', type: 'Checking', price: '$500' },
@@ -37,7 +44,6 @@ const BankLogs = () => {
     { id: 22, bank: 'BMO Harris Bank', balance: '$34,100', type: 'Checking', price: '$640' },
     { id: 23, bank: 'TCF Bank', balance: '$23,900', type: 'Business', price: '$500' },
     { id: 24, bank: 'Webster Bank', balance: '$30,600', type: 'Savings', price: '$580' },
-    // 50 additional bank products
     { id: 25, bank: 'Chase Bank', balance: '$45,800', type: 'Business', price: '$890' },
     { id: 26, bank: 'Bank of America', balance: '$12,300', type: 'Checking', price: '$280' },
     { id: 27, bank: 'Wells Fargo', balance: '$58,700', type: 'Savings', price: '$1,200' },
@@ -90,10 +96,42 @@ const BankLogs = () => {
     { id: 74, bank: 'Bank of America', balance: '$35,400', type: 'Checking', price: '$680' },
   ];
 
-  // Filter products based on search term
-  const filteredProducts = bankProducts.filter(product =>
-    product.bank.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const accountTypes = ['Checking', 'Savings', 'Business'];
+
+  // Helper function to convert balance string to number
+  const parseBalance = (balanceStr: string) => {
+    return parseInt(balanceStr.replace(/[$,]/g, ''));
+  };
+
+  // Filter and sort products
+  const filteredProducts = useMemo(() => {
+    let filtered = bankProducts.filter(product => {
+      // Search by bank name
+      const matchesSearch = product.bank.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filter by balance range
+      const balance = parseBalance(product.balance);
+      const min = minBalance ? parseInt(minBalance) : 0;
+      const max = maxBalance ? parseInt(maxBalance) : Infinity;
+      const matchesBalance = balance >= min && balance <= max;
+      
+      // Filter by account type
+      const matchesType = selectedAccountTypes.length === 0 || selectedAccountTypes.includes(product.type);
+      
+      return matchesSearch && matchesBalance && matchesType;
+    });
+
+    // Sort products
+    if (sortBy === 'name') {
+      filtered.sort((a, b) => a.bank.localeCompare(b.bank));
+    } else if (sortBy === 'balance-low') {
+      filtered.sort((a, b) => parseBalance(a.balance) - parseBalance(b.balance));
+    } else if (sortBy === 'balance-high') {
+      filtered.sort((a, b) => parseBalance(b.balance) - parseBalance(a.balance));
+    }
+
+    return filtered;
+  }, [searchTerm, minBalance, maxBalance, selectedAccountTypes, sortBy]);
 
   const handleAddToCart = (product: any) => {
     toast({
@@ -103,8 +141,20 @@ const BankLogs = () => {
     console.log('Added to cart:', product);
   };
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
+  const handleAccountTypeChange = (type: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAccountTypes([...selectedAccountTypes, type]);
+    } else {
+      setSelectedAccountTypes(selectedAccountTypes.filter(t => t !== type));
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setMinBalance('');
+    setMaxBalance('');
+    setSelectedAccountTypes([]);
+    setSortBy('name');
   };
 
   return (
@@ -135,28 +185,102 @@ const BankLogs = () => {
           </p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex gap-4 mb-6">
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyber-light/50 h-4 w-4" />
             <Input 
               placeholder="Search by bank name..."
               className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button className="bg-cyber-blue/20 border border-cyber-blue text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+
+          {/* Sort */}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full lg:w-48 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent className="bg-cyber-gray border-cyber-blue/20">
+              <SelectItem value="name" className="text-cyber-light hover:bg-cyber-blue/10">Name A-Z</SelectItem>
+              <SelectItem value="balance-low" className="text-cyber-light hover:bg-cyber-blue/10">Balance: Low to High</SelectItem>
+              <SelectItem value="balance-high" className="text-cyber-light hover:bg-cyber-blue/10">Balance: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Advanced Filters */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="bg-cyber-blue/20 border border-cyber-blue text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark">
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filters
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 bg-cyber-gray border-cyber-blue/20" align="end">
+              <div className="space-y-4">
+                <h4 className="font-medium text-cyber-light">Filter Options</h4>
+                
+                {/* Balance Range */}
+                <div className="space-y-2">
+                  <label className="text-sm text-cyber-light/70">Balance Range</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Min"
+                      type="number"
+                      value={minBalance}
+                      onChange={(e) => setMinBalance(e.target.value)}
+                      className="bg-cyber-gray/50 border-cyber-blue/20 text-cyber-light"
+                    />
+                    <Input
+                      placeholder="Max"
+                      type="number"
+                      value={maxBalance}
+                      onChange={(e) => setMaxBalance(e.target.value)}
+                      className="bg-cyber-gray/50 border-cyber-blue/20 text-cyber-light"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Types */}
+                <div className="space-y-2">
+                  <label className="text-sm text-cyber-light/70">Account Types</label>
+                  <div className="space-y-2">
+                    {accountTypes.map((type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={type}
+                          checked={selectedAccountTypes.includes(type)}
+                          onCheckedChange={(checked) => handleAccountTypeChange(type, checked as boolean)}
+                          className="border-cyber-blue/30"
+                        />
+                        <label htmlFor={type} className="text-sm text-cyber-light">
+                          {type}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="w-full border-cyber-blue/30 text-cyber-light hover:bg-cyber-blue/10"
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* No results message */}
-        {filteredProducts.length === 0 && searchTerm && (
+        {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-cyber-light/60 text-lg">
-              No banks found matching "{searchTerm}"
+              No banks found matching your criteria
             </p>
           </div>
         )}
