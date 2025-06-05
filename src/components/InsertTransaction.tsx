@@ -14,9 +14,9 @@ export default function InsertTransaction() {
       status: 'pending',
     });
 
-    if (error) {
-  console.error(error);
-  setStatus(`❌ ${error.message}`);
+if (error) {
+  console.error('Insert error:', error); // 👈 This is key
+  setStatus(`❌ ${JSON.stringify(error)}`); // Show full raw error
 } else {
       setStatus('✅ Transaction inserted!');
     }
