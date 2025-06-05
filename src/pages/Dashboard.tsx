@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -81,7 +82,6 @@ const Dashboard = () => {
   };
 
   const sidebarItems = [
-    { name: 'FAQ', icon: HelpCircle, path: '/dashboard/faq', active: true },
     { name: 'Bank Logs', icon: CreditCard, path: '/dashboard/bank-logs' },
     { name: 'Cards/Linkables', icon: CreditCard, path: '/dashboard/cards' },
     { name: 'PayPal Logs', icon: Database, path: '/dashboard/paypal' },
