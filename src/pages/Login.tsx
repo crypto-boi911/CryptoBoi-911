@@ -67,6 +67,19 @@ const Login = () => {
           </button>
           <h2 className="text-2xl font-bold text-cyber-blue flex-1 text-center">Login with Access Key</h2>
         </div>
+        
+        <div className="mb-6 p-4 bg-cyber-blue/10 border border-cyber-blue/30 rounded-lg">
+          <p className="text-cyber-light text-sm text-center">
+            Don't have an access key yet?{" "}
+            <button
+              onClick={() => navigate('/get-started')}
+              className="text-cyber-blue hover:text-cyber-blue/80 underline font-medium"
+            >
+              Generate one here
+            </button>
+          </p>
+        </div>
+        
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block mb-2 text-sm text-cyber-light">Access Key</label>
