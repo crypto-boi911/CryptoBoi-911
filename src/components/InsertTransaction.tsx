@@ -15,9 +15,9 @@ export default function InsertTransaction() {
     });
 
     if (error) {
-      console.error(error);
-      setStatus('❌ Error inserting transaction');
-    } else {
+  console.error(error);
+  setStatus(`❌ ${error.message}`);
+} else {
       setStatus('✅ Transaction inserted!');
     }
   };
