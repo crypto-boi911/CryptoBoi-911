@@ -91,7 +91,7 @@ const AdminDashboard = () => {
       title: "Logged Out",
       description: "You have been logged out of the admin dashboard",
     });
-    navigate('/admin/login');
+    navigate('/');
   };
 
   const dashboardItems = [

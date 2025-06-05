@@ -79,7 +79,7 @@ const Dashboard = () => {
       title: "Logged Out",
       description: "You have been logged out successfully",
     });
-    navigate('/login');
+    navigate('/');
   };
 
   const sidebarItems = [
