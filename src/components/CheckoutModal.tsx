@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,10 +22,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const { toast } = useToast();
 
-  // Add debugging
-  useEffect(() => {
-    console.log('CheckoutModal isOpen changed to:', isOpen);
-  }, [isOpen]);
+  console.log('CheckoutModal render - isOpen:', isOpen, 'total:', total);
 
   const cryptoOptions = [
     { 
@@ -164,18 +162,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, total })
     return (total / crypto.rate).toFixed(8);
   };
 
-  const handleModalClose = (open: boolean) => {
-    console.log('Dialog onOpenChange called with:', open);
-    if (!open) {
-      onClose();
-    }
-  };
-
-  console.log('CheckoutModal rendering with isOpen:', isOpen, 'total:', total);
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="max-w-2xl bg-cyber-gray/95 border-cyber-blue/20 text-cyber-light">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      console.log('Dialog onOpenChange called with:', open);
+      if (!open) {
+        onClose();
+      }
+    }}>
+      <DialogContent className="max-w-2xl bg-cyber-gray/95 border-cyber-blue/20 text-cyber-light max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-cyber-light font-tech text-xl">
             Cryptocurrency Payment
