@@ -23,7 +23,7 @@ const tiers: TierInfo[] = [
   {
     level: 1,
     name: "Beginner",
-    icon: <Star className="h-4 w-4" />,
+    icon: <Star className="h-3 w-3 sm:h-4 sm:w-4" />,
     color: "text-yellow-400",
     minOrders: 5,
     maxOrders: 14,
@@ -32,7 +32,7 @@ const tiers: TierInfo[] = [
   {
     level: 2,
     name: "Amateur", 
-    icon: <Trophy className="h-4 w-4" />,
+    icon: <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />,
     color: "text-blue-400",
     minOrders: 15,
     maxOrders: 29,
@@ -41,7 +41,7 @@ const tiers: TierInfo[] = [
   {
     level: 3,
     name: "Pro",
-    icon: <Crown className="h-4 w-4" />,
+    icon: <Crown className="h-3 w-3 sm:h-4 sm:w-4" />,
     color: "text-purple-400",
     minOrders: 30,
     maxOrders: 50,
@@ -84,21 +84,21 @@ const UserTierSystem: React.FC<UserTierSystemProps> = ({ compact = false }) => {
   if (compact) {
     return (
       <Card className="bg-cyber-gray/50 border-cyber-blue/20">
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <div className={currentTier.color}>
                 {currentTier.icon}
               </div>
-              <span className="text-cyber-light font-tech text-sm">
+              <span className="text-cyber-light font-tech text-xs sm:text-sm">
                 Tier {currentTier.level}: {currentTier.name}
               </span>
             </div>
-            <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30">
+            <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30 text-xs">
               {completedOrders} orders
             </Badge>
           </div>
-          <Progress value={getProgressPercentage()} className="h-2 mb-2" />
+          <Progress value={getProgressPercentage()} className="h-1.5 sm:h-2 mb-2" />
           {nextTier && (
             <p className="text-cyber-light/60 text-xs">
               {ordersUntilNext} more orders to {nextTier.name}
@@ -111,47 +111,47 @@ const UserTierSystem: React.FC<UserTierSystemProps> = ({ compact = false }) => {
 
   return (
     <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-      <CardHeader>
-        <CardTitle className="text-cyber-light font-tech flex items-center gap-2">
+      <CardHeader className="responsive-card">
+        <CardTitle className="text-cyber-light font-tech flex items-center gap-2 text-base sm:text-lg">
           <div className={currentTier.color}>
             {currentTier.icon}
           </div>
           Tier System - {currentTier.name}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="responsive-card space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-cyber-light">Completed Orders:</span>
-          <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30">
+          <span className="text-cyber-light text-sm sm:text-base">Completed Orders:</span>
+          <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30 text-xs sm:text-sm">
             {completedOrders}
           </Badge>
         </div>
 
         {nextTier && (
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-xs sm:text-sm">
               <span className="text-cyber-light/60">Progress to {nextTier.name}</span>
               <span className="text-cyber-light/60">{ordersUntilNext} orders left</span>
             </div>
-            <Progress value={getProgressPercentage()} className="h-3" />
+            <Progress value={getProgressPercentage()} className="h-2 sm:h-3" />
           </div>
         )}
 
         <div className="space-y-2">
-          <h4 className="text-cyber-light font-tech text-sm">Current Benefits:</h4>
+          <h4 className="text-cyber-light font-tech text-xs sm:text-sm">Current Benefits:</h4>
           <div className="space-y-1">
             {currentTier.discounts.bankLogs && (
-              <div className="text-green-400 text-sm">
+              <div className="text-green-400 text-xs sm:text-sm">
                 • {currentTier.discounts.bankLogs}% off Bank Logs
               </div>
             )}
             {currentTier.discounts.paypalLogs && (
-              <div className="text-green-400 text-sm">
+              <div className="text-green-400 text-xs sm:text-sm">
                 • {currentTier.discounts.paypalLogs}% off PayPal Logs
               </div>
             )}
             {currentTier.discounts.cashappLogs && (
-              <div className="text-green-400 text-sm">
+              <div className="text-green-400 text-xs sm:text-sm">
                 • {currentTier.discounts.cashappLogs}% off CashApp Logs
               </div>
             )}
@@ -159,27 +159,29 @@ const UserTierSystem: React.FC<UserTierSystemProps> = ({ compact = false }) => {
         </div>
 
         {/* All Tiers Overview */}
-        <div className="space-y-2 pt-4 border-t border-cyber-blue/20">
-          <h4 className="text-cyber-light font-tech text-sm">All Tiers:</h4>
-          {tiers.map((tier) => (
-            <div key={tier.level} className={`flex items-center justify-between p-2 rounded ${
-              tier.level === currentTier.level ? 'bg-cyber-blue/10 border border-cyber-blue/30' : 'bg-cyber-gray/20'
-            }`}>
-              <div className="flex items-center gap-2">
-                <div className={tier.color}>
-                  {tier.icon}
+        <div className="space-y-2 pt-3 sm:pt-4 border-t border-cyber-blue/20">
+          <h4 className="text-cyber-light font-tech text-xs sm:text-sm">All Tiers:</h4>
+          <div className="space-y-2">
+            {tiers.map((tier) => (
+              <div key={tier.level} className={`flex items-center justify-between p-2 rounded text-xs sm:text-sm ${
+                tier.level === currentTier.level ? 'bg-cyber-blue/10 border border-cyber-blue/30' : 'bg-cyber-gray/20'
+              }`}>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <div className={tier.color}>
+                    {tier.icon}
+                  </div>
+                  <span className="text-cyber-light">
+                    {tier.name} ({tier.minOrders}-{tier.maxOrders} orders)
+                  </span>
                 </div>
-                <span className="text-cyber-light text-sm">
-                  {tier.name} ({tier.minOrders}-{tier.maxOrders} orders)
-                </span>
+                <div className="text-xs text-cyber-light/60 text-right">
+                  {Object.entries(tier.discounts).map(([key, value]) => (
+                    <div key={key}>{value}% off {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>
+                  ))}
+                </div>
               </div>
-              <div className="text-xs text-cyber-light/60">
-                {Object.entries(tier.discounts).map(([key, value]) => (
-                  <div key={key}>{value}% off {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -70,26 +70,27 @@ const ProductsTable = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-cyber-gradient pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-cyber-gradient pt-16 sm:pt-20">
+      <div className="container-responsive py-4 sm:py-6 lg:py-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
+          className="spacing-responsive"
         >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-cyber font-bold text-cyber-blue mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-cyber font-bold text-cyber-blue mb-2 sm:mb-4">
                 Premium Products Access
               </h1>
-              <p className="text-xl text-cyber-light/70">
+              <p className="text-base sm:text-lg md:text-xl text-cyber-light/70">
                 Comprehensive overview of all available cybersecurity products
               </p>
             </div>
             <Button
               onClick={() => navigate('/')}
               variant="outline"
-              className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
+              className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10 w-full sm:w-auto"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
@@ -97,21 +98,21 @@ const ProductsTable = () => {
           </div>
 
           <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-            <CardHeader>
-              <CardTitle className="text-2xl font-cyber text-cyber-light">
+            <CardHeader className="responsive-card">
+              <CardTitle className="text-xl sm:text-2xl font-cyber text-cyber-light">
                 All Products ({products.length} items)
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
+            <CardContent className="responsive-card">
+              <div className="table-responsive">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-cyber-blue/20">
-                      <TableHead className="text-cyber-light font-tech">Product</TableHead>
-                      <TableHead className="text-cyber-light font-tech">Category</TableHead>
-                      <TableHead className="text-cyber-light font-tech">Description</TableHead>
-                      <TableHead className="text-cyber-light font-tech">Key Features</TableHead>
-                      <TableHead className="text-cyber-light font-tech">Price</TableHead>
+                      <TableHead className="text-cyber-light font-tech text-sm sm:text-base">Product</TableHead>
+                      <TableHead className="text-cyber-light font-tech text-sm sm:text-base hidden sm:table-cell">Category</TableHead>
+                      <TableHead className="text-cyber-light font-tech text-sm sm:text-base hidden md:table-cell">Description</TableHead>
+                      <TableHead className="text-cyber-light font-tech text-sm sm:text-base hidden lg:table-cell">Key Features</TableHead>
+                      <TableHead className="text-cyber-light font-tech text-sm sm:text-base">Price</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -121,28 +122,33 @@ const ProductsTable = () => {
                         className="border-cyber-blue/10 hover:bg-cyber-blue/5 transition-colors"
                       >
                         <TableCell className="font-medium">
-                          <div className="flex items-center space-x-3">
-                            <product.icon className="h-8 w-8 text-cyber-blue flex-shrink-0" />
-                            <span className="text-cyber-light font-tech">{product.name}</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <product.icon className="h-6 w-6 sm:h-8 sm:w-8 text-cyber-blue flex-shrink-0" />
+                            <div>
+                              <span className="text-cyber-light font-tech text-sm sm:text-base block">{product.name}</span>
+                              <span className="text-cyber-blue text-xs sm:text-sm font-tech sm:hidden">
+                                {product.category}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <span className="text-cyber-blue text-sm font-tech">
+                        <TableCell className="hidden sm:table-cell">
+                          <span className="text-cyber-blue text-xs sm:text-sm font-tech">
                             {product.category}
                           </span>
                         </TableCell>
-                        <TableCell>
-                          <p className="text-cyber-light/70 text-sm max-w-xs">
+                        <TableCell className="hidden md:table-cell">
+                          <p className="text-cyber-light/70 text-xs sm:text-sm max-w-xs">
                             {product.description}
                           </p>
                         </TableCell>
-                        <TableCell>
-                          <p className="text-cyber-light/60 text-sm max-w-md">
+                        <TableCell className="hidden lg:table-cell">
+                          <p className="text-cyber-light/60 text-xs sm:text-sm max-w-md">
                             {product.features}
                           </p>
                         </TableCell>
                         <TableCell>
-                          <span className="text-cyber-blue font-cyber font-bold">
+                          <span className="text-cyber-blue font-cyber font-bold text-sm sm:text-base">
                             {product.price}
                           </span>
                         </TableCell>
