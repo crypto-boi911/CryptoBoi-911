@@ -15,26 +15,45 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       const isAdminAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
       const adminToken = localStorage.getItem('adminToken');
       const expectedToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
+      const adminSession = localStorage.getItem('adminSession');
       
       console.log('AdminProtectedRoute check:', {
         isAdminAuthenticated,
         adminToken,
         expectedToken,
-        tokenMatch: adminToken === expectedToken
+        tokenMatch: adminToken === expectedToken,
+        hasSession: !!adminSession
       });
       
       const authorized = isAdminAuthenticated && adminToken === expectedToken;
+      
+      // Update admin session with current timestamp
+      if (authorized) {
+        localStorage.setItem('adminSession', JSON.stringify({
+          loginTime: new Date().toISOString(),
+          lastActivity: new Date().toISOString()
+        }));
+      }
+      
       setIsAuthorized(authorized);
       setIsChecking(false);
 
       if (!authorized) {
         console.log('Admin access denied, will redirect to login');
+        // Clear any partial admin data
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('isAdminAuthenticated');
+        localStorage.removeItem('adminSession');
       } else {
         console.log('Admin access granted');
       }
     };
 
     checkAuth();
+
+    // Check auth state every 30 seconds for security
+    const interval = setInterval(checkAuth, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (isChecking) {

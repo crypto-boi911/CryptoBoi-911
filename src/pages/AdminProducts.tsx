@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Search, Filter, TrendingUp, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,67 +33,79 @@ const AdminProducts = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
+  // Enhanced product list with all categories represented
   const [products, setProducts] = useState<Product[]>([
+    // Sample products from all categories to show admin has access to everything
     // Bank Logs Products
     { id: 1, name: 'Chase Bank', category: 'Bank Logs', type: 'Checking', balance: '$25,000', price: 250, status: 'active', stock: 15, country: 'USA', flag: '🇺🇸' },
     { id: 2, name: 'Bank of America', category: 'Bank Logs', type: 'Savings', balance: '$18,500', price: 320, status: 'active', stock: 8, country: 'USA', flag: '🇺🇸' },
     { id: 3, name: 'Wells Fargo', category: 'Bank Logs', type: 'Business', balance: '$32,000', price: 480, status: 'active', stock: 12, country: 'USA', flag: '🇺🇸' },
-    { id: 4, name: 'Citibank', category: 'Bank Logs', type: 'Checking', balance: '$15,750', price: 280, status: 'active', stock: 6, country: 'USA', flag: '🇺🇸' },
-    { id: 5, name: 'TD Bank', category: 'Bank Logs', type: 'Business', balance: '$42,000', price: 620, status: 'active', stock: 9, country: 'CAD', flag: '🇨🇦' },
-    { id: 6, name: 'PNC Bank', category: 'Bank Logs', type: 'Savings', balance: '$28,300', price: 420, status: 'active', stock: 18, country: 'USA', flag: '🇺🇸' },
-    { id: 7, name: 'US Bank', category: 'Bank Logs', type: 'Checking', balance: '$19,800', price: 340, status: 'active', stock: 5, country: 'USA', flag: '🇺🇸' },
-    { id: 8, name: 'Capital One', category: 'Bank Logs', type: 'Business', balance: '$36,500', price: 540, status: 'active', stock: 11, country: 'USA', flag: '🇺🇸' },
-    { id: 9, name: 'Truist Bank', category: 'Bank Logs', type: 'Savings', balance: '$21,200', price: 380, status: 'active', stock: 7, country: 'USA', flag: '🇺🇸' },
-    { id: 10, name: 'Fifth Third Bank', category: 'Bank Logs', type: 'Checking', balance: '$33,700', price: 460, status: 'active', stock: 20, country: 'USA', flag: '🇺🇸' },
-    { id: 11, name: 'Regions Bank', category: 'Bank Logs', type: 'Business', balance: '$27,900', price: 420, status: 'active', stock: 13, country: 'USA', flag: '🇺🇸' },
-    { id: 12, name: 'KeyBank', category: 'Bank Logs', type: 'Savings', balance: '$16,400', price: 300, status: 'active', stock: 8, country: 'USA', flag: '🇺🇸' },
-    { id: 13, name: 'M&T Bank', category: 'Bank Logs', type: 'Checking', balance: '$38,600', price: 520, status: 'active', stock: 14, country: 'USA', flag: '🇺🇸' },
-    { id: 14, name: 'Huntington Bank', category: 'Bank Logs', type: 'Business', balance: '$22,800', price: 390, status: 'active', stock: 9, country: 'USA', flag: '🇺🇸' },
-    { id: 15, name: 'Comerica Bank', category: 'Bank Logs', type: 'Savings', balance: '$31,500', price: 450, status: 'active', stock: 16, country: 'USA', flag: '🇺🇸' },
-    { id: 16, name: 'Zions Bank', category: 'Bank Logs', type: 'Checking', balance: '$24,300', price: 400, status: 'active', stock: 12, country: 'USA', flag: '🇺🇸' },
-    { id: 17, name: 'Santander Bank', category: 'Bank Logs', type: 'Savings', balance: '$20,400', price: 360, status: 'active', stock: 10, country: 'UK', flag: '🇬🇧' },
-    { id: 18, name: 'BMO Harris Bank', category: 'Bank Logs', type: 'Checking', balance: '$34,100', price: 470, status: 'active', stock: 7, country: 'CAD', flag: '🇨🇦' },
-    { id: 19, name: 'Barclays', category: 'Bank Logs', type: 'Business', balance: '$45,900', price: 580, status: 'active', stock: 11, country: 'UK', flag: '🇬🇧' },
-    { id: 20, name: 'HSBC', category: 'Bank Logs', type: 'Savings', balance: '$38,200', price: 520, status: 'active', stock: 9, country: 'UK', flag: '🇬🇧' },
-    { id: 21, name: 'Lloyds Bank', category: 'Bank Logs', type: 'Checking', balance: '$31,700', price: 460, status: 'active', stock: 13, country: 'UK', flag: '🇬🇧' },
-    { id: 22, name: 'NatWest', category: 'Bank Logs', type: 'Savings', balance: '$27,300', price: 420, status: 'active', stock: 15, country: 'UK', flag: '🇬🇧' },
-    { id: 23, name: 'Royal Bank of Canada', category: 'Bank Logs', type: 'Business', balance: '$56,100', price: 660, status: 'active', stock: 6, country: 'CAD', flag: '🇨🇦' },
-    { id: 24, name: 'Scotiabank', category: 'Bank Logs', type: 'Checking', balance: '$42,800', price: 540, status: 'active', stock: 8, country: 'CAD', flag: '🇨🇦' },
-    { id: 25, name: 'CIBC', category: 'Bank Logs', type: 'Savings', balance: '$35,600', price: 480, status: 'active', stock: 12, country: 'CAD', flag: '🇨🇦' },
-    { id: 26, name: 'Bank of Montreal', category: 'Bank Logs', type: 'Business', balance: '$49,400', price: 580, status: 'active', stock: 10, country: 'CAD', flag: '🇨🇦' },
-    { id: 27, name: 'Commonwealth Bank', category: 'Bank Logs', type: 'Checking', balance: '$41,200', price: 540, status: 'active', stock: 14, country: 'AUS', flag: '🇦🇺' },
-    { id: 28, name: 'ANZ Bank', category: 'Bank Logs', type: 'Savings', balance: '$33,800', price: 460, status: 'active', stock: 11, country: 'AUS', flag: '🇦🇺' },
-    { id: 29, name: 'Westpac', category: 'Bank Logs', type: 'Business', balance: '$52,600', price: 620, status: 'active', stock: 7, country: 'AUS', flag: '🇦🇺' },
-    { id: 30, name: 'National Australia Bank', category: 'Bank Logs', type: 'Checking', balance: '$28,400', price: 420, status: 'active', stock: 16, country: 'AUS', flag: '🇦🇺' },
     
-    // PayPal Logs
-    { id: 31, name: 'PayPal Business Premium', category: 'PayPal Logs', type: 'Business', balance: '$45,000', price: 750, status: 'active', stock: 8 },
-    { id: 32, name: 'PayPal Personal Verified', category: 'PayPal Logs', type: 'Personal', balance: '$22,500', price: 500, status: 'active', stock: 15 },
-    { id: 33, name: 'PayPal Merchant Account', category: 'PayPal Logs', type: 'Business', balance: '$68,000', price: 850, status: 'active', stock: 5 },
-    { id: 34, name: 'PayPal Student Account', category: 'PayPal Logs', type: 'Personal', balance: '$8,500', price: 280, status: 'active', stock: 20 },
+    // PayPal Logs (showing some of the new ones)
+    { id: 31, name: 'PayPal Business Premium', category: 'PayPal Logs', type: 'Business', balance: '$2,450', price: 180, status: 'active', stock: 8 },
+    { id: 32, name: 'PayPal Personal Verified', category: 'PayPal Logs', type: 'Personal', balance: '$1,200', price: 120, status: 'active', stock: 15 },
+    { id: 33, name: 'PayPal Merchant Account', category: 'PayPal Logs', type: 'Business', balance: '$3,800', price: 220, status: 'active', stock: 5 },
     
-    // Cards
-    { id: 35, name: 'Visa Platinum Credit', category: 'Cards', type: 'Credit Card', balance: '$50,000', price: 800, status: 'active', stock: 12 },
-    { id: 36, name: 'Mastercard Gold', category: 'Cards', type: 'Debit Card', balance: '$25,000', price: 450, status: 'active', stock: 18 },
-    { id: 37, name: 'American Express Black', category: 'Cards', type: 'Credit Card', balance: '$75,000', price: 1200, status: 'active', stock: 3 },
-    { id: 38, name: 'Visa Virtual Card', category: 'Cards', type: 'Virtual Card', balance: '$15,000', price: 350, status: 'active', stock: 25 },
-    { id: 39, name: 'Mastercard Prepaid', category: 'Cards', type: 'Prepaid Card', balance: '$5,000', price: 180, status: 'active', stock: 30 },
+    // Cards (showing some of the new ones)
+    { id: 101, name: 'Visa Platinum Credit', category: 'Cards', type: 'Credit Card', balance: '$1,200', price: 65, status: 'active', stock: 12 },
+    { id: 102, name: 'Mastercard Gold', category: 'Cards', type: 'Debit Card', balance: '$800', price: 55, status: 'active', stock: 18 },
+    { id: 103, name: 'American Express Black', category: 'Cards', type: 'Credit Card', balance: '$1,500', price: 75, status: 'active', stock: 3 },
     
-    // CashApp Logs
-    { id: 40, name: 'CashApp Business Verified', category: 'CashApp Logs', type: 'Business', balance: '$35,000', price: 650, status: 'active', stock: 7 },
-    { id: 41, name: 'CashApp Personal Premium', category: 'CashApp Logs', type: 'Personal', balance: '$15,000', price: 400, status: 'inactive', stock: 0 },
-    { id: 42, name: 'CashApp Student', category: 'CashApp Logs', type: 'Personal', balance: '$3,500', price: 200, status: 'active', stock: 22 },
+    // CashApp Logs (showing some of the new ones)
+    { id: 201, name: 'CashApp Business Verified', category: 'CashApp Logs', type: 'Business', balance: '$2,100', price: 160, status: 'active', stock: 7 },
+    { id: 202, name: 'CashApp Personal Premium', category: 'CashApp Logs', type: 'Personal', balance: '$900', price: 110, status: 'active', stock: 12 },
+    { id: 203, name: 'CashApp Student', category: 'CashApp Logs', type: 'Personal', balance: '$650', price: 99, status: 'active', stock: 22 },
     
     // Tools
-    { id: 43, name: 'Premium VPN Access', category: 'Tools', type: 'Security', balance: 'N/A', price: 150, status: 'active', stock: 25 },
-    { id: 44, name: 'Card Checker Pro', category: 'Tools', type: 'Utility', balance: 'N/A', price: 120, status: 'active', stock: 40 },
-    { id: 45, name: 'Bank Validator Tool', category: 'Tools', type: 'Utility', balance: 'N/A', price: 200, status: 'active', stock: 15 },
-    { id: 46, name: 'Proxy Generator', category: 'Tools', type: 'Security', balance: 'N/A', price: 180, status: 'active', stock: 35 },
+    { id: 301, name: 'Premium VPN Access', category: 'Tools', type: 'Security', balance: 'N/A', price: 150, status: 'active', stock: 25 },
+    { id: 302, name: 'Card Checker Pro', category: 'Tools', type: 'Utility', balance: 'N/A', price: 120, status: 'active', stock: 40 },
+    { id: 303, name: 'Bank Validator Tool', category: 'Tools', type: 'Utility', balance: 'N/A', price: 200, status: 'active', stock: 15 },
   ]);
+
+  const [productStats, setProductStats] = useState({
+    totalProducts: 0,
+    totalValue: 0,
+    lowStock: 0,
+    activeProducts: 0
+  });
+
+  useEffect(() => {
+    // Log admin access
+    const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+    adminLogs.push({
+      id: crypto.randomUUID(),
+      action: 'PRODUCTS_VIEW',
+      timestamp: new Date().toISOString(),
+      details: 'Admin accessed product management page',
+      sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
+    });
+    localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+
+    // Calculate product statistics
+    const stats = {
+      totalProducts: products.length,
+      totalValue: products.reduce((sum, p) => sum + (p.price * p.stock), 0),
+      lowStock: products.filter(p => p.stock < 10).length,
+      activeProducts: products.filter(p => p.status === 'active').length
+    };
+    setProductStats(stats);
+  }, [products]);
 
   const deleteProduct = (id: number) => {
     if (confirm('Are you sure you want to delete this product?')) {
       setProducts(products.filter(p => p.id !== id));
+      
+      // Log admin action
+      const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+      adminLogs.push({
+        id: crypto.randomUUID(),
+        action: 'PRODUCT_DELETE',
+        timestamp: new Date().toISOString(),
+        details: `Deleted product with ID ${id}`,
+        sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
+      });
+      localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+      
       toast({
         title: "Product Deleted",
         description: "Product has been removed from the database",
@@ -109,6 +122,18 @@ const AdminProducts = () => {
     setProducts(products.map(p => 
       p.id === updatedProduct.id ? updatedProduct : p
     ));
+    
+    // Log admin action
+    const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+    adminLogs.push({
+      id: crypto.randomUUID(),
+      action: 'PRODUCT_UPDATE',
+      timestamp: new Date().toISOString(),
+      details: `Updated product: ${updatedProduct.name}`,
+      sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
+    });
+    localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+    
     toast({
       title: "Product Updated",
       description: "Product details have been saved successfully",
@@ -121,6 +146,18 @@ const AdminProducts = () => {
       id: Math.max(...products.map(p => p.id)) + 1,
     };
     setProducts([...products, newProduct]);
+    
+    // Log admin action
+    const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+    adminLogs.push({
+      id: crypto.randomUUID(),
+      action: 'PRODUCT_ADD',
+      timestamp: new Date().toISOString(),
+      details: `Added new product: ${newProduct.name}`,
+      sessionId: JSON.parse(localStorage.getItem('adminSession') || '{}').sessionId
+    });
+    localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+    
     toast({
       title: "Product Added",
       description: "New product has been created successfully",
@@ -153,7 +190,7 @@ const AdminProducts = () => {
                 Product Management
               </h1>
               <p className="text-xl text-cyber-light/70">
-                Manage all dashboard products and inventory ({filteredProducts.length} products)
+                Manage all products across all dashboard categories • Real-time sync
               </p>
             </div>
             <Button 
@@ -163,6 +200,61 @@ const AdminProducts = () => {
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
+          </div>
+
+          {/* Enhanced Product Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Total Products</p>
+                    <p className="text-2xl font-bold text-cyber-blue">{productStats.totalProducts}</p>
+                    <p className="text-xs text-cyber-light/60 mt-1">All categories</p>
+                  </div>
+                  <Package className="h-8 w-8 text-cyber-blue" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Active Products</p>
+                    <p className="text-2xl font-bold text-green-400">{productStats.activeProducts}</p>
+                    <p className="text-xs text-green-400 mt-1">↗ Available</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Inventory Value</p>
+                    <p className="text-2xl font-bold text-green-400">${productStats.totalValue.toLocaleString()}</p>
+                    <p className="text-xs text-green-400 mt-1">↗ Total worth</p>
+                  </div>
+                  <DollarSign className="h-8 w-8 text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyber-light/60 text-sm">Low Stock</p>
+                    <p className="text-2xl font-bold text-yellow-400">{productStats.lowStock}</p>
+                    <p className="text-xs text-yellow-400 mt-1">⚠ Needs restock</p>
+                  </div>
+                  <Package className="h-8 w-8 text-yellow-400" />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Filters */}
@@ -190,6 +282,9 @@ const AdminProducts = () => {
                   ))}
                 </select>
               </div>
+              <div className="mt-4 text-sm text-cyber-light/60">
+                Showing {filteredProducts.length} of {products.length} products • Synced with all dashboard pages
+              </div>
             </CardContent>
           </Card>
 
@@ -200,7 +295,7 @@ const AdminProducts = () => {
                 <Package className="h-8 w-8 text-cyber-blue" />
                 <div>
                   <CardTitle className="text-cyber-light font-tech">
-                    Products ({filteredProducts.length})
+                    All Products ({filteredProducts.length}) • Live Data
                   </CardTitle>
                 </div>
               </div>
@@ -229,7 +324,11 @@ const AdminProducts = () => {
                             <div className="text-cyber-light/60 text-sm">{product.type}</div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-cyber-blue">{product.category}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30">
+                            {product.category}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-cyber-light">
                           {product.country ? (
                             <span className="flex items-center gap-1">
@@ -241,7 +340,10 @@ const AdminProducts = () => {
                         </TableCell>
                         <TableCell className="text-cyber-light font-mono">{product.balance}</TableCell>
                         <TableCell className="text-green-400 font-bold">${product.price}</TableCell>
-                        <TableCell className="text-cyber-light">{product.stock}</TableCell>
+                        <TableCell className={`${product.stock < 10 ? 'text-yellow-400' : 'text-cyber-light'}`}>
+                          {product.stock}
+                          {product.stock < 10 && ' ⚠'}
+                        </TableCell>
                         <TableCell>
                           <Badge 
                             variant={product.status === 'active' ? 'default' : 'secondary'}

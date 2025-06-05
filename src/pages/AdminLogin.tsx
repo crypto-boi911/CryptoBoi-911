@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, UserCheck, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,17 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if admin is already logged in
+    const isAdminAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
+    const adminToken = localStorage.getItem('adminToken');
+    const expectedToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
+    
+    if (isAdminAuthenticated && adminToken === expectedToken) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,13 +53,33 @@ const AdminLogin = () => {
       if (password === adminPassword) {
         console.log('Password match! Setting authentication...');
         
-        // Set both items in localStorage
+        const sessionData = {
+          loginTime: new Date().toISOString(),
+          lastActivity: new Date().toISOString(),
+          permissions: ['read', 'write', 'delete', 'manage_users', 'manage_products'],
+          sessionId: crypto.randomUUID()
+        };
+        
+        // Set authentication data
         localStorage.setItem('adminToken', adminToken);
         localStorage.setItem('isAdminAuthenticated', 'true');
+        localStorage.setItem('adminSession', JSON.stringify(sessionData));
+        
+        // Log admin activity
+        const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+        adminLogs.push({
+          id: crypto.randomUUID(),
+          action: 'LOGIN',
+          timestamp: new Date().toISOString(),
+          details: 'Admin logged in successfully',
+          sessionId: sessionData.sessionId
+        });
+        localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
         
         console.log('localStorage after setting:', {
           adminToken: localStorage.getItem('adminToken'),
-          isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated')
+          isAdminAuthenticated: localStorage.getItem('isAdminAuthenticated'),
+          session: localStorage.getItem('adminSession')
         });
 
         toast({
@@ -62,6 +93,18 @@ const AdminLogin = () => {
         }, 100);
       } else {
         console.log('Password mismatch!');
+        
+        // Log failed attempt
+        const adminLogs = JSON.parse(localStorage.getItem('adminActivityLogs') || '[]');
+        adminLogs.push({
+          id: crypto.randomUUID(),
+          action: 'LOGIN_FAILED',
+          timestamp: new Date().toISOString(),
+          details: 'Failed login attempt',
+          ip: 'Unknown'
+        });
+        localStorage.setItem('adminActivityLogs', JSON.stringify(adminLogs));
+        
         toast({
           title: "Access Denied",
           description: "Invalid admin password",
