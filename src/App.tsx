@@ -1,4 +1,5 @@
 
+
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import { useEffect } from "react";
 
 // Pages
 import Home from "./pages/Home";
@@ -60,6 +62,20 @@ const AuthRedirect = () => {
 const EmailConfirmed = () => {
   const { user, profile, isLoading } = useAuth();
   
+  useEffect(() => {
+    if (!isLoading && user) {
+      const timer = setTimeout(() => {
+        if (profile?.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [user, profile, isLoading]);
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
@@ -81,14 +97,6 @@ const EmailConfirmed = () => {
         <p className="text-cyber-light">Redirecting you to your dashboard...</p>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyber-blue mx-auto"></div>
       </div>
-      {/* Auto redirect after showing success message */}
-      {setTimeout(() => {
-        if (profile?.role === 'admin') {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/dashboard';
-        }
-      }, 2000)}
     </div>
   );
 };
@@ -201,3 +209,4 @@ const App = () => (
 );
 
 export default App;
+
