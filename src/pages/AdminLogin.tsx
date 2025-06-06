@@ -6,17 +6,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
+  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("Admin login temporarily disabled for rebuild");
+    setIsLoading(true);
+
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid admin credentials",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Redirect will happen automatically through auth context
+      navigate('/admin');
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoBack = () => {
@@ -79,23 +106,14 @@ const AdminLogin = () => {
                 disabled={isLoading}
                 required
               />
-              <p className="text-xs text-cyber-light/60">
-                Temporarily disabled for rebuild
-              </p>
             </div>
-
-            {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded">
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            )}
 
             <Button
               type="submit"
               disabled={isLoading}
               className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
             >
-              Access Admin Dashboard
+              {isLoading ? "Signing In..." : "Access Admin Dashboard"}
             </Button>
           </form>
 

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,6 +26,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminTickets from "./pages/AdminTickets";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +66,7 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               
               {/* Protected user routes */}
               <Route path="/dashboard" element={
