@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CreditCard, Check } from 'lucide-react';
+import { CreditCard, Check, Bitcoin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CryptoPayment from '@/components/CryptoPayment';
 
 interface CartItem {
   id: string;
@@ -24,6 +25,9 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'demo'>('demo');
+  const [showCryptoPayment, setShowCryptoPayment] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -99,20 +103,35 @@ const Checkout = () => {
 
       if (orderError) throw orderError;
 
-      // Clear cart
-      const { error: clearCartError } = await supabase
-        .from('cart')
-        .delete()
-        .eq('user_id', user.id);
+      setCurrentOrderId(order.id);
 
-      if (clearCartError) throw clearCartError;
+      if (paymentMethod === 'crypto') {
+        // Show crypto payment interface
+        setShowCryptoPayment(true);
+      } else {
+        // Demo payment - mark as paid immediately
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ status: 'paid' })
+          .eq('id', order.id);
 
-      toast({
-        title: "Order Placed Successfully!",
-        description: `Order #${order.id.slice(0, 8)} has been created`,
-      });
+        if (updateError) throw updateError;
 
-      navigate('/dashboard/orders');
+        // Clear cart
+        const { error: clearCartError } = await supabase
+          .from('cart')
+          .delete()
+          .eq('user_id', user.id);
+
+        if (clearCartError) throw clearCartError;
+
+        toast({
+          title: "Order Placed Successfully!",
+          description: `Order #${order.id.slice(0, 8)} has been created`,
+        });
+
+        navigate('/dashboard/orders');
+      }
     } catch (error: any) {
       toast({
         title: "Error Processing Order",
@@ -124,11 +143,52 @@ const Checkout = () => {
     }
   };
 
+  const handleCryptoPaymentConfirmed = async () => {
+    // Clear cart after successful payment
+    try {
+      const { error: clearCartError } = await supabase
+        .from('cart')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (clearCartError) throw clearCartError;
+
+      toast({
+        title: "Payment Confirmed!",
+        description: "Your order has been successfully processed",
+      });
+
+      navigate('/dashboard/orders');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancelCryptoPayment = () => {
+    setShowCryptoPayment(false);
+    setCurrentOrderId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cyber-gradient pt-20 flex items-center justify-center">
         <div className="text-cyber-blue text-xl">Loading checkout...</div>
       </div>
+    );
+  }
+
+  if (showCryptoPayment && currentOrderId) {
+    return (
+      <CryptoPayment
+        orderId={currentOrderId}
+        amount={calculateTotal()}
+        onPaymentConfirmed={handleCryptoPaymentConfirmed}
+        onCancel={handleCancelCryptoPayment}
+      />
     );
   }
 
@@ -145,7 +205,7 @@ const Checkout = () => {
               Checkout
             </h1>
             <p className="text-xl text-cyber-light/70">
-              Review your order and complete your purchase
+              Review your order and select payment method
             </p>
           </div>
 
@@ -187,19 +247,54 @@ const Checkout = () => {
             <Card className="bg-cyber-darker/60 border-cyber-blue/30">
               <CardHeader>
                 <CardTitle className="text-cyber-light font-tech">
-                  Payment Information
+                  Payment Method
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8">
-                  <CreditCard className="h-16 w-16 text-cyber-blue/50 mx-auto mb-4" />
-                  <p className="text-cyber-light/70 mb-4">
-                    For demo purposes, this will create a pending order
-                  </p>
-                  <p className="text-cyber-light/60 text-sm">
-                    In a real application, you would integrate with a payment processor
-                  </p>
+                {/* Payment Method Selection */}
+                <div className="space-y-4">
+                  <div 
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === 'crypto' 
+                        ? 'border-cyber-blue bg-cyber-blue/20' 
+                        : 'border-cyber-blue/30 hover:border-cyber-blue/50'
+                    }`}
+                    onClick={() => setPaymentMethod('crypto')}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bitcoin className="h-6 w-6 text-orange-400" />
+                      <div>
+                        <h3 className="text-cyber-light font-medium">Cryptocurrency Payment</h3>
+                        <p className="text-cyber-light/60 text-sm">Pay with USDT, BTC, ETH, and more</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div 
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === 'demo' 
+                        ? 'border-cyber-blue bg-cyber-blue/20' 
+                        : 'border-cyber-blue/30 hover:border-cyber-blue/50'
+                    }`}
+                    onClick={() => setPaymentMethod('demo')}
+                  >
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-6 w-6 text-cyber-blue" />
+                      <div>
+                        <h3 className="text-cyber-light font-medium">Demo Payment</h3>
+                        <p className="text-cyber-light/60 text-sm">For demonstration purposes</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {paymentMethod === 'demo' && (
+                  <div className="text-center py-4">
+                    <p className="text-cyber-light/70 mb-4">
+                      For demo purposes, this will create a completed order
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   onClick={processOrder}
@@ -212,7 +307,10 @@ const Checkout = () => {
                   ) : (
                     <>
                       <Check className="h-5 w-5 mr-2" />
-                      Place Order - ${calculateTotal().toFixed(2)}
+                      {paymentMethod === 'crypto' 
+                        ? `Pay with Crypto - $${calculateTotal().toFixed(2)}`
+                        : `Place Order - $${calculateTotal().toFixed(2)}`
+                      }
                     </>
                   )}
                 </Button>
