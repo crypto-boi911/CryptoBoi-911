@@ -8,6 +8,7 @@ interface UserProfile {
   id: string;
   username: string;
   role: string;
+  tier: string;
   created_at: string;
   updated_at: string;
 }
