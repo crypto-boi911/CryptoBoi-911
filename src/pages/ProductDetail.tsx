@@ -19,6 +19,8 @@ interface Product {
   image_url: string;
   category: string;
   stock: number;
+  country?: string;
+  country_flag?: string;
 }
 
 const ProductDetail = () => {
@@ -184,7 +186,14 @@ const ProductDetail = () => {
                   <h1 className="text-4xl font-cyber font-bold text-cyber-blue mb-2">
                     {product.name}
                   </h1>
-                  <p className="text-cyber-light/60 text-lg">{product.category}</p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-cyber-light/60 text-lg">{product.category}</p>
+                    {product.country && product.country_flag && (
+                      <span className="text-cyber-light/60 text-lg flex items-center gap-2">
+                        {product.country_flag} {product.country}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="text-3xl font-bold text-green-400">

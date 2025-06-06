@@ -11,27 +11,27 @@ export type Database = {
     Tables: {
       cart: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           product_id: string
           quantity: number
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           product_id: string
           quantity?: number
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           product_id?: string
           quantity?: number
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -80,38 +80,80 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string
+          price: number
+          product_category: string
+          product_id: string
+          product_name: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id: string
+          price: number
+          product_category: string
+          product_id: string
+          product_name: string
+          quantity: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          price?: number
+          product_category?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
-          created_at: string
-          crypto_address: string | null
+          created_at: string | null
           id: string
-          items: Json
           payment_method: string | null
           status: string
           total: number
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
-          crypto_address?: string | null
+          created_at?: string | null
           id?: string
-          items: Json
           payment_method?: string | null
           status?: string
           total: number
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
-          crypto_address?: string | null
+          created_at?: string | null
           id?: string
-          items?: Json
           payment_method?: string | null
           status?: string
           total?: number
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -119,38 +161,38 @@ export type Database = {
       payments: {
         Row: {
           amount: number
-          created_at: string
+          created_at: string | null
           currency: string
           id: string
           order_id: string
           pay_address: string
           payment_id: string
           status: string
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           amount: number
-          created_at?: string
+          created_at?: string | null
           currency?: string
           id?: string
           order_id: string
           pay_address: string
           payment_id: string
           status?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           amount?: number
-          created_at?: string
+          created_at?: string | null
           currency?: string
           id?: string
           order_id?: string
           pay_address?: string
           payment_id?: string
           status?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -165,60 +207,72 @@ export type Database = {
       }
       products: {
         Row: {
-          category: string | null
-          created_at: string
+          balance: string | null
+          category: string
+          country: string | null
+          country_flag: string | null
+          created_at: string | null
           description: string | null
           id: string
           image_url: string | null
           name: string
           price: number
           stock: number | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          category?: string | null
-          created_at?: string
+          balance?: string | null
+          category: string
+          country?: string | null
+          country_flag?: string | null
+          created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           name: string
           price: number
           stock?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          category?: string | null
-          created_at?: string
+          balance?: string | null
+          category?: string
+          country?: string | null
+          country_flag?: string | null
+          created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           name?: string
           price?: number
           stock?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           role: string
-          updated_at: string
+          tier: string
+          updated_at: string | null
           username: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id: string
           role?: string
-          updated_at?: string
+          tier?: string
+          updated_at?: string | null
           username: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           role?: string
-          updated_at?: string
+          tier?: string
+          updated_at?: string | null
           username?: string
         }
         Relationships: []
@@ -246,6 +300,74 @@ export type Database = {
           product_name?: string
           purchase_date?: string | null
           status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ticket_messages: {
+        Row: {
+          attachment_url: string | null
+          created_at: string | null
+          id: string
+          is_admin: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean
+          message?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          created_at: string | null
+          id: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

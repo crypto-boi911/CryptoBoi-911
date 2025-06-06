@@ -19,6 +19,8 @@ interface Product {
   image_url: string;
   category: string;
   stock: number;
+  country?: string;
+  country_flag?: string;
 }
 
 const Products = () => {
@@ -157,9 +159,16 @@ const Products = () => {
                           <CardHeader>
                             <div className="flex items-center justify-between mb-4">
                               <Package className="h-8 w-8 text-cyber-blue" />
-                              <span className="text-cyber-light/60 text-sm">
-                                Stock: {product.stock}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                {product.country && product.country_flag && (
+                                  <span className="text-cyber-light/60 text-sm flex items-center gap-1">
+                                    {product.country_flag} {product.country}
+                                  </span>
+                                )}
+                                <span className="text-cyber-light/60 text-sm">
+                                  Stock: {product.stock}
+                                </span>
+                              </div>
                             </div>
                             <CardTitle className="text-cyber-light font-tech">
                               {product.name}
