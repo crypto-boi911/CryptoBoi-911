@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -55,6 +56,43 @@ const AuthRedirect = () => {
   return <Navigate to="/dashboard" replace />;
 };
 
+// Email confirmation success component
+const EmailConfirmed = () => {
+  const { user, profile, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+        <div className="text-cyber-blue text-xl">Verifying email...</div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Show success message and redirect based on role
+  return (
+    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="text-6xl mb-4">✅</div>
+        <h1 className="text-2xl font-cyber text-cyber-blue">Email verified!</h1>
+        <p className="text-cyber-light">Redirecting you to your dashboard...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyber-blue mx-auto"></div>
+      </div>
+      {/* Auto redirect after showing success message */}
+      {setTimeout(() => {
+        if (profile?.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+      }, 2000)}
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -67,6 +105,9 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/admin/login" element={<AdminLogin />} />
+              
+              {/* Email confirmation route */}
+              <Route path="/email-confirmed" element={<EmailConfirmed />} />
               
               {/* Protected user routes */}
               <Route path="/dashboard" element={

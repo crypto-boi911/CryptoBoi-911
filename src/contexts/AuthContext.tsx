@@ -43,6 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -88,6 +90,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const getRedirectUrl = () => {
+    // Use production URL for redirects
+    const productionUrl = 'https://krypt-replica-project-637b0c65.vercel.app';
+    const currentUrl = window.location.origin;
+    
+    // Always use production URL for email redirects to ensure consistency
+    return `${productionUrl}/dashboard`;
+  };
+
   const signUp = async (email: string, password: string, username: string) => {
     try {
       setIsLoading(true);
@@ -103,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             username,
             role
           },
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: getRedirectUrl()
         }
       });
 
