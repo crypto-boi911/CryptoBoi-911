@@ -2,37 +2,46 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import BankLogs from "./pages/BankLogs";
-import CardsLinkables from "./pages/CardsLinkables";
-import PayPalLogs from "./pages/PayPalLogs";
-import CashAppLogs from "./pages/CashAppLogs";
-import Tools from "./pages/Tools";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
-import Login from "./pages/Login";
-import GetStarted from "./pages/GetStarted";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminUsers from "./pages/AdminUsers";
-import AdminProducts from "./pages/AdminProducts";
-import AdminOrders from "./pages/AdminOrders";
-import AdminContent from "./pages/AdminContent";
-import AdminLogs from "./pages/AdminLogs";
-import AdminMessages from "./pages/AdminMessages";
-import AdminSettings from "./pages/AdminSettings";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
-import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
+
+// Dashboard redirect component
+const DashboardRedirect = () => {
+  const { user, profile, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+        <div className="text-cyber-blue text-xl">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Redirect admin users to admin panel
+  if (profile?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  
+  // For now, redirect regular users to products page since we don't have a dashboard yet
+  return <Navigate to="/products" replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -42,39 +51,16 @@ const App = () => (
           <div className="min-h-screen bg-cyber-dark">
             <Routes>
               {/* Public routes */}
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/get-started" element={<GetStarted />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
               
-              {/* Protected user routes */}
+              {/* Protected routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/bank-logs" element={
-                <ProtectedRoute>
-                  <BankLogs />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/cards" element={
-                <ProtectedRoute>
-                  <CardsLinkables />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/paypal" element={
-                <ProtectedRoute>
-                  <PayPalLogs />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/cashapp" element={
-                <ProtectedRoute>
-                  <CashAppLogs />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/tools" element={
-                <ProtectedRoute>
-                  <Tools />
+                  <DashboardRedirect />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/cart" element={
@@ -92,71 +78,16 @@ const App = () => (
                   <Orders />
                 </ProtectedRoute>
               } />
-              <Route path="/dashboard/support" element={
-                <ProtectedRoute>
-                  <Support />
+              
+              {/* Admin routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminPanel />
                 </ProtectedRoute>
               } />
               
-              {/* Protected admin routes */}
-              <Route path="/admin/dashboard" element={
-                <AdminProtectedRoute>
-                  <AdminDashboard />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/users" element={
-                <AdminProtectedRoute>
-                  <AdminUsers />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/products" element={
-                <AdminProtectedRoute>
-                  <AdminProducts />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/orders" element={
-                <AdminProtectedRoute>
-                  <AdminOrders />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/content" element={
-                <AdminProtectedRoute>
-                  <AdminContent />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/logs" element={
-                <AdminProtectedRoute>
-                  <AdminLogs />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/messages" element={
-                <AdminProtectedRoute>
-                  <AdminMessages />
-                </AdminProtectedRoute>
-              } />
-              <Route path="/admin/settings" element={
-                <AdminProtectedRoute>
-                  <AdminSettings />
-                </AdminProtectedRoute>
-              } />
-              
-              {/* Home route with navbar/footer */}
-              <Route path="/" element={
-                <>
-                  <Navbar />
-                  <Home />
-                  <Footer />
-                </>
-              } />
-              
               {/* 404 route */}
-              <Route path="*" element={
-                <>
-                  <Navbar />
-                  <NotFound />
-                  <Footer />
-                </>
-              } />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
           <Toaster />

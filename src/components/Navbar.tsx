@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Shield, LogOut } from 'lucide-react';
+import { Menu, X, Shield, LogOut, ShoppingCart, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,22 +20,20 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
-    };
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, [location]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
-  const navItems: { name: string; path: string }[] = [];
+  const navItems = [
+    { name: 'Products', path: '/products' },
+  ];
+
+  const userNavItems = user ? [
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Cart', path: '/dashboard/cart' },
+    { name: 'Orders', path: '/dashboard/orders' },
+  ] : [];
 
   return (
     <motion.nav
@@ -67,18 +67,45 @@ const Navbar = () => {
               </Link>
             ))}
             
-            {isAuthenticated ? (
-              <button 
-                onClick={handleLogout}
-                className="cyber-button flex items-center gap-2"
+            {userNavItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`font-tech font-medium transition-colors duration-300 hover:text-cyber-blue ${
+                  location.pathname === item.path ? 'text-cyber-blue' : 'text-cyber-light'
+                }`}
               >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </button>
-            ) : (
-              <Link to="/get-started" className="cyber-button">
-                <span>Get Started</span>
+                {item.name}
               </Link>
+            ))}
+            
+            {user ? (
+              <div className="flex items-center gap-4">
+                {profile?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="font-tech font-medium text-purple-400 hover:text-purple-300 transition-colors duration-300"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <button 
+                  onClick={handleLogout}
+                  className="cyber-button flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link to="/login" className="font-tech font-medium text-cyber-light hover:text-cyber-blue transition-colors duration-300">
+                  Login
+                </Link>
+                <Link to="/signup" className="cyber-button">
+                  <span>Sign Up</span>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -116,26 +143,60 @@ const Navbar = () => {
                   {item.name}
                 </Link>
               ))}
+              
+              {userNavItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`block px-3 py-2 font-tech font-medium transition-colors duration-300 hover:text-cyber-blue ${
+                    location.pathname === item.path ? 'text-cyber-blue' : 'text-cyber-light'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              
               <div className="px-3 py-2">
-                {isAuthenticated ? (
-                  <button 
-                    onClick={() => {
-                      handleLogout();
-                      setIsOpen(false);
-                    }}
-                    className="cyber-button w-full flex items-center gap-2 justify-center"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </button>
+                {user ? (
+                  <div className="space-y-2">
+                    {profile?.role === 'admin' && (
+                      <Link 
+                        to="/admin" 
+                        onClick={() => setIsOpen(false)}
+                        className="block w-full text-left cyber-button text-purple-400"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
+                    <button 
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="cyber-button w-full flex items-center gap-2 justify-center"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
                 ) : (
-                  <Link 
-                    to="/get-started" 
-                    onClick={() => setIsOpen(false)}
-                    className="cyber-button w-full block text-center"
-                  >
-                    <span>Get Started</span>
-                  </Link>
+                  <div className="space-y-2">
+                    <Link 
+                      to="/login" 
+                      onClick={() => setIsOpen(false)}
+                      className="block w-full text-center cyber-button"
+                    >
+                      Login
+                    </Link>
+                    <Link 
+                      to="/signup" 
+                      onClick={() => setIsOpen(false)}
+                      className="block w-full text-center cyber-button"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>
