@@ -1,110 +1,117 @@
 
-import React, { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Shield, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { signIn, isLoading } = useAuth();
 
-  const from = location.state?.from?.pathname || "/dashboard";
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
     const { error } = await signIn(email, password);
     
     if (!error) {
-      navigate(from, { replace: true });
+      // Redirect will be handled by AuthContext and App.tsx routing
+      navigate('/auth-redirect');
     }
-  };
-
-  const handleGoBack = () => {
-    navigate('/');
+    
+    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-cyber-gradient">
-      <Card className="w-full max-w-md bg-cyber-darker/90 border-cyber-blue/20">
-        <CardHeader>
-          <div className="flex items-center mb-4">
-            <Button
-              onClick={handleGoBack}
-              variant="ghost"
-              className="text-cyber-light hover:text-cyber-blue mr-4 p-2"
-              disabled={isLoading}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <CardTitle className="text-2xl font-cyber text-cyber-blue">
-              Login
-            </CardTitle>
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-cyber-light">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-cyber-light">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-
+    <div className="min-h-screen bg-cyber-gradient flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Card className="bg-cyber-darker/80 border-cyber-blue/30 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Shield className="h-12 w-12 text-cyber-blue" />
+              </div>
+              <CardTitle className="text-2xl font-cyber text-cyber-blue">Welcome Back</CardTitle>
+              <CardDescription className="text-cyber-light/70">
+                Sign in to access your dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-cyber-light">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-cyber-light">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
+                      placeholder="Enter your password"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
+                >
+                  {isLoading ? 'Signing In...' : 'Sign In'}
+                </Button>
+              </form>
+              
+              <div className="mt-6 text-center">
+                <p className="text-cyber-light/70">
+                  Don't have an account?{' '}
+                  <Link to="/signup" className="text-cyber-blue hover:text-cyber-blue/80">
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
           <div className="mt-6 text-center">
-            <p className="text-cyber-light/70 text-sm">
-              Don't have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-cyber-blue hover:text-cyber-blue/80 underline font-medium"
-              >
-                Sign up here
-              </Link>
-            </p>
+            <Link to="/" className="inline-flex items-center text-cyber-light/70 hover:text-cyber-blue">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to home
+            </Link>
           </div>
-        </CardContent>
-      </Card>
+        </motion.div>
+      </div>
     </div>
   );
 };

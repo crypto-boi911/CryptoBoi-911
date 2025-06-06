@@ -17,7 +17,7 @@ interface Product {
   category: string;
 }
 
-const PayPalLogs = () => {
+const CCLinkable = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,7 +30,7 @@ const PayPalLogs = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('category', 'PayPal Logs')
+        .eq('category', 'CC Linkable')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -48,7 +48,7 @@ const PayPalLogs = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="PayPal Logs" showBackButton>
+      <DashboardLayout title="CC Linkable" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading products...</div>
         </div>
@@ -57,7 +57,7 @@ const PayPalLogs = () => {
   }
 
   return (
-    <DashboardLayout title="PayPal Logs" showBackButton>
+    <DashboardLayout title="CC Linkable" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -66,18 +66,18 @@ const PayPalLogs = () => {
       >
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-cyber text-cyber-light">
-            PayPal Account Logs
+            Credit Card Linkable Accounts
           </h2>
           <p className="text-cyber-light/70 max-w-2xl mx-auto">
-            Verified PayPal accounts with confirmed balances. All accounts are business 
-            and personal verified with established transaction history.
+            Verified credit card accounts ready for linking to various services. 
+            All cards come with confirmed balances and established credit history.
           </p>
         </div>
 
         {products.length === 0 ? (
           <div className="text-center py-12">
             <h3 className="text-xl text-cyber-light/60 mb-4">No products available</h3>
-            <p className="text-cyber-light/40">Check back soon for new PayPal logs.</p>
+            <p className="text-cyber-light/40">Check back soon for new CC linkable accounts.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -95,4 +95,4 @@ const PayPalLogs = () => {
   );
 };
 
-export default PayPalLogs;
+export default CCLinkable;

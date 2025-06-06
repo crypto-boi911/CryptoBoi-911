@@ -5,21 +5,33 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+
+// Pages
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
+import Dashboard from "./pages/Dashboard";
+import PremiumBankLogs from "./pages/PremiumBankLogs";
+import CCLinkable from "./pages/CCLinkable";
+import PayPalLogs from "./pages/PayPalLogs";
+import CashAppLogs from "./pages/CashAppLogs";
+import Tools from "./pages/Tools";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import Orders from "./pages/Orders";
-import AdminPanel from "./pages/AdminPanel";
+import OrderHistory from "./pages/OrderHistory";
+import Tickets from "./pages/Tickets";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminProducts from "./pages/AdminProducts";
+import AdminOrders from "./pages/AdminOrders";
+import AdminTickets from "./pages/AdminTickets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Dashboard redirect component
-const DashboardRedirect = () => {
+// Smart redirect component for authenticated users
+const AuthRedirect = () => {
   const { user, profile, isLoading } = useAuth();
   
   if (isLoading) {
@@ -31,40 +43,16 @@ const DashboardRedirect = () => {
   }
   
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
   
-  // Redirect admin users to admin panel
+  // Redirect admin users to admin dashboard
   if (profile?.role === 'admin') {
     return <Navigate to="/admin" replace />;
   }
   
-  // For regular users, redirect to products page
-  return <Navigate to="/products" replace />;
-};
-
-// Home redirect component
-const HomeRedirect = () => {
-  const { user, profile, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
-        <div className="text-cyber-blue text-xl">Loading...</div>
-      </div>
-    );
-  }
-  
-  // If logged in, redirect based on role
-  if (user) {
-    if (profile?.role === 'admin') {
-      return <Navigate to="/admin" replace />;
-    }
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  // If not logged in, show home page
-  return <Home />;
+  // For regular users, redirect to user dashboard
+  return <Navigate to="/dashboard" replace />;
 };
 
 const App = () => (
@@ -74,21 +62,40 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen bg-cyber-dark">
             <Routes>
-              {/* Home route with smart redirect */}
-              <Route path="/" element={<HomeRedirect />} />
-              
-              {/* Auth routes */}
+              {/* Public routes */}
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               
-              {/* Public product routes */}
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              
-              {/* Protected dashboard routes */}
+              {/* Protected user routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <DashboardRedirect />
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/premium-banklogs" element={
+                <ProtectedRoute>
+                  <PremiumBankLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/cc-linkable" element={
+                <ProtectedRoute>
+                  <CCLinkable />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/paypal-logs" element={
+                <ProtectedRoute>
+                  <PayPalLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/cashapp-logs" element={
+                <ProtectedRoute>
+                  <CashAppLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/tools" element={
+                <ProtectedRoute>
+                  <Tools />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/cart" element={
@@ -103,35 +110,44 @@ const App = () => (
               } />
               <Route path="/dashboard/orders" element={
                 <ProtectedRoute>
-                  <Orders />
+                  <OrderHistory />
                 </ProtectedRoute>
               } />
-              
-              {/* Cart route (legacy support) */}
-              <Route path="/cart" element={
+              <Route path="/dashboard/tickets" element={
                 <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              } />
-              <Route path="/checkout" element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              } />
-              <Route path="/orders" element={
-                <ProtectedRoute>
-                  <Orders />
+                  <Tickets />
                 </ProtectedRoute>
               } />
               
               {/* Admin routes */}
               <Route path="/admin" element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminPanel />
-                </ProtectedRoute>
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/users" element={
+                <AdminProtectedRoute>
+                  <AdminUsers />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/products" element={
+                <AdminProtectedRoute>
+                  <AdminProducts />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/orders" element={
+                <AdminProtectedRoute>
+                  <AdminOrders />
+                </AdminProtectedRoute>
+              } />
+              <Route path="/admin/tickets" element={
+                <AdminProtectedRoute>
+                  <AdminTickets />
+                </AdminProtectedRoute>
               } />
               
-              {/* 404 route */}
+              {/* Fallback routes */}
+              <Route path="/auth-redirect" element={<AuthRedirect />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

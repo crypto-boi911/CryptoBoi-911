@@ -1,273 +1,245 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { 
-  Home, 
   CreditCard, 
-  Database, 
-  Smartphone, 
-  Wrench, 
+  Wallet, 
+  DollarSign, 
+  Package, 
   ShoppingCart, 
-  ClipboardList, 
-  HelpCircle,
-  LogOut,
-  Lock,
-  Settings,
-  User,
-  LifeBuoy,
-  Shield
+  Clock, 
+  TrendingUp,
+  Users,
+  Activity
 } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
-  useSidebar,
-} from '@/components/ui/sidebar';
-import UserTierSystem from '@/components/UserTierSystem';
+import { Badge } from '@/components/ui/badge';
+import DashboardLayout from '@/components/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+
+interface DashboardStats {
+  totalOrders: number;
+  pendingOrders: number;
+  cartItems: number;
+  totalSpent: number;
+}
 
 const Dashboard = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { profile } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalOrders: 0,
+    pendingOrders: 0,
+    cartItems: 0,
+    totalSpent: 0
+  });
 
-  const handleLogout = async () => {
-    navigate('/');
-  };
-
-  const sidebarItems = [
-    { name: 'Bank Logs', icon: CreditCard, path: '/dashboard/bank-logs' },
-    { name: 'Cards/Linkables', icon: CreditCard, path: '/dashboard/cards' },
-    { name: 'PayPal Logs', icon: Database, path: '/dashboard/paypal' },
-    { name: 'CashApp Logs', icon: Smartphone, path: '/dashboard/cashapp' },
-    { name: 'Tools', icon: Wrench, path: '/dashboard/tools' },
-    { name: 'Cart', icon: ShoppingCart, path: '/dashboard/cart' },
-    { name: 'Orders', icon: ClipboardList, path: '/dashboard/orders' },
-    { name: 'Support', icon: HelpCircle, path: '/dashboard/support' },
-  ];
-
-  const quickTips = [
-    "System temporarily offline for rebuild",
-    "All features will be restored soon", 
-    "Static UI only - no live data",
-    "Thank you for your patience"
-  ];
-
-  const platformFeatures = [
+  const quickLinks = [
     {
-      icon: Lock,
-      title: "Secure",
-      description: "Fast & secure log purchases"
+      title: 'Premium Banklogs',
+      description: 'High-balance verified accounts',
+      href: '/dashboard/premium-banklogs',
+      icon: CreditCard,
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/20'
     },
     {
-      icon: Settings,
-      title: "Customizable",
-      description: "Tailored to your needs"
+      title: 'CC Linkable',
+      description: 'Credit card accounts',
+      href: '/dashboard/cc-linkable',
+      icon: CreditCard,
+      color: 'text-green-400',
+      bgColor: 'bg-green-500/20'
     },
     {
-      icon: User,
-      title: "User-Friendly",
-      description: "Easy to navigate"
+      title: 'PayPal Logs',
+      description: 'Verified PayPal accounts',
+      href: '/dashboard/paypal-logs',
+      icon: Wallet,
+      color: 'text-purple-400',
+      bgColor: 'bg-purple-500/20'
     },
     {
-      icon: LifeBuoy,
-      title: "24/7 Support",
-      description: "Always here to help"
+      title: 'CashApp Logs',
+      description: 'CashApp verified balances',
+      href: '/dashboard/cashapp-logs',
+      icon: DollarSign,
+      color: 'text-orange-400',
+      bgColor: 'bg-orange-500/20'
+    },
+    {
+      title: 'Tools',
+      description: 'Professional security tools',
+      href: '/dashboard/tools',
+      icon: Package,
+      color: 'text-cyan-400',
+      bgColor: 'bg-cyan-500/20'
+    },
+    {
+      title: 'My Cart',
+      description: 'Review your selections',
+      href: '/dashboard/cart',
+      icon: ShoppingCart,
+      color: 'text-pink-400',
+      bgColor: 'bg-pink-500/20'
     }
   ];
 
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-cyber-gradient flex w-full">
-        <AppSidebar sidebarItems={sidebarItems} onLogout={handleLogout} />
-        
-        <SidebarInset className="flex-1">
-          <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-3 sm:p-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-2 sm:gap-4">
-                <SidebarTrigger className="
-                  bg-cyber-blue/20 
-                  border-2 
-                  border-cyber-blue 
-                  text-cyber-blue 
-                  hover:bg-cyber-blue 
-                  hover:text-cyber-dark 
-                  transition-all 
-                  duration-300 
-                  w-10 h-10 sm:w-12 sm:h-12
-                  rounded-lg 
-                  shadow-lg 
-                  shadow-cyber-blue/30
-                  hover:shadow-cyber-blue/50
-                  hover:scale-105
-                  active:scale-95
-                " />
-                <div>
-                  <h1 className="text-lg sm:text-2xl font-cyber font-bold text-cyber-blue">
-                    Welcome, User!
-                  </h1>
-                  <p className="text-xs sm:text-sm text-cyber-light/70">
-                    System offline for rebuild
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-full sm:w-80">
-                  <UserTierSystem compact={true} />
-                </div>
-              </div>
-            </div>
-          </header>
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
 
-          <main className="flex-1 p-3 sm:p-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-6xl space-y-4 sm:space-y-8"
-            >
-              <div className="block sm:hidden">
-                <UserTierSystem />
-              </div>
+  const fetchDashboardStats = async () => {
+    try {
+      // Fetch user's orders
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('total, status')
+        .eq('user_id', profile?.id);
 
-              <div className="space-y-3 sm:space-y-4">
-                <h2 className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">
-                  System Status
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-                  {quickTips.map((tip, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      className="text-cyber-light/80 text-sm sm:text-base p-2 sm:p-3 bg-cyber-darker/40 rounded-lg border border-cyber-blue/20"
-                    >
-                      • {tip}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+      // Fetch cart items
+      const { data: cartItems } = await supabase
+        .from('cart')
+        .select('quantity')
+        .eq('user_id', profile?.id);
 
-              <div className="hidden sm:block">
-                <UserTierSystem />
-              </div>
+      const totalOrders = orders?.length || 0;
+      const pendingOrders = orders?.filter(o => o.status === 'pending').length || 0;
+      const totalSpent = orders?.filter(o => o.status === 'completed').reduce((sum, o) => sum + Number(o.total), 0) || 0;
+      const cartItemsCount = cartItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="space-y-4 sm:space-y-6"
-              >
-                <h2 className="text-lg sm:text-2xl font-cyber font-bold text-center text-cyber-blue">
-                  Why Choose Us?
-                </h2>
-                
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                  {platformFeatures.map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
-                    >
-                      <Card className="bg-cyber-darker/60 border-cyber-blue/30 hover:border-cyber-blue/60 transition-all duration-300 h-full">
-                        <CardHeader className="text-center pb-2 sm:pb-4 p-3 sm:p-6">
-                          <div className="flex justify-center mb-2 sm:mb-4">
-                            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-cyber-blue/20 rounded-lg flex items-center justify-center">
-                              <feature.icon className="h-4 w-4 sm:h-6 sm:w-6 text-cyber-blue" />
-                            </div>
-                          </div>
-                          <CardTitle className="text-sm sm:text-lg font-cyber text-cyber-light">
-                            {feature.title}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center p-3 sm:p-6 pt-0">
-                          <p className="text-cyber-light/80 text-xs sm:text-sm leading-relaxed">
-                            {feature.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </motion.div>
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  );
-};
-
-const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout: () => void }) => {
-  const location = useLocation();
-  const { state } = useSidebar();
+      setStats({
+        totalOrders,
+        pendingOrders,
+        cartItems: cartItemsCount,
+        totalSpent
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    }
+  };
 
   return (
-    <Sidebar className="bg-cyber-darker/90 border-r border-cyber-blue/20">
-      <SidebarHeader className="p-4 sm:p-6 border-b border-cyber-blue/20">
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
-            <span className="text-cyber-dark font-bold text-sm sm:text-base">H</span>
+    <DashboardLayout title="Dashboard">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="space-y-8"
+      >
+        {/* Welcome Section */}
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl font-cyber text-cyber-blue">
+            Welcome back, {profile?.username}!
+          </h2>
+          <div className="flex justify-center">
+            <Badge variant="outline" className="border-cyber-blue/30 text-cyber-blue px-4 py-2">
+              Tier: {profile?.tier}
+            </Badge>
           </div>
-          {state === 'expanded' && (
-            <span className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">HUXLOGS</span>
-          )}
         </div>
-      </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1 sm:space-y-2">
-              {sidebarItems.map((item, index) => (
-                <SidebarMenuItem key={index}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')}
-                    className={`flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
-                      location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/dashboard')
-                        ? 'bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30'
-                        : 'text-cyber-light/70 hover:bg-cyber-blue/10 hover:text-cyber-blue'
-                    }`}
-                  >
-                    <Link to={item.path} className="flex items-center space-x-2 sm:space-x-3 w-full">
-                      <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span className="font-tech text-sm sm:text-base">{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-cyber-darker/60 border-cyber-blue/30">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-cyber-light/60 text-sm">Total Orders</p>
+                  <p className="text-2xl font-bold text-cyber-blue">{stats.totalOrders}</p>
+                </div>
+                <Clock className="h-8 w-8 text-cyber-blue" />
+              </div>
+            </CardContent>
+          </Card>
 
-      <SidebarFooter className="p-3 sm:p-4 border-t border-cyber-blue/20">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={onLogout}
-              className="flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all w-full"
-            >
-              <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="font-tech text-sm sm:text-base">Logout</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+          <Card className="bg-cyber-darker/60 border-cyber-blue/30">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-cyber-light/60 text-sm">Pending Orders</p>
+                  <p className="text-2xl font-bold text-orange-400">{stats.pendingOrders}</p>
+                </div>
+                <Activity className="h-8 w-8 text-orange-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-cyber-darker/60 border-cyber-blue/30">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-cyber-light/60 text-sm">Cart Items</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.cartItems}</p>
+                </div>
+                <ShoppingCart className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-cyber-darker/60 border-cyber-blue/30">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-cyber-light/60 text-sm">Total Spent</p>
+                  <p className="text-2xl font-bold text-purple-400">${stats.totalSpent.toFixed(2)}</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Links */}
+        <div>
+          <h3 className="text-2xl font-cyber text-cyber-light mb-6">Quick Access</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {quickLinks.map((link, index) => (
+              <motion.div
+                key={link.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <Link to={link.href}>
+                  <Card className="bg-cyber-darker/60 border-cyber-blue/30 hover:border-cyber-blue/60 transition-all duration-300 cursor-pointer group">
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-lg ${link.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <link.icon className={`h-6 w-6 ${link.color}`} />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-cyber-light group-hover:text-cyber-blue transition-colors">
+                            {link.title}
+                          </h4>
+                          <p className="text-cyber-light/60 text-sm">
+                            {link.description}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <Card className="bg-cyber-darker/60 border-cyber-blue/30">
+          <CardHeader>
+            <CardTitle className="text-cyber-light font-tech">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-cyber-light/40 mx-auto mb-4" />
+              <p className="text-cyber-light/60">Your recent orders and activities will appear here</p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </DashboardLayout>
   );
 };
 

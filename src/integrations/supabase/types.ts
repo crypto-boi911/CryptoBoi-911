@@ -402,21 +402,21 @@ export type Database = {
       user_activity: {
         Row: {
           action: string
-          created_at: string
+          created_at: string | null
           details: Json | null
           id: string
           user_id: string | null
         }
         Insert: {
           action: string
-          created_at?: string
+          created_at?: string | null
           details?: Json | null
           id?: string
           user_id?: string | null
         }
         Update: {
           action?: string
-          created_at?: string
+          created_at?: string | null
           details?: Json | null
           id?: string
           user_id?: string | null
