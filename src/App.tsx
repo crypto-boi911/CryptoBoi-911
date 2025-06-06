@@ -39,8 +39,32 @@ const DashboardRedirect = () => {
     return <Navigate to="/admin" replace />;
   }
   
-  // For now, redirect regular users to products page since we don't have a dashboard yet
+  // For regular users, redirect to products page
   return <Navigate to="/products" replace />;
+};
+
+// Home redirect component
+const HomeRedirect = () => {
+  const { user, profile, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
+        <div className="text-cyber-blue text-xl">Loading...</div>
+      </div>
+    );
+  }
+  
+  // If logged in, redirect based on role
+  if (user) {
+    if (profile?.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // If not logged in, show home page
+  return <Home />;
 };
 
 const App = () => (
@@ -50,14 +74,18 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen bg-cyber-dark">
             <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Home />} />
+              {/* Home route with smart redirect */}
+              <Route path="/" element={<HomeRedirect />} />
+              
+              {/* Auth routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              
+              {/* Public product routes */}
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<ProductDetail />} />
               
-              {/* Protected routes */}
+              {/* Protected dashboard routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <DashboardRedirect />
@@ -74,6 +102,23 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/orders" element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              } />
+              
+              {/* Cart route (legacy support) */}
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              } />
+              <Route path="/checkout" element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              } />
+              <Route path="/orders" element={
                 <ProtectedRoute>
                   <Orders />
                 </ProtectedRoute>
