@@ -17,9 +17,7 @@ interface Ticket {
   priority: string;
   created_at: string;
   user_id: string;
-  profiles: {
-    username: string;
-  };
+  username?: string;
   ticket_messages: Array<{
     id: string;
     message: string;
@@ -41,11 +39,11 @@ const AdminTickets = () => {
 
   const fetchTickets = async () => {
     try {
-      const { data, error } = await supabase
+      // First get tickets
+      const { data: ticketsData, error: ticketsError } = await supabase
         .from('tickets')
         .select(`
           *,
-          profiles (username),
           ticket_messages (
             id,
             message,
@@ -55,12 +53,31 @@ const AdminTickets = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching tickets:', error);
+      if (ticketsError) {
+        console.error('Error fetching tickets:', ticketsError);
         return;
       }
 
-      setTickets(data || []);
+      // Then get profiles separately
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username');
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return;
+      }
+
+      // Combine the data
+      const ticketsWithUsernames = ticketsData?.map(ticket => {
+        const profile = profilesData?.find(p => p.id === ticket.user_id);
+        return {
+          ...ticket,
+          username: profile?.username || 'Unknown User'
+        };
+      }) || [];
+
+      setTickets(ticketsWithUsernames);
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
@@ -194,7 +211,7 @@ const AdminTickets = () => {
         <Card className="bg-cyber-darker/60 border-cyber-blue/30">
           <CardHeader>
             <CardTitle className="text-cyber-light">
-              {selectedTicket.subject} - {selectedTicket.profiles.username}
+              {selectedTicket.subject} - {selectedTicket.username}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 max-h-96 overflow-y-auto">
@@ -209,7 +226,7 @@ const AdminTickets = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-cyber-light">
-                    {message.is_admin ? 'Admin (You)' : selectedTicket.profiles.username}
+                    {message.is_admin ? 'Admin (You)' : selectedTicket.username}
                   </span>
                   <span className="text-xs text-cyber-light/60">
                     {new Date(message.created_at).toLocaleString()}
@@ -273,7 +290,7 @@ const AdminTickets = () => {
                   </Badge>
                 </div>
                 <div className="flex items-center space-x-4 text-sm text-cyber-light/60">
-                  <span>User: {ticket.profiles.username}</span>
+                  <span>User: {ticket.username}</span>
                   <div className="flex items-center space-x-1">
                     <Clock className="h-4 w-4" />
                     <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
