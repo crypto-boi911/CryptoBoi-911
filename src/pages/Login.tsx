@@ -6,8 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [accessKey, setAccessKey] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,20 +17,25 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      const role = user.user_metadata?.role;
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!accessKey || accessKey.length < 8) {
-      setError("Please enter a valid access key.");
+    if (!email || !email.includes('@')) {
+      setError("Please enter a valid email address.");
       return;
     }
 
-    if (!username || username.trim().length < 3) {
-      setError("Please enter a valid username.");
+    if (!password || password.length < 6) {
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -38,12 +43,14 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(username, accessKey);
+      const { error } = await signIn(email, password);
       
       if (error) {
         console.error('Login error:', error);
         if (error.message.includes('Invalid login credentials')) {
-          setError("Invalid username or access key. Please check your credentials.");
+          setError("Invalid email or password. Please check your credentials.");
+        } else if (error.message.includes('Email not confirmed')) {
+          setError("Please check your email and click the confirmation link before logging in.");
         } else {
           setError(error.message || "Login failed");
         }
@@ -76,37 +83,34 @@ const Login = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h2 className="text-2xl font-bold text-cyber-blue flex-1 text-center">Login with Access Key</h2>
+          <h2 className="text-2xl font-bold text-cyber-blue flex-1 text-center">Login</h2>
         </div>
         
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block mb-2 text-sm text-cyber-light">Username</label>
+            <label className="block mb-2 text-sm text-cyber-light">Email</label>
             <input
-              type="text"
+              type="email"
               className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               disabled={isLoading}
               required
             />
           </div>
 
           <div className="mb-4">
-            <label className="block mb-2 text-sm text-cyber-light">Access Key</label>
+            <label className="block mb-2 text-sm text-cyber-light">Password</label>
             <input
               type="password"
               className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
-              value={accessKey}
-              onChange={(e) => setAccessKey(e.target.value)}
-              placeholder="Enter your access key"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
               disabled={isLoading}
               required
             />
-            <p className="text-xs text-cyber-light/60 mt-1">
-              This is the secure key generated during signup
-            </p>
           </div>
 
           {error && (
@@ -126,19 +130,19 @@ const Login = () => {
                 Logging in...
               </div>
             ) : (
-              'Access Dashboard'
+              'Login'
             )}
           </button>
         </form>
 
         <p className="text-cyber-light/70 text-sm text-center mt-4">
-          Don't have an access key yet?{" "}
+          Don't have an account yet?{" "}
           <button
             onClick={() => navigate('/get-started')}
             className="text-cyber-blue hover:text-cyber-blue/80 underline font-medium"
             disabled={isLoading}
           >
-            Generate one here
+            Sign up here
           </button>
         </p>
       </div>

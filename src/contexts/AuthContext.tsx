@@ -16,8 +16,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfile | null;
-  signUp: (username: string, accessKey: string) => Promise<{ error: any }>;
-  signIn: (username: string, accessKey: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
   logActivity: (action: string, details?: any) => Promise<void>;
@@ -94,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setTimeout(() => {
               logActivity('LOGIN', { 
                 timestamp: new Date().toISOString(),
+                email: session.user.email,
                 username: session.user.user_metadata?.username || 'unknown'
               });
             }, 0);
@@ -123,16 +124,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const signUp = async (username: string, accessKey: string) => {
-    const email = `${username}@cryptoboi.fake`;
+  const signUp = async (email: string, password: string, username: string) => {
+    // Set default role to "user", but "admin@cryptoboi.fake" gets "admin" role
+    const role = email === 'admin@cryptoboi.fake' ? 'admin' : 'user';
     
     const { error } = await supabase.auth.signUp({
       email,
-      password: accessKey,
+      password,
       options: {
         data: {
           username: username,
-          role: 'user'
+          role: role
         }
       }
     });
@@ -140,14 +142,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!error) {
       toast({
         title: "Success",
-        description: "Account created successfully!",
+        description: "Account created successfully! Please check your email to confirm your account.",
       });
       
       // Log signup activity
       setTimeout(() => {
         logActivity('SIGNUP', { 
           timestamp: new Date().toISOString(),
-          username: username
+          email: email,
+          username: username,
+          role: role
         });
       }, 100);
     }
@@ -155,15 +159,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signIn = async (username: string, accessKey: string) => {
-    const email = `${username}@cryptoboi.fake`;
-    
+  const signIn = async (email: string, password: string) => {
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
-      password: accessKey
+      password
     });
 
     if (!error && data.session) {
+      const username = data.user.user_metadata?.username || 'User';
+      const role = data.user.user_metadata?.role || 'user';
+      
       toast({
         title: "Welcome back!",
         description: `Logged in as ${username}`,
@@ -171,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Session persistence is handled automatically by Supabase
       console.log('Login successful, session persisted:', data.session.access_token);
+      console.log('User role:', role);
     }
 
     return { error };
@@ -180,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       await logActivity('LOGOUT', { 
         timestamp: new Date().toISOString(),
+        email: user.email,
         username: user.user_metadata?.username || 'unknown'
       });
     }

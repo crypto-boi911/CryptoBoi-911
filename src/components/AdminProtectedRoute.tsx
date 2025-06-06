@@ -8,7 +8,7 @@ interface AdminProtectedRouteProps {
 }
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
-  const { user, profile, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -25,7 +25,9 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (!profile || profile.role !== 'admin') {
+  // Check if user has admin role in user_metadata
+  const userRole = user.user_metadata?.role;
+  if (userRole !== 'admin') {
     return <Navigate to="/login" replace />;
   }
   

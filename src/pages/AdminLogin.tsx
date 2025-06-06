@@ -10,33 +10,36 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
-  const [accessKey, setAccessKey] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, user, profile } = useAuth();
+  const { signIn, user } = useAuth();
 
-  // Redirect if already logged in as admin
+  // Redirect if already logged in
   useEffect(() => {
-    if (user && profile?.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else if (user && profile?.role !== 'admin') {
-      navigate('/dashboard');
+    if (user) {
+      const role = user.user_metadata?.role;
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, profile, navigate]);
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!accessKey || accessKey.length < 8) {
-      setError("Please enter a valid access key.");
+    if (!email || !email.includes('@')) {
+      setError("Please enter a valid email address.");
       return;
     }
 
-    if (!username || username.trim().length < 3) {
-      setError("Please enter a valid username.");
+    if (!password || password.length < 6) {
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -44,12 +47,14 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(username, accessKey);
+      const { error } = await signIn(email, password);
       
       if (error) {
         console.error('Admin login error:', error);
         if (error.message.includes('Invalid login credentials')) {
-          setError("Invalid admin credentials. Please check your username and access key.");
+          setError("Invalid admin credentials. Please check your email and password.");
+        } else if (error.message.includes('Email not confirmed')) {
+          setError("Please check your email and click the confirmation link before logging in.");
         } else {
           setError(error.message || "Login failed");
         }
@@ -98,15 +103,15 @@ const AdminLogin = () => {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-cyber-light">
-                Admin Username
+              <Label htmlFor="email" className="text-cyber-light">
+                Admin Email
               </Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter admin username"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter admin email"
                 className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
                 disabled={isLoading}
                 required
@@ -114,15 +119,15 @@ const AdminLogin = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="accessKey" className="text-cyber-light">
-                Admin Access Key
+              <Label htmlFor="password" className="text-cyber-light">
+                Password
               </Label>
               <Input
-                id="accessKey"
+                id="password"
                 type="password"
-                value={accessKey}
-                onChange={(e) => setAccessKey(e.target.value)}
-                placeholder="Enter admin access key"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
                 className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
                 disabled={isLoading}
                 required
