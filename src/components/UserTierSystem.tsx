@@ -1,108 +1,70 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Crown, Star, Zap, Shield, Gift } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Star, Crown } from 'lucide-react';
-
-interface TierInfo {
-  level: number;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  minOrders: number;
-  maxOrders: number;
-  discounts: {
-    bankLogs?: number;
-    paypalLogs?: number;
-    cashappLogs?: number;
-  };
-}
-
-const tiers: TierInfo[] = [
-  {
-    level: 1,
-    name: "Beginner",
-    icon: <Star className="h-3 w-3 sm:h-4 sm:w-4" />,
-    color: "text-yellow-400",
-    minOrders: 5,
-    maxOrders: 14,
-    discounts: { bankLogs: 10 }
-  },
-  {
-    level: 2,
-    name: "Amateur", 
-    icon: <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />,
-    color: "text-blue-400",
-    minOrders: 15,
-    maxOrders: 29,
-    discounts: { paypalLogs: 15, cashappLogs: 15 }
-  },
-  {
-    level: 3,
-    name: "Pro",
-    icon: <Crown className="h-3 w-3 sm:h-4 sm:w-4" />,
-    color: "text-purple-400",
-    minOrders: 30,
-    maxOrders: 50,
-    discounts: { bankLogs: 30, paypalLogs: 30, cashappLogs: 30 }
-  }
-];
+import { useTierSystem } from '@/hooks/useTierSystem';
 
 interface UserTierSystemProps {
   compact?: boolean;
 }
 
 const UserTierSystem: React.FC<UserTierSystemProps> = ({ compact = false }) => {
-  const [completedOrders, setCompletedOrders] = useState(0);
-  const [currentTier, setCurrentTier] = useState<TierInfo>(tiers[0]);
-  const [nextTier, setNextTier] = useState<TierInfo | null>(null);
+  const { currentTier, nextTier, totalSpent, progressToNextTier, isLoading } = useTierSystem();
 
-  useEffect(() => {
-    // Get completed orders from localStorage
-    const storedOrders = localStorage.getItem('userCompletedOrders');
-    const orders = storedOrders ? parseInt(storedOrders) : 0;
-    setCompletedOrders(orders);
-
-    // Calculate current tier
-    const tier = tiers.find(t => orders >= t.minOrders && orders <= t.maxOrders) || tiers[tiers.length - 1];
-    setCurrentTier(tier);
-
-    // Calculate next tier
-    const nextTierIndex = tiers.findIndex(t => t.level === tier.level) + 1;
-    setNextTier(nextTierIndex < tiers.length ? tiers[nextTierIndex] : null);
-  }, []);
-
-  const getProgressPercentage = () => {
-    if (!nextTier) return 100;
-    const progress = ((completedOrders - currentTier.minOrders) / (nextTier.minOrders - currentTier.minOrders)) * 100;
-    return Math.min(Math.max(progress, 0), 100);
+  const getTierIcon = (tierName: string) => {
+    switch (tierName) {
+      case 'Diamond': return <Crown className="h-5 w-5 text-purple-400" />;
+      case 'Platinum': return <Star className="h-5 w-5 text-cyan-400" />;
+      case 'Gold': return <Zap className="h-5 w-5 text-yellow-400" />;
+      case 'Silver': return <Shield className="h-5 w-5 text-gray-400" />;
+      default: return <Gift className="h-5 w-5 text-amber-600" />;
+    }
   };
 
-  const ordersUntilNext = nextTier ? nextTier.minOrders - completedOrders : 0;
+  const getTierColor = (tierName: string) => {
+    switch (tierName) {
+      case 'Diamond': return 'from-purple-500 to-pink-500';
+      case 'Platinum': return 'from-cyan-400 to-blue-500';
+      case 'Gold': return 'from-yellow-400 to-orange-500';
+      case 'Silver': return 'from-gray-400 to-gray-600';
+      default: return 'from-amber-600 to-amber-800';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-cyber-gray/50 border-cyber-blue/20">
+        <CardContent className="p-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-cyber-blue/20 rounded w-3/4 mb-2"></div>
+            <div className="h-2 bg-cyber-blue/20 rounded w-full"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (compact) {
     return (
       <Card className="bg-cyber-gray/50 border-cyber-blue/20">
-        <CardContent className="p-3 sm:p-4">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <div className={currentTier.color}>
-                {currentTier.icon}
-              </div>
-              <span className="text-cyber-light font-tech text-xs sm:text-sm">
-                Tier {currentTier.level}: {currentTier.name}
-              </span>
+            <div className="flex items-center gap-2">
+              {getTierIcon(currentTier.name)}
+              <span className="font-tech text-cyber-light">{currentTier.name} Tier</span>
             </div>
-            <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30 text-xs">
-              {completedOrders} orders
-            </Badge>
+            <span className="text-xs text-cyber-light/60">${totalSpent.toFixed(0)} spent</span>
           </div>
-          <Progress value={getProgressPercentage()} className="h-1.5 sm:h-2 mb-2" />
           {nextTier && (
-            <p className="text-cyber-light/60 text-xs">
-              {ordersUntilNext} more orders to {nextTier.name}
-            </p>
+            <>
+              <Progress value={progressToNextTier} className="h-2 mb-1" />
+              <p className="text-xs text-cyber-light/60">
+                ${(nextTier.minSpent - totalSpent).toFixed(0)} to {nextTier.name}
+              </p>
+            </>
           )}
         </CardContent>
       </Card>
@@ -110,81 +72,79 @@ const UserTierSystem: React.FC<UserTierSystemProps> = ({ compact = false }) => {
   }
 
   return (
-    <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
-      <CardHeader className="responsive-card">
-        <CardTitle className="text-cyber-light font-tech flex items-center gap-2 text-base sm:text-lg">
-          <div className={currentTier.color}>
-            {currentTier.icon}
-          </div>
-          Tier System - {currentTier.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="responsive-card space-y-3 sm:space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-cyber-light text-sm sm:text-base">Completed Orders:</span>
-          <Badge variant="outline" className="text-cyber-blue border-cyber-blue/30 text-xs sm:text-sm">
-            {completedOrders}
-          </Badge>
-        </div>
-
-        {nextTier && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span className="text-cyber-light/60">Progress to {nextTier.name}</span>
-              <span className="text-cyber-light/60">{ordersUntilNext} orders left</span>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="space-y-6"
+    >
+      <Card className="glow-box bg-cyber-gray/50 border-cyber-blue/20">
+        <CardHeader>
+          <CardTitle className="text-cyber-light font-tech flex items-center gap-2">
+            {getTierIcon(currentTier.name)}
+            Your Tier Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className={`text-2xl font-bold bg-gradient-to-r ${getTierColor(currentTier.name)} bg-clip-text text-transparent`}>
+                {currentTier.name} Tier
+              </h3>
+              <p className="text-cyber-light/60">Total Spent: ${totalSpent.toFixed(2)}</p>
             </div>
-            <Progress value={getProgressPercentage()} className="h-2 sm:h-3" />
+            <Badge className={`bg-gradient-to-r ${getTierColor(currentTier.name)} text-white`}>
+              Level {currentTier.level}
+            </Badge>
           </div>
-        )}
 
-        <div className="space-y-2">
-          <h4 className="text-cyber-light font-tech text-xs sm:text-sm">Current Benefits:</h4>
-          <div className="space-y-1">
-            {currentTier.discounts.bankLogs && (
-              <div className="text-green-400 text-xs sm:text-sm">
-                • {currentTier.discounts.bankLogs}% off Bank Logs
+          {nextTier && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-cyber-light">Progress to {nextTier.name}</span>
+                <span className="text-cyber-light">{progressToNextTier.toFixed(1)}%</span>
               </div>
-            )}
-            {currentTier.discounts.paypalLogs && (
-              <div className="text-green-400 text-xs sm:text-sm">
-                • {currentTier.discounts.paypalLogs}% off PayPal Logs
-              </div>
-            )}
-            {currentTier.discounts.cashappLogs && (
-              <div className="text-green-400 text-xs sm:text-sm">
-                • {currentTier.discounts.cashappLogs}% off CashApp Logs
-              </div>
-            )}
-          </div>
-        </div>
+              <Progress value={progressToNextTier} className="h-3" />
+              <p className="text-cyber-light/60 text-sm">
+                Spend ${(nextTier.minSpent - totalSpent).toFixed(2)} more to reach {nextTier.name} tier
+              </p>
+            </div>
+          )}
 
-        {/* All Tiers Overview */}
-        <div className="space-y-2 pt-3 sm:pt-4 border-t border-cyber-blue/20">
-          <h4 className="text-cyber-light font-tech text-xs sm:text-sm">All Tiers:</h4>
           <div className="space-y-2">
-            {tiers.map((tier) => (
-              <div key={tier.level} className={`flex items-center justify-between p-2 rounded text-xs sm:text-sm ${
-                tier.level === currentTier.level ? 'bg-cyber-blue/10 border border-cyber-blue/30' : 'bg-cyber-gray/20'
-              }`}>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <div className={tier.color}>
-                    {tier.icon}
-                  </div>
-                  <span className="text-cyber-light">
-                    {tier.name} ({tier.minOrders}-{tier.maxOrders} orders)
-                  </span>
+            <h4 className="text-cyber-light font-medium">Current Benefits:</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {currentTier.benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm text-cyber-light/80">
+                  <div className="w-1.5 h-1.5 bg-cyber-blue rounded-full"></div>
+                  {benefit}
                 </div>
-                <div className="text-xs text-cyber-light/60 text-right">
-                  {Object.entries(tier.discounts).map(([key, value]) => (
-                    <div key={key}>{value}% off {key.replace(/([A-Z])/g, ' $1').toLowerCase()}</div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {(currentTier.discounts.banklogs > 0 || currentTier.discounts.cards > 0) && (
+            <div className="space-y-2">
+              <h4 className="text-cyber-light font-medium">Active Discounts:</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {currentTier.discounts.banklogs > 0 && (
+                  <div className="text-green-400">Bank Logs: {currentTier.discounts.banklogs}% off</div>
+                )}
+                {currentTier.discounts.paypallogs > 0 && (
+                  <div className="text-green-400">PayPal: {currentTier.discounts.paypallogs}% off</div>
+                )}
+                {currentTier.discounts.cashapplogs > 0 && (
+                  <div className="text-green-400">CashApp: {currentTier.discounts.cashapplogs}% off</div>
+                )}
+                {currentTier.discounts.cards > 0 && (
+                  <div className="text-green-400">Cards: {currentTier.discounts.cards}% off</div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

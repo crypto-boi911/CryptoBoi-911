@@ -41,9 +41,12 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen bg-cyber-dark">
             <Routes>
-              {/* Routes without Navbar/Footer */}
+              {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/get-started" element={<GetStarted />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              
+              {/* Protected user routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
@@ -94,6 +97,8 @@ const App = () => (
                   <Support />
                 </ProtectedRoute>
               } />
+              
+              {/* Protected admin routes */}
               <Route path="/admin/dashboard" element={
                 <AdminProtectedRoute>
                   <AdminDashboard />
@@ -135,15 +140,20 @@ const App = () => (
                 </AdminProtectedRoute>
               } />
               
-              {/* Routes with Navbar/Footer */}
-              <Route path="/*" element={
+              {/* Home route with navbar/footer */}
+              <Route path="/" element={
                 <>
                   <Navbar />
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <Home />
+                  <Footer />
+                </>
+              } />
+              
+              {/* 404 route */}
+              <Route path="*" element={
+                <>
+                  <Navbar />
+                  <NotFound />
                   <Footer />
                 </>
               } />

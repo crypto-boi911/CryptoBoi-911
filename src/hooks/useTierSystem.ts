@@ -1,99 +1,138 @@
 
 import { useState, useEffect } from 'react';
-
-interface TierDiscount {
-  bankLogs?: number;
-  paypalLogs?: number;
-  cashappLogs?: number;
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TierInfo {
-  level: number;
   name: string;
-  minOrders: number;
-  maxOrders: number;
-  discounts: TierDiscount;
+  level: number;
+  minSpent: number;
+  discounts: {
+    banklogs: number;
+    paypallogs: number;
+    cashapplogs: number;
+    cards: number;
+  };
+  benefits: string[];
 }
 
-const tiers: TierInfo[] = [
+const TIERS: TierInfo[] = [
   {
+    name: 'Bronze',
     level: 1,
-    name: "Beginner",
-    minOrders: 5,
-    maxOrders: 14,
-    discounts: { bankLogs: 10 }
+    minSpent: 0,
+    discounts: { banklogs: 0, paypallogs: 0, cashapplogs: 0, cards: 0 },
+    benefits: ['Basic support', 'Standard processing']
   },
   {
+    name: 'Silver',
     level: 2,
-    name: "Amateur", 
-    minOrders: 15,
-    maxOrders: 29,
-    discounts: { paypalLogs: 15, cashappLogs: 15 }
+    minSpent: 1000,
+    discounts: { banklogs: 5, paypallogs: 5, cashapplogs: 5, cards: 3 },
+    benefits: ['5% discount on logs', '3% discount on cards', 'Priority support']
   },
   {
+    name: 'Gold',
     level: 3,
-    name: "Pro",
-    minOrders: 30,
-    maxOrders: 50,
-    discounts: { bankLogs: 30, paypalLogs: 30, cashappLogs: 30 }
+    minSpent: 5000,
+    discounts: { banklogs: 10, paypallogs: 10, cashapplogs: 10, cards: 7 },
+    benefits: ['10% discount on logs', '7% discount on cards', 'VIP support', 'Early access']
+  },
+  {
+    name: 'Platinum',
+    level: 4,
+    minSpent: 15000,
+    discounts: { banklogs: 15, paypallogs: 15, cashapplogs: 15, cards: 12 },
+    benefits: ['15% discount on logs', '12% discount on cards', 'Dedicated manager', 'Custom requests']
+  },
+  {
+    name: 'Diamond',
+    level: 5,
+    minSpent: 50000,
+    discounts: { banklogs: 25, paypallogs: 25, cashapplogs: 25, cards: 20 },
+    benefits: ['25% discount on logs', '20% discount on cards', 'Exclusive access', 'Custom solutions']
   }
 ];
 
 export const useTierSystem = () => {
-  const [completedOrders, setCompletedOrders] = useState(0);
-  const [currentTier, setCurrentTier] = useState<TierInfo>(tiers[0]);
+  const { user } = useAuth();
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadOrderCount = () => {
-      const storedOrders = localStorage.getItem('userCompletedOrders');
-      const orders = storedOrders ? parseInt(storedOrders) : 0;
-      setCompletedOrders(orders);
+    const fetchUserSpending = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
 
-      const tier = tiers.find(t => orders >= t.minOrders && orders <= t.maxOrders) || tiers[tiers.length - 1];
-      setCurrentTier(tier);
+      try {
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('total')
+          .eq('user_id', user.id)
+          .eq('status', 'completed');
+
+        if (error) throw error;
+
+        const total = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
+        setTotalSpent(total);
+      } catch (error) {
+        console.error('Error fetching user spending:', error);
+        setTotalSpent(0);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadOrderCount();
+    fetchUserSpending();
+  }, [user]);
 
-    // Listen for order completion events
-    const handleOrderComplete = () => {
-      loadOrderCount();
-    };
+  const getCurrentTier = (): TierInfo => {
+    for (let i = TIERS.length - 1; i >= 0; i--) {
+      if (totalSpent >= TIERS[i].minSpent) {
+        return TIERS[i];
+      }
+    }
+    return TIERS[0];
+  };
 
-    window.addEventListener('orderCompleted', handleOrderComplete);
-    return () => window.removeEventListener('orderCompleted', handleOrderComplete);
-  }, []);
+  const getNextTier = (): TierInfo | null => {
+    const currentTier = getCurrentTier();
+    const nextTierIndex = TIERS.findIndex(tier => tier.level > currentTier.level);
+    return nextTierIndex !== -1 ? TIERS[nextTierIndex] : null;
+  };
 
-  const incrementCompletedOrders = () => {
-    const newCount = completedOrders + 1;
-    localStorage.setItem('userCompletedOrders', newCount.toString());
-    setCompletedOrders(newCount);
+  const getProgressToNextTier = (): number => {
+    const nextTier = getNextTier();
+    if (!nextTier) return 100;
     
-    // Dispatch event for other components
-    window.dispatchEvent(new CustomEvent('orderCompleted'));
+    const currentTier = getCurrentTier();
+    const progress = ((totalSpent - currentTier.minSpent) / (nextTier.minSpent - currentTier.minSpent)) * 100;
+    return Math.min(Math.max(progress, 0), 100);
   };
 
-  const getDiscount = (category: string): number => {
-    const categoryKey = category.toLowerCase().replace(/\s+/g, '') as keyof TierDiscount;
-    return currentTier.discounts[categoryKey] || 0;
-  };
-
-  const applyDiscount = (price: number, category: string): { originalPrice: number; discountedPrice: number; discount: number } => {
-    const discount = getDiscount(category);
-    const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
+  const applyDiscount = (originalPrice: number, category: string) => {
+    const currentTier = getCurrentTier();
+    const discountKey = category as keyof typeof currentTier.discounts;
+    const discount = currentTier.discounts[discountKey] || 0;
+    const discountedPrice = originalPrice * (1 - discount / 100);
     
     return {
-      originalPrice: price,
-      discountedPrice: Math.round(discountedPrice * 100) / 100,
-      discount
+      originalPrice,
+      discountedPrice,
+      discount,
+      savings: originalPrice - discountedPrice
     };
   };
 
   return {
-    completedOrders,
-    currentTier,
-    getDiscount,
+    currentTier: getCurrentTier(),
+    nextTier: getNextTier(),
+    totalSpent,
+    progressToNextTier: getProgressToNextTier(),
     applyDiscount,
-    incrementCompletedOrders
+    isLoading,
+    allTiers: TIERS
   };
 };

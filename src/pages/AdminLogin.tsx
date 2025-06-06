@@ -1,53 +1,70 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const AdminLogin = () => {
+  const [username, setUsername] = useState("");
+  const [accessKey, setAccessKey] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn, user, profile } = useAuth();
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (user && profile?.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user && profile?.role !== 'admin') {
+      navigate('/dashboard');
+    }
+  }, [user, profile, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
 
-    // Simple hardcoded admin credentials for demo
-    const adminEmail = "admin@example.com";
-    const adminPassword = "password";
-
-    if (email === adminEmail && password === adminPassword) {
-      // Set admin authentication
-      const adminToken = import.meta.env.VITE_ADMIN_TOKEN || 'admin-token-2024';
-      localStorage.setItem('isAdminAuthenticated', 'true');
-      localStorage.setItem('adminToken', adminToken);
-      localStorage.setItem('adminSession', JSON.stringify({
-        loginTime: new Date().toISOString(),
-        lastActivity: new Date().toISOString(),
-        email: email
-      }));
-
-      toast({
-        title: "Admin Access Granted",
-        description: "Welcome to the admin panel!",
-      });
-
-      navigate('/admin/dashboard');
-    } else {
-      setError("Invalid email or password");
-      toast({
-        title: "Login Failed",
-        description: "Invalid admin credentials",
-        variant: "destructive",
-      });
+    if (!accessKey || accessKey.length < 8) {
+      setError("Please enter a valid access key.");
+      return;
     }
 
-    setIsLoading(false);
+    if (!username || username.trim().length < 3) {
+      setError("Please enter a valid username.");
+      return;
+    }
+
+    setError("");
+    setIsLoading(true);
+    
+    try {
+      const { error } = await signIn(username, accessKey);
+      
+      if (error) {
+        console.error('Admin login error:', error);
+        if (error.message.includes('Invalid login credentials')) {
+          setError("Invalid admin credentials. Please check your username and access key.");
+        } else {
+          setError(error.message || "Login failed");
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user has admin role after successful login
+      // This will be handled by the useEffect above
+      
+    } catch (error) {
+      console.error('Admin login error:', error);
+      setError("An unexpected error occurred");
+      setIsLoading(false);
+    }
   };
 
   const handleGoBack = () => {
@@ -55,58 +72,105 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-cyber-dark">
-      <div className="bg-cyber-darker border border-cyber-blue/20 rounded-xl p-8 w-full max-w-md shadow-lg">
-        <div className="flex items-center mb-6">
-          <button
-            onClick={handleGoBack}
-            className="flex items-center text-cyber-light hover:text-cyber-blue transition-colors duration-300 mr-4"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h2 className="text-2xl font-bold text-cyber-blue flex-1 text-center">Admin Login</h2>
-        </div>
+    <div className="min-h-screen flex justify-center items-center bg-cyber-gradient">
+      <Card className="w-full max-w-md bg-cyber-darker/90 border-cyber-blue/20">
+        <CardHeader>
+          <div className="flex items-center mb-4">
+            <Button
+              onClick={handleGoBack}
+              variant="ghost"
+              className="text-cyber-light hover:text-cyber-blue mr-4 p-2"
+              disabled={isLoading}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-cyber-blue/20 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-cyber-blue" />
+              </div>
+              <CardTitle className="text-2xl font-cyber text-cyber-blue">
+                Admin Portal
+              </CardTitle>
+            </div>
+          </div>
+        </CardHeader>
         
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="block mb-2 text-sm text-cyber-light">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter admin email"
-              required
-            />
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-cyber-light">
+                Admin Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter admin username"
+                className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="accessKey" className="text-cyber-light">
+                Admin Access Key
+              </Label>
+              <Input
+                id="accessKey"
+                type="password"
+                value={accessKey}
+                onChange={(e) => setAccessKey(e.target.value)}
+                placeholder="Enter admin access key"
+                className="bg-cyber-gray/50 border-cyber-blue/30 text-cyber-light"
+                disabled={isLoading}
+                required
+              />
+              <p className="text-xs text-cyber-light/60">
+                Only administrators can access this portal
+              </p>
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyber-dark"></div>
+                  Authenticating...
+                </div>
+              ) : (
+                'Access Admin Dashboard'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-cyber-light/70 text-sm">
+              Regular user?{" "}
+              <Button
+                onClick={() => navigate('/login')}
+                variant="link"
+                className="text-cyber-blue hover:text-cyber-blue/80 p-0 h-auto font-medium"
+                disabled={isLoading}
+              >
+                Login here
+              </Button>
+            </p>
           </div>
-
-          <div className="mb-4">
-            <label className="block mb-2 text-sm text-cyber-light">Password</label>
-            <input
-              type="password"
-              className="w-full px-4 py-2 rounded bg-cyber-gray border border-cyber-blue/30 text-cyber-light focus:outline-none focus:ring-2 focus:ring-cyber-blue focus:border-cyber-blue"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter admin password"
-              required
-            />
-          </div>
-
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-semibold rounded transition duration-200 disabled:opacity-50"
-          >
-            {isLoading ? 'Logging in...' : 'Access Admin Panel'}
-          </button>
-        </form>
-
-        <p className="text-cyber-light/70 text-sm text-center mt-4">
-          Demo credentials: admin@example.com / password
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default AdminLogin;
