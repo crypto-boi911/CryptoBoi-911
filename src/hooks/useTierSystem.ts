@@ -126,12 +126,34 @@ export const useTierSystem = () => {
     };
   };
 
+  const incrementCompletedOrders = async () => {
+    // This function can be used to trigger a refetch of user spending
+    // when a new order is completed
+    if (!user) return;
+
+    try {
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('total')
+        .eq('user_id', user.id)
+        .eq('status', 'completed');
+
+      if (error) throw error;
+
+      const total = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
+      setTotalSpent(total);
+    } catch (error) {
+      console.error('Error refreshing user spending:', error);
+    }
+  };
+
   return {
     currentTier: getCurrentTier(),
     nextTier: getNextTier(),
     totalSpent,
     progressToNextTier: getProgressToNextTier(),
     applyDiscount,
+    incrementCompletedOrders,
     isLoading,
     allTiers: TIERS
   };
