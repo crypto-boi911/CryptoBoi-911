@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -9,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import SimpleFooter from '@/components/SimpleFooter';
 
 interface CartItem {
   id: string;
@@ -146,7 +145,7 @@ const Cart = () => {
         <div className="min-h-screen bg-cyber-gradient pt-20 flex items-center justify-center">
           <div className="text-cyber-blue text-xl">Loading cart...</div>
         </div>
-        <Footer />
+        <SimpleFooter />
       </>
     );
   }
@@ -283,7 +282,7 @@ const Cart = () => {
           </motion.div>
         </div>
       </div>
-      <Footer />
+      <SimpleFooter />
     </>
   );
 };

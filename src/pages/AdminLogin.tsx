@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,15 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user, profile } = useAuth();
   const { toast } = useToast();
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (user && profile?.role === 'admin') {
+      navigate('/admin');
+    }
+  }, [user, profile, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,21 +34,21 @@ const AdminLogin = () => {
       if (error) {
         toast({
           title: "Login Failed",
-          description: "Invalid admin credentials",
+          description: error.message || "Invalid admin credentials",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
-      // Redirect will happen automatically through auth context
-      navigate('/admin');
-    } catch (error) {
+      // Success message will be shown by the auth context
+      // Navigation will happen automatically via useEffect above
+    } catch (error: any) {
       toast({
         title: "Login Error",
-        description: "An error occurred during login",
+        description: error.message || "An error occurred during login",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
