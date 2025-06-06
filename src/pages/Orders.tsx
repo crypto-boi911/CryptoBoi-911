@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Clock, CheckCircle, XCircle } from 'lucide-react';
@@ -6,12 +7,20 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
+interface OrderItem {
+  id: string;
+  product_name: string;
+  quantity: number;
+  price: number;
+  product_category: string;
+}
+
 interface Order {
   id: string;
-  items: any[];
   total: number;
   status: string;
   created_at: string;
+  order_items: OrderItem[];
 }
 
 const Orders = () => {
@@ -27,9 +36,18 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: ordersData, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            product_name,
+            quantity,
+            price,
+            product_category
+          )
+        `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
@@ -38,12 +56,7 @@ const Orders = () => {
         return;
       }
 
-      // Transform the data to match our interface
-      const transformedOrders = (data || []).map(order => ({
-        ...order,
-        items: Array.isArray(order.items) ? order.items : []
-      }));
-      setOrders(transformedOrders);
+      setOrders(ordersData || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -139,10 +152,10 @@ const Orders = () => {
                         <div>
                           <h4 className="text-cyber-light font-medium mb-2">Items:</h4>
                           <div className="space-y-2">
-                            {order.items.map((item: any, itemIndex: number) => (
-                              <div key={itemIndex} className="flex justify-between items-center p-3 bg-cyber-gray/20 rounded-lg">
+                            {order.order_items?.map((item: OrderItem, itemIndex: number) => (
+                              <div key={item.id} className="flex justify-between items-center p-3 bg-cyber-gray/20 rounded-lg">
                                 <div>
-                                  <span className="text-cyber-light">{item.name}</span>
+                                  <span className="text-cyber-light">{item.product_name}</span>
                                   <span className="text-cyber-light/60 text-sm ml-2">
                                     x{item.quantity}
                                   </span>

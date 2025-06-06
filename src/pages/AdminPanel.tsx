@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Package, ShoppingCart, Settings, LogOut } from 'lucide-react';
@@ -17,14 +18,22 @@ interface User {
   created_at: string;
 }
 
+interface OrderItem {
+  id: string;
+  product_name: string;
+  quantity: number;
+  price: number;
+  product_category: string;
+}
+
 interface Order {
   id: string;
   user_id: string;
-  items: any[];
   total: number;
   status: string;
   created_at: string;
   user_email?: string;
+  order_items: OrderItem[];
 }
 
 const AdminPanel = () => {
@@ -53,21 +62,25 @@ const AdminPanel = () => {
         setUsers(profiles || []);
       }
 
-      // Fetch orders
+      // Fetch orders with order items
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            product_name,
+            quantity,
+            price,
+            product_category
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (ordersError) {
         console.error('Error fetching orders:', ordersError);
       } else {
-        // Transform the data to match our interface
-        const transformedOrders = (ordersData || []).map(order => ({
-          ...order,
-          items: Array.isArray(order.items) ? order.items : []
-        }));
-        setOrders(transformedOrders);
+        setOrders(ordersData || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -266,7 +279,7 @@ const AdminPanel = () => {
                         #{order.id.slice(0, 8)}
                       </TableCell>
                       <TableCell className="text-cyber-light/70">
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                        {order.order_items?.length || 0} item{(order.order_items?.length || 0) !== 1 ? 's' : ''}
                       </TableCell>
                       <TableCell className="text-green-400 font-bold">
                         ${order.total.toFixed(2)}
