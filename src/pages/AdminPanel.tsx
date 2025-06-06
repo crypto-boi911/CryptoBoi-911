@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Package, ShoppingCart, Settings, LogOut } from 'lucide-react';
@@ -13,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
-  email: string;
   username: string;
   role: string;
   created_at: string;
@@ -64,7 +62,12 @@ const AdminPanel = () => {
       if (ordersError) {
         console.error('Error fetching orders:', ordersError);
       } else {
-        setOrders(ordersData || []);
+        // Transform the data to match our interface
+        const transformedOrders = (ordersData || []).map(order => ({
+          ...order,
+          items: Array.isArray(order.items) ? order.items : []
+        }));
+        setOrders(transformedOrders);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

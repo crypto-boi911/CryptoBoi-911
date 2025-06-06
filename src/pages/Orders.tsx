@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Clock, CheckCircle, XCircle } from 'lucide-react';
@@ -39,7 +38,12 @@ const Orders = () => {
         return;
       }
 
-      setOrders(data || []);
+      // Transform the data to match our interface
+      const transformedOrders = (data || []).map(order => ({
+        ...order,
+        items: Array.isArray(order.items) ? order.items : []
+      }));
+      setOrders(transformedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
