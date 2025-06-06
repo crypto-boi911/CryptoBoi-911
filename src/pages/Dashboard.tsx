@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -13,7 +14,8 @@ import {
   Lock,
   Settings,
   User,
-  LifeBuoy
+  LifeBuoy,
+  Shield
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,9 +43,10 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, signOut, getUserRole, promoteToAdmin } = useAuth();
 
   const username = user?.user_metadata?.username || 'User';
+  const userRole = getUserRole();
 
   const handleLogout = async () => {
     await signOut();
@@ -52,6 +55,27 @@ const Dashboard = () => {
       description: "You have been logged out successfully",
     });
     navigate('/');
+  };
+
+  const handlePromoteToAdmin = async () => {
+    const { error } = await promoteToAdmin();
+    
+    if (!error) {
+      toast({
+        title: "Admin Access Granted",
+        description: "You can now access the admin portal",
+      });
+      // Redirect to admin after a short delay
+      setTimeout(() => {
+        navigate('/admin/dashboard');
+      }, 1500);
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to promote to admin: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const sidebarItems = [
@@ -126,12 +150,28 @@ const Dashboard = () => {
                   <h1 className="text-lg sm:text-2xl font-cyber font-bold text-cyber-blue">
                     Welcome, {username}!
                   </h1>
+                  <p className="text-xs sm:text-sm text-cyber-light/70">
+                    Role: {userRole}
+                  </p>
                 </div>
               </div>
               
-              {/* Tier Progress Bar - Top Right */}
-              <div className="w-full sm:w-80">
-                <UserTierSystem compact={true} />
+              {/* Admin Access Button or Tier Progress */}
+              <div className="flex items-center gap-2">
+                {userRole !== 'admin' && (
+                  <Button
+                    onClick={handlePromoteToAdmin}
+                    variant="outline"
+                    size="sm"
+                    className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Get Admin Access
+                  </Button>
+                )}
+                <div className="w-full sm:w-80">
+                  <UserTierSystem compact={true} />
+                </div>
               </div>
             </div>
           </header>
@@ -144,6 +184,36 @@ const Dashboard = () => {
               transition={{ duration: 0.6 }}
               className="max-w-6xl space-y-4 sm:space-y-8"
             >
+              {/* Admin Portal Access Card */}
+              {userRole === 'admin' && (
+                <Card className="glow-box bg-gradient-to-r from-cyber-blue/20 to-cyber-purple/20 border-cyber-blue/40">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-cyber-blue/30 rounded-lg flex items-center justify-center">
+                          <Shield className="h-5 w-5 text-cyber-blue" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-cyber font-bold text-cyber-blue">
+                            Admin Portal Access
+                          </h3>
+                          <p className="text-cyber-light/70 text-sm">
+                            You have administrator privileges
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigate('/admin/dashboard')}
+                        className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Access Admin Panel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Tier System Details - Mobile First */}
               <div className="block sm:hidden">
                 <UserTierSystem />

@@ -21,6 +21,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isLoading: boolean;
   logActivity: (action: string, details?: any) => Promise<void>;
+  promoteToAdmin: () => Promise<{ error: any }>;
+  getUserRole: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,6 +57,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
+    }
+  };
+
+  const getUserRole = () => {
+    return user?.user_metadata?.role || 'user';
+  };
+
+  const promoteToAdmin = async () => {
+    if (!user) {
+      return { error: { message: 'No user logged in' } };
+    }
+
+    try {
+      // Update user metadata to admin role
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...user.user_metadata,
+          role: 'admin'
+        }
+      });
+
+      if (error) {
+        console.error('Error promoting to admin:', error);
+        return { error };
+      }
+
+      toast({
+        title: "Admin Access Granted",
+        description: "You have been promoted to administrator.",
+      });
+
+      // Log the promotion activity
+      await logActivity('PROMOTED_TO_ADMIN', {
+        timestamp: new Date().toISOString(),
+        email: user.email
+      });
+
+      return { error: null };
+    } catch (error) {
+      console.error('Error promoting to admin:', error);
+      return { error };
     }
   };
 
@@ -95,7 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               logActivity('LOGIN', { 
                 timestamp: new Date().toISOString(),
                 email: session.user.email,
-                username: session.user.user_metadata?.username || 'unknown'
+                username: session.user.user_metadata?.username || 'unknown',
+                role: session.user.user_metadata?.role || 'user'
               });
             }, 0);
           }
@@ -206,7 +250,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     isLoading,
-    logActivity
+    logActivity,
+    promoteToAdmin,
+    getUserRole
   };
 
   return (

@@ -16,19 +16,19 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, user } = useAuth();
+  const { signIn, user, getUserRole, promoteToAdmin } = useAuth();
 
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      const role = user.user_metadata?.role;
+      const role = getUserRole();
       if (role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/dashboard');
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, getUserRole]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +68,24 @@ const AdminLogin = () => {
     } catch (error) {
       console.error('Admin login error:', error);
       setError("An unexpected error occurred");
+      setIsLoading(false);
+    }
+  };
+
+  const handlePromoteToAdmin = async () => {
+    if (!user) {
+      setError("Please log in first before promoting to admin.");
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await promoteToAdmin();
+    
+    if (error) {
+      setError("Failed to promote to admin: " + error.message);
+      setIsLoading(false);
+    } else {
+      // User will be redirected automatically via useEffect
       setIsLoading(false);
     }
   };
@@ -158,6 +176,19 @@ const AdminLogin = () => {
               )}
             </Button>
           </form>
+
+          {user && getUserRole() !== 'admin' && (
+            <div className="mt-4">
+              <Button
+                onClick={handlePromoteToAdmin}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
+              >
+                Promote Current User to Admin
+              </Button>
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-cyber-light/70 text-sm">
