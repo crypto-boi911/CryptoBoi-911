@@ -1,13 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, UserCheck, UserX, Crown } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 interface UserProfile {
   id: string;
@@ -19,101 +16,12 @@ interface UserProfile {
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      // Get users from Supabase Auth (admin function)
-      const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
-
-      if (error) {
-        console.error('Error fetching users:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load users",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Transform auth users to our UserProfile format
-      const userProfiles: UserProfile[] = authUsers.map((user: User) => ({
-        id: user.id,
-        username: user.user_metadata?.username || user.email?.split('@')[0] || 'Unknown',
-        role: user.user_metadata?.role || 'user',
-        created_at: user.created_at,
-        email: user.email
-      }));
-
-      setUsers(userProfiles);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateUserRole = async (userId: string, newRole: string) => {
-    try {
-      // Update user metadata using Supabase Auth admin function
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        user_metadata: { 
-          ...users.find(u => u.id === userId),
-          role: newRole 
-        }
-      });
-
-      if (error) {
-        console.error('Error updating user role:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update user role",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Update the local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ));
-
-      toast({
-        title: "Success",
-        description: `User role updated to ${newRole}`,
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoBack = () => {
     navigate('/admin/dashboard');
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
-        <div className="text-cyber-light">Loading users...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-cyber-gradient pt-20">
@@ -138,7 +46,7 @@ const AdminUsers = () => {
                   User Management
                 </h1>
                 <p className="text-xl text-cyber-light/70 mt-2">
-                  Manage all registered users • Total: {users.length}
+                  Temporarily disabled for rebuild • Total: {users.length}
                 </p>
               </div>
             </div>
@@ -151,7 +59,7 @@ const AdminUsers = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-cyber-light/60 text-sm">Total Users</p>
-                    <p className="text-2xl font-bold text-cyber-blue">{users.length}</p>
+                    <p className="text-2xl font-bold text-cyber-blue">0</p>
                   </div>
                   <Users className="h-8 w-8 text-cyber-blue" />
                 </div>
@@ -163,9 +71,7 @@ const AdminUsers = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-cyber-light/60 text-sm">Admin Users</p>
-                    <p className="text-2xl font-bold text-purple-400">
-                      {users.filter(user => user.role === 'admin').length}
-                    </p>
+                    <p className="text-2xl font-bold text-purple-400">0</p>
                   </div>
                   <Crown className="h-8 w-8 text-purple-400" />
                 </div>
@@ -177,9 +83,7 @@ const AdminUsers = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-cyber-light/60 text-sm">Regular Users</p>
-                    <p className="text-2xl font-bold text-green-400">
-                      {users.filter(user => user.role === 'user').length}
-                    </p>
+                    <p className="text-2xl font-bold text-green-400">0</p>
                   </div>
                   <UserCheck className="h-8 w-8 text-green-400" />
                 </div>
@@ -192,67 +96,13 @@ const AdminUsers = () => {
             <CardHeader>
               <CardTitle className="text-cyber-light font-tech">All Users</CardTitle>
               <CardDescription className="text-cyber-light/60">
-                Manage user accounts and permissions
+                User management temporarily disabled for rebuild
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {users.length === 0 ? (
-                  <div className="text-center py-8">
-                    <UserX className="h-12 w-12 text-cyber-light/40 mx-auto mb-4" />
-                    <p className="text-cyber-light/60">No users found</p>
-                  </div>
-                ) : (
-                  users.map((user, index) => (
-                    <motion.div
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      className="flex items-center justify-between p-4 bg-cyber-darker/40 rounded-lg border border-cyber-blue/10"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          user.role === 'admin' ? 'bg-purple-500/20' : 'bg-cyber-blue/20'
-                        }`}>
-                          {user.role === 'admin' ? (
-                            <Crown className="h-5 w-5 text-purple-400" />
-                          ) : (
-                            <UserCheck className="h-5 w-5 text-cyber-blue" />
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="text-cyber-light font-medium">{user.username}</h3>
-                          <p className="text-cyber-light/60 text-sm">
-                            Joined: {new Date(user.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.role === 'admin' 
-                            ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                            : 'bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30'
-                        }`}>
-                          {user.role}
-                        </span>
-                        
-                        <Button
-                          onClick={() => updateUserRole(
-                            user.id, 
-                            user.role === 'admin' ? 'user' : 'admin'
-                          )}
-                          variant="outline"
-                          size="sm"
-                          className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
-                        >
-                          {user.role === 'admin' ? 'Make User' : 'Make Admin'}
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
+              <div className="text-center py-8">
+                <UserX className="h-12 w-12 text-cyber-light/40 mx-auto mb-4" />
+                <p className="text-cyber-light/60">User management disabled for rebuild</p>
               </div>
             </CardContent>
           </Card>

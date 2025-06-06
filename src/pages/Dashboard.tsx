@@ -20,8 +20,6 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -42,40 +40,9 @@ import UserTierSystem from '@/components/UserTierSystem';
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user, signOut, getUserRole, promoteToAdmin } = useAuth();
-
-  const username = user?.user_metadata?.username || 'User';
-  const userRole = getUserRole();
 
   const handleLogout = async () => {
-    await signOut();
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully",
-    });
     navigate('/');
-  };
-
-  const handlePromoteToAdmin = async () => {
-    const { error } = await promoteToAdmin();
-    
-    if (!error) {
-      toast({
-        title: "Admin Access Granted",
-        description: "You can now access the admin portal",
-      });
-      // Redirect to admin after a short delay
-      setTimeout(() => {
-        navigate('/admin/dashboard');
-      }, 1500);
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to promote to admin: " + error.message,
-        variant: "destructive"
-      });
-    }
   };
 
   const sidebarItems = [
@@ -90,10 +57,10 @@ const Dashboard = () => {
   ];
 
   const quickTips = [
-    "Secure platform with bulletproof servers",
-    "Re-checked logs after bulk purchases", 
-    "2-hour return window with screenshots",
-    "24/7 support available"
+    "System temporarily offline for rebuild",
+    "All features will be restored soon", 
+    "Static UI only - no live data",
+    "Thank you for your patience"
   ];
 
   const platformFeatures = [
@@ -125,7 +92,6 @@ const Dashboard = () => {
         <AppSidebar sidebarItems={sidebarItems} onLogout={handleLogout} />
         
         <SidebarInset className="flex-1">
-          {/* Header with Sidebar Toggle */}
           <header className="bg-cyber-darker/50 border-b border-cyber-blue/20 p-3 sm:p-6">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-2 sm:gap-4">
@@ -148,27 +114,15 @@ const Dashboard = () => {
                 " />
                 <div>
                   <h1 className="text-lg sm:text-2xl font-cyber font-bold text-cyber-blue">
-                    Welcome, {username}!
+                    Welcome, User!
                   </h1>
                   <p className="text-xs sm:text-sm text-cyber-light/70">
-                    Role: {userRole}
+                    System offline for rebuild
                   </p>
                 </div>
               </div>
               
-              {/* Admin Access Button or Tier Progress */}
               <div className="flex items-center gap-2">
-                {userRole !== 'admin' && (
-                  <Button
-                    onClick={handlePromoteToAdmin}
-                    variant="outline"
-                    size="sm"
-                    className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10"
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Get Admin Access
-                  </Button>
-                )}
                 <div className="w-full sm:w-80">
                   <UserTierSystem compact={true} />
                 </div>
@@ -176,7 +130,6 @@ const Dashboard = () => {
             </div>
           </header>
 
-          {/* Dashboard Content */}
           <main className="flex-1 p-3 sm:p-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -184,45 +137,13 @@ const Dashboard = () => {
               transition={{ duration: 0.6 }}
               className="max-w-6xl space-y-4 sm:space-y-8"
             >
-              {/* Admin Portal Access Card */}
-              {userRole === 'admin' && (
-                <Card className="glow-box bg-gradient-to-r from-cyber-blue/20 to-cyber-purple/20 border-cyber-blue/40">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-cyber-blue/30 rounded-lg flex items-center justify-center">
-                          <Shield className="h-5 w-5 text-cyber-blue" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-cyber font-bold text-cyber-blue">
-                            Admin Portal Access
-                          </h3>
-                          <p className="text-cyber-light/70 text-sm">
-                            You have administrator privileges
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => navigate('/admin/dashboard')}
-                        className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
-                      >
-                        <Shield className="h-4 w-4 mr-2" />
-                        Access Admin Panel
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Tier System Details - Mobile First */}
               <div className="block sm:hidden">
                 <UserTierSystem />
               </div>
 
-              {/* Quick Tips - Condensed */}
               <div className="space-y-3 sm:space-y-4">
                 <h2 className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">
-                  Quick Info
+                  System Status
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                   {quickTips.map((tip, index) => (
@@ -239,12 +160,10 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Tier System Details - Desktop */}
               <div className="hidden sm:block">
                 <UserTierSystem />
               </div>
 
-              {/* Platform Features - Compact */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}

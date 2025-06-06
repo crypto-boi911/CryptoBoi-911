@@ -1,9 +1,7 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -11,61 +9,10 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { signIn, user, getUserRole } = useAuth();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      const role = getUserRole();
-      if (role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [user, navigate, getUserRole]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !email.includes('@')) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setError("Password must be at least 6 characters long.");
-      return;
-    }
-
-    setError("");
-    setIsLoading(true);
-    
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        console.error('Login error:', error);
-        if (error.message.includes('Invalid login credentials')) {
-          setError("Invalid email or password. Please check your credentials.");
-        } else if (error.message.includes('Email not confirmed')) {
-          setError("Please check your email and click the confirmation link before logging in.");
-        } else {
-          setError(error.message || "Login failed");
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      // Redirect will happen automatically when user state updates
-      // No need to manually navigate here as useEffect handles it
-      
-    } catch (error) {
-      console.error('Login error:', error);
-      setError("An unexpected error occurred");
-      setIsLoading(false);
-    }
+    setError("Login temporarily disabled for rebuild");
   };
 
   const handleGoBack = () => {
@@ -124,14 +71,7 @@ const Login = () => {
             disabled={isLoading}
             className="w-full py-2 bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-semibold rounded transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyber-dark"></div>
-                Logging in...
-              </div>
-            ) : (
-              'Login'
-            )}
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 

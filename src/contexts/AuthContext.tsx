@@ -1,8 +1,7 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
@@ -39,207 +38,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const getUserRole = () => {
-    return user?.user_metadata?.role || 'user';
+    return 'user'; // Static role for now
   };
 
   const promoteToAdmin = async () => {
-    if (!user) {
-      return { error: { message: 'No user logged in' } };
-    }
-
-    try {
-      // Update user metadata to admin role
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          ...user.user_metadata,
-          role: 'admin'
-        }
-      });
-
-      if (error) {
-        console.error('Error promoting to admin:', error);
-        return { error };
-      }
-
-      toast({
-        title: "Admin Access Granted",
-        description: "You have been promoted to administrator.",
-      });
-
-      // Log the promotion activity
-      await logActivity('PROMOTED_TO_ADMIN', {
-        timestamp: new Date().toISOString(),
-        email: user.email
-      });
-
-      return { error: null };
-    } catch (error) {
-      console.error('Error promoting to admin:', error);
-      return { error };
-    }
+    // Disabled for rebuild
+    return { error: { message: 'Feature temporarily disabled' } };
   };
 
   const logActivity = async (action: string, details?: any) => {
-    if (!user) return;
-    
-    try {
-      await supabase
-        .from('user_activity')
-        .insert({
-          user_id: user.id,
-          action,
-          details: details || {}
-        });
-      console.log('Activity logged:', action, details);
-    } catch (error) {
-      console.error('Error logging activity:', error);
-    }
+    // Disabled for rebuild
+    console.log('Activity logging disabled:', action, details);
   };
 
-  useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
-          if (event === 'SIGNED_IN') {
-            // Use setTimeout to avoid potential recursion in auth callback
-            setTimeout(() => {
-              logActivity('LOGIN', { 
-                timestamp: new Date().toISOString(),
-                email: session.user.email,
-                username: session.user.user_metadata?.username || 'unknown',
-                role: session.user.user_metadata?.role || 'user'
-              });
-            }, 0);
-          }
-        } else {
-          setProfile(null);
-        }
-        setIsLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-      setIsLoading(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const signUp = async (email: string, password: string, username: string) => {
-    // Set default role to "user", but "admin@cryptoboi.fake" gets "admin" role
-    const role = email === 'admin@cryptoboi.fake' ? 'admin' : 'user';
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username,
-          role: role
-        }
-      }
-    });
-
-    if (!error) {
-      toast({
-        title: "Success",
-        description: "Account created successfully! Please check your email to confirm your account.",
-      });
-      
-      // Log signup activity
-      setTimeout(() => {
-        logActivity('SIGNUP', { 
-          timestamp: new Date().toISOString(),
-          email: email,
-          username: username,
-          role: role
-        });
-      }, 100);
-    }
-
-    return { error };
+    // Static implementation - no live updates
+    return { error: { message: 'Signup temporarily disabled for rebuild' } };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (!error && data.session) {
-      const username = data.user.user_metadata?.username || 'User';
-      const role = data.user.user_metadata?.role || 'user';
-      
-      toast({
-        title: "Welcome back!",
-        description: `Logged in as ${username}`,
-      });
-      
-      // Session persistence is handled automatically by Supabase
-      console.log('Login successful, session persisted:', data.session.access_token);
-      console.log('User role:', role);
-    }
-
-    return { error };
+    // Static implementation - no live updates
+    return { error: { message: 'Login temporarily disabled for rebuild' } };
   };
 
   const signOut = async () => {
-    if (user) {
-      await logActivity('LOGOUT', { 
-        timestamp: new Date().toISOString(),
-        email: user.email,
-        username: user.user_metadata?.username || 'unknown'
-      });
-    }
-    await supabase.auth.signOut();
+    // Static implementation - no live updates
+    setUser(null);
+    setSession(null);
     setProfile(null);
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
   };
 
   const value = {
