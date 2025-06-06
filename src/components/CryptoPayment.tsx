@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Copy, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,6 +34,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
   const [isPolling, setIsPolling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
   }, []);
 
   useEffect(() => {
-    if (payment && payment.status === 'pending') {
+    if (payment && payment.status === 'waiting') {
       setIsPolling(true);
       const interval = setInterval(() => {
         checkPaymentStatus();
@@ -68,11 +69,21 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
   const createPayment = async () => {
     setIsCreating(true);
+    setError(null);
+    
     try {
+      // Validate amount
+      const numericAmount = parseFloat(amount.toString());
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        throw new Error('Invalid payment amount');
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('No active session');
       }
+
+      console.log('Creating payment with data:', { orderId, amount: numericAmount, currency: 'usdt' });
 
       const response = await fetch('/functions/v1/create-crypto-payment', {
         method: 'POST',
@@ -82,17 +93,20 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
         },
         body: JSON.stringify({
           orderId,
-          amount,
-          currency: 'USDT'
+          amount: numericAmount,
+          currency: 'usdt'
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create payment');
+        console.error('Payment creation failed:', errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const paymentData = await response.json();
+      console.log('Payment created successfully:', paymentData);
+      
       setPayment(paymentData);
       
       toast({
@@ -100,12 +114,13 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
         description: "Please send the exact amount to the provided address",
       });
     } catch (error: any) {
+      console.error('Payment creation error:', error);
+      setError(error.message);
       toast({
         title: "Payment Creation Failed",
         description: error.message,
         variant: "destructive",
       });
-      onCancel();
     } finally {
       setIsCreating(false);
     }
@@ -131,6 +146,8 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
       if (response.ok) {
         const statusData = await response.json();
+        console.log('Payment status check:', statusData);
+        
         setPayment(prev => prev ? { ...prev, status: statusData.status } : null);
 
         if (statusData.status === 'confirmed' || statusData.status === 'finished') {
@@ -173,10 +190,12 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-500/20 text-yellow-400';
+      case 'waiting': return 'bg-yellow-500/20 text-yellow-400';
+      case 'confirming': return 'bg-blue-500/20 text-blue-400';
       case 'confirmed': return 'bg-green-500/20 text-green-400';
       case 'finished': return 'bg-green-500/20 text-green-400';
       case 'failed': return 'bg-red-500/20 text-red-400';
+      case 'expired': return 'bg-gray-500/20 text-gray-400';
       default: return 'bg-gray-500/20 text-gray-400';
     }
   };
@@ -187,6 +206,9 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
       case 'finished':
         return <CheckCircle className="h-4 w-4" />;
       case 'failed':
+      case 'expired':
+        return <XCircle className="h-4 w-4" />;
+      case 'confirming':
         return <AlertCircle className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
@@ -196,15 +218,40 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
   if (isCreating) {
     return (
       <div className="min-h-screen bg-cyber-gradient pt-20 flex items-center justify-center">
-        <div className="text-cyber-blue text-xl">Creating crypto payment...</div>
+        <div className="text-center">
+          <div className="text-cyber-blue text-xl mb-4">Creating crypto payment...</div>
+          <div className="text-cyber-light/60">Please wait while we generate your payment address</div>
+        </div>
       </div>
     );
   }
 
-  if (!payment) {
+  if (error || !payment) {
     return (
       <div className="min-h-screen bg-cyber-gradient pt-20 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Failed to create payment</div>
+        <Card className="bg-cyber-darker/60 border-red-500/30 max-w-md mx-4">
+          <CardContent className="p-6 text-center">
+            <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-cyber text-red-400 mb-2">Payment Creation Failed</h2>
+            <p className="text-cyber-light/70 mb-4">{error || 'Unknown error occurred'}</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={createPayment}
+                className="flex-1 bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80"
+                disabled={isCreating}
+              >
+                Try Again
+              </Button>
+              <Button 
+                onClick={onCancel}
+                variant="outline"
+                className="flex-1 border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -247,10 +294,15 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {payment.status === 'pending' && (
+            {payment.status === 'waiting' && (
               <p className="text-cyber-light/70">
                 Waiting for payment confirmation...
                 {isPolling && " (Checking status automatically)"}
+              </p>
+            )}
+            {payment.status === 'confirming' && (
+              <p className="text-blue-400">
+                Payment detected! Waiting for blockchain confirmations...
               </p>
             )}
             {(payment.status === 'confirmed' || payment.status === 'finished') && (
@@ -271,12 +323,12 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
               <div>
                 <span className="text-cyber-light/60">Amount:</span>
                 <p className="text-green-400 font-bold text-xl">
-                  {payment.amount} {payment.currency}
+                  {payment.amount} {payment.currency.toUpperCase()}
                 </p>
               </div>
               <div>
                 <span className="text-cyber-light/60">Currency:</span>
-                <p className="text-cyber-light font-bold">{payment.currency}</p>
+                <p className="text-cyber-light font-bold">{payment.currency.toUpperCase()}</p>
               </div>
             </div>
 
@@ -299,7 +351,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
             <div className="bg-yellow-500/20 border border-yellow-500/30 rounded p-4">
               <p className="text-yellow-400 text-sm">
-                <strong>Important:</strong> Send exactly {payment.amount} {payment.currency} to the address above. 
+                <strong>Important:</strong> Send exactly {payment.amount} {payment.currency.toUpperCase()} to the address above. 
                 Sending a different amount may result in payment failure.
               </p>
             </div>
@@ -318,7 +370,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
           <Button
             onClick={checkPaymentStatus}
             className="flex-1 bg-cyber-blue text-cyber-dark hover:bg-cyber-blue/80"
-            disabled={payment.status !== 'pending'}
+            disabled={payment.status !== 'waiting' && payment.status !== 'confirming'}
           >
             Check Status
           </Button>
