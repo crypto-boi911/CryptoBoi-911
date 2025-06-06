@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -220,10 +219,10 @@ const AppSidebar = ({ sidebarItems, onLogout }: { sidebarItems: any[], onLogout:
       <SidebarHeader className="p-4 sm:p-6 border-b border-cyber-blue/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-cyber-blue rounded-lg flex items-center justify-center">
-            <span className="text-cyber-dark font-bold text-sm sm:text-base">C</span>
+            <span className="text-cyber-dark font-bold text-sm sm:text-base">H</span>
           </div>
           {state === 'expanded' && (
-            <span className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">CRYPTOBOI-911</span>
+            <span className="text-lg sm:text-xl font-cyber font-bold text-cyber-blue">HUXLOGS</span>
           )}
         </div>
       </SidebarHeader>

@@ -88,7 +88,7 @@ export default function Home() {
             <div className="flex items-center justify-center mb-6">
               <Shield className="h-16 w-16 text-cyber-blue mr-4" />
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-cyber font-bold text-cyber-blue">
-                CRYPTOBOI-911
+                HUXLOGS
               </h1>
             </div>
             
@@ -152,7 +152,7 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-cyber font-bold text-cyber-light mb-4">
-              Why Choose CRYPTOBOI-911
+              Why Choose HUXLOGS
             </h2>
             <p className="text-cyber-light/70 text-lg max-w-2xl mx-auto">
               Industry-leading security and reliability you can trust

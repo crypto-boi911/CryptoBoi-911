@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,7 +49,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center space-x-2">
             <Shield className="h-8 w-8 text-cyber-blue" />
             <span className="font-cyber text-xl font-bold text-cyber-blue">
-              CRYPTOBOI-911
+              HUXLOGS
             </span>
           </Link>
 

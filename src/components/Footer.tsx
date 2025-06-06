@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Mail, Phone, MapPin } from 'lucide-react';
@@ -13,7 +12,7 @@ const Footer = () => {
             <div className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-cyber-blue" />
               <span className="font-cyber text-xl font-bold text-cyber-blue">
-                CRYPTOBOI-911
+                HUXLOGS
               </span>
             </div>
             <p className="text-cyber-light/70 font-tech">
@@ -66,7 +65,7 @@ const Footer = () => {
 
         <div className="border-t border-cyber-blue/20 mt-8 pt-8 text-center">
           <p className="text-cyber-light/50 font-tech">
-            © 2024 CRYPTOBOI-911. All rights reserved.
+            © 2024 HUXLOGS. All rights reserved.
           </p>
         </div>
       </div>
