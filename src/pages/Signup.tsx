@@ -20,8 +20,7 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate 24-digit access key
-    if (password.length !== 24 || !/^\d{24}$/.test(password)) {
+    if (password.length < 6) {
       return;
     }
     
@@ -88,7 +87,7 @@ const Signup = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-cyber-light">24-Digit Access Key</Label>
+                  <Label htmlFor="password" className="text-cyber-light">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
                     <Input
@@ -97,24 +96,19 @@ const Signup = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
-                      placeholder="Enter 24-digit access key"
-                      maxLength={24}
-                      pattern="\d{24}"
-                      title="Must be exactly 24 digits"
+                      placeholder="Enter your password"
+                      minLength={6}
                       required
                     />
                   </div>
-                  {password && password.length !== 24 && (
-                    <p className="text-red-400 text-sm">Access key must be exactly 24 digits</p>
-                  )}
-                  {password && !/^\d+$/.test(password) && (
-                    <p className="text-red-400 text-sm">Access key must contain only numbers</p>
+                  {password && password.length < 6 && (
+                    <p className="text-red-400 text-sm">Password must be at least 6 characters</p>
                   )}
                 </div>
                 
                 <Button
                   type="submit"
-                  disabled={isLoading || password.length !== 24 || !/^\d{24}$/.test(password)}
+                  disabled={isLoading || password.length < 6}
                   className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
                 >
                   {isLoading ? 'Creating Account...' : 'Create Account'}

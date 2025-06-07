@@ -17,10 +17,11 @@ const Home = () => {
     }
   }, [user, isLoading, navigate]);
 
+  // Show loading screen while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
-        <div className="text-cyber-blue text-xl">Loading...</div>
+        <div className="text-cyber-blue text-xl font-cyber">Loading...</div>
       </div>
     );
   }
