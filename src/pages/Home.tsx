@@ -72,38 +72,6 @@ const Home = () => {
                 </Button>
               </Link>
             </div>
-            
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="bg-cyber-darker/40 p-6 rounded-lg border border-cyber-blue/20"
-              >
-                <h3 className="text-xl font-cyber text-cyber-blue mb-3">Premium Bank Logs</h3>
-                <p className="text-cyber-light/70">High-balance verified accounts from top financial institutions</p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="bg-cyber-darker/40 p-6 rounded-lg border border-cyber-blue/20"
-              >
-                <h3 className="text-xl font-cyber text-cyber-blue mb-3">Digital Wallets</h3>
-                <p className="text-cyber-light/70">PayPal and CashApp accounts with verified balances</p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                className="bg-cyber-darker/40 p-6 rounded-lg border border-cyber-blue/20"
-              >
-                <h3 className="text-xl font-cyber text-cyber-blue mb-3">Professional Tools</h3>
-                <p className="text-cyber-light/70">Security tools and utilities for professionals</p>
-              </motion.div>
-            </div>
           </motion.div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import UserProtectedRoute from "./components/UserProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -24,26 +24,6 @@ import Tickets from "./pages/Tickets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
-
-// Smart redirect component for authenticated users
-const AuthRedirect = () => {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cyber-gradient flex items-center justify-center">
-        <div className="text-cyber-blue text-xl">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-  
-  // All authenticated users go to dashboard
-  return <Navigate to="/dashboard" replace />;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -111,7 +91,6 @@ const App = () => (
                 } />
                 
                 {/* Fallback routes */}
-                <Route path="/auth-redirect" element={<AuthRedirect />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

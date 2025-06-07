@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Plus, Send } from 'lucide-react';
+import { Send, Paperclip, MessageSquare, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import UserDashboardLayout from '@/components/UserDashboardLayout';
 
 interface Ticket {
   id: string;
@@ -19,19 +18,25 @@ interface Ticket {
   status: string;
   priority: string;
   created_at: string;
-  updated_at: string;
+}
+
+interface TicketMessage {
+  id: string;
+  message: string;
+  is_admin: boolean;
+  created_at: string;
+  attachment_url?: string;
 }
 
 const Tickets = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
+  const [newSubject, setNewSubject] = useState('');
+  const [newMessage, setNewMessage] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState({
-    subject: '',
-    message: '',
-    priority: 'normal'
-  });
+  const [isSending, setIsSending] = useState(false);
+  const [showNewTicket, setShowNewTicket] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -41,6 +46,12 @@ const Tickets = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (selectedTicket) {
+      fetchMessages(selectedTicket.id);
+    }
+  }, [selectedTicket]);
+
   const fetchTickets = async () => {
     try {
       const { data, error } = await supabase
@@ -49,60 +60,75 @@ const Tickets = () => {
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching tickets:', error);
-        return;
-      }
-
+      if (error) throw error;
       setTickets(data || []);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
-  const createTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !formData.subject.trim() || !formData.message.trim()) return;
+  const fetchMessages = async (ticketId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('ticket_messages')
+        .select('*')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const createTicket = async () => {
+    if (!newSubject.trim() || !newMessage.trim()) return;
 
     setIsCreating(true);
     try {
-      // Create ticket
       const { data: ticket, error: ticketError } = await supabase
         .from('tickets')
         .insert({
-          user_id: user.id,
-          subject: formData.subject.trim(),
-          priority: formData.priority,
-          status: 'open'
+          user_id: user?.id,
+          subject: newSubject,
+          status: 'open',
+          priority: 'normal'
         })
         .select()
         .single();
 
       if (ticketError) throw ticketError;
 
-      // Create initial message
       const { error: messageError } = await supabase
         .from('ticket_messages')
         .insert({
           ticket_id: ticket.id,
-          user_id: user.id,
-          message: formData.message.trim(),
+          user_id: user?.id,
+          message: newMessage,
           is_admin: false
         });
 
       if (messageError) throw messageError;
 
+      setNewSubject('');
+      setNewMessage('');
+      setShowNewTicket(false);
+      fetchTickets();
+      setSelectedTicket(ticket);
+
       toast({
         title: "Ticket Created",
         description: "Your support ticket has been created successfully",
       });
-
-      // Reset form and refresh tickets
-      setFormData({ subject: '', message: '', priority: 'normal' });
-      setShowCreateForm(false);
-      fetchTickets();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -114,41 +140,48 @@ const Tickets = () => {
     }
   };
 
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedTicket) return;
+
+    setIsSending(true);
+    try {
+      const { error } = await supabase
+        .from('ticket_messages')
+        .insert({
+          ticket_id: selectedTicket.id,
+          user_id: user?.id,
+          message: newMessage,
+          is_admin: false
+        });
+
+      if (error) throw error;
+
+      setNewMessage('');
+      fetchMessages(selectedTicket.id);
+
+      toast({
+        title: "Message Sent",
+        description: "Your message has been sent to support",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open':
-        return 'bg-green-500/20 text-green-400';
-      case 'in_progress':
-        return 'bg-yellow-500/20 text-yellow-400';
-      case 'closed':
-        return 'bg-gray-500/20 text-gray-400';
-      default:
-        return 'bg-blue-500/20 text-blue-400';
+      case 'open': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'closed': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'in_progress': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-500/20 text-red-400';
-      case 'normal':
-        return 'bg-blue-500/20 text-blue-400';
-      case 'low':
-        return 'bg-gray-500/20 text-gray-400';
-      default:
-        return 'bg-blue-500/20 text-blue-400';
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <UserDashboardLayout title="Support Tickets" showBackButton>
-        <div className="flex items-center justify-center py-12">
-          <div className="text-cyber-blue text-xl">Loading tickets...</div>
-        </div>
-      </UserDashboardLayout>
-    );
-  }
 
   return (
     <UserDashboardLayout title="Support Tickets" showBackButton>
@@ -158,123 +191,174 @@ const Tickets = () => {
         transition={{ duration: 0.6 }}
         className="space-y-6"
       >
-        {/* Create Ticket Button */}
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-cyber text-cyber-light">Your Support Tickets</h2>
+          <h2 className="text-2xl font-cyber text-cyber-light">Support Center</h2>
           <Button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
+            onClick={() => setShowNewTicket(true)}
+            className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <MessageSquare className="h-4 w-4 mr-2" />
             New Ticket
           </Button>
         </div>
 
-        {/* Create Ticket Form */}
-        {showCreateForm && (
+        {showNewTicket && (
           <Card className="bg-cyber-darker/60 border-cyber-blue/30">
             <CardHeader>
-              <CardTitle className="text-cyber-light font-tech">Create Support Ticket</CardTitle>
+              <CardTitle className="text-cyber-light">Create New Ticket</CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={createTicket} className="space-y-4">
-                <div>
-                  <Label htmlFor="subject" className="text-cyber-light">Subject</Label>
-                  <Input
-                    id="subject"
-                    value={formData.subject}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                    className="bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
-                    placeholder="Brief description of your issue"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="priority" className="text-cyber-light">Priority</Label>
-                  <select
-                    id="priority"
-                    value={formData.priority}
-                    onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-                    className="w-full bg-cyber-gray/30 border border-cyber-blue/20 text-cyber-light rounded-md px-3 py-2"
-                  >
-                    <option value="low">Low</option>
-                    <option value="normal">Normal</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="message" className="text-cyber-light">Message</Label>
-                  <Textarea
-                    id="message"
-                    value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                    className="bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light min-h-[100px]"
-                    placeholder="Describe your issue in detail..."
-                    required
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    disabled={isCreating}
-                    className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark font-tech"
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    {isCreating ? 'Creating...' : 'Create Ticket'}
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    variant="outline"
-                    className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-cyber-dark"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
+            <CardContent className="space-y-4">
+              <Input
+                placeholder="Subject"
+                value={newSubject}
+                onChange={(e) => setNewSubject(e.target.value)}
+                className="bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
+              />
+              <Textarea
+                placeholder="Describe your issue..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className="bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light min-h-32"
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={createTicket}
+                  disabled={isCreating || !newSubject.trim() || !newMessage.trim()}
+                  className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
+                >
+                  {isCreating ? 'Creating...' : 'Create Ticket'}
+                </Button>
+                <Button
+                  onClick={() => setShowNewTicket(false)}
+                  variant="outline"
+                  className="border-cyber-blue/30 text-cyber-blue"
+                >
+                  Cancel
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Tickets List */}
-        {tickets.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageSquare className="h-16 w-16 text-cyber-light/40 mx-auto mb-4" />
-            <h3 className="text-xl text-cyber-light/60 mb-2">No tickets yet</h3>
-            <p className="text-cyber-light/40">Create your first support ticket to get help</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {tickets.map((ticket) => (
-              <Card key={ticket.id} className="bg-cyber-darker/60 border-cyber-blue/30">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-cyber-light font-tech">
-                      {ticket.subject}
-                    </CardTitle>
-                    <div className="flex gap-2">
-                      <Badge className={getStatusColor(ticket.status)}>
-                        {ticket.status.replace('_', ' ')}
-                      </Badge>
-                      <Badge className={getPriorityColor(ticket.priority)}>
-                        {ticket.priority}
-                      </Badge>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Tickets List */}
+          <div className="lg:col-span-1 space-y-4">
+            <h3 className="text-lg font-cyber text-cyber-light">Your Tickets</h3>
+            {tickets.length === 0 ? (
+              <Card className="bg-cyber-darker/60 border-cyber-blue/30 text-center p-8">
+                <MessageSquare className="h-12 w-12 text-cyber-blue/50 mx-auto mb-4" />
+                <p className="text-cyber-light/60">No tickets yet</p>
+                <p className="text-cyber-light/40 text-sm">Create your first support ticket</p>
+              </Card>
+            ) : (
+              tickets.map((ticket) => (
+                <Card
+                  key={ticket.id}
+                  className={`bg-cyber-darker/60 border-cyber-blue/30 cursor-pointer transition-all duration-300 ${
+                    selectedTicket?.id === ticket.id ? 'border-cyber-blue' : 'hover:border-cyber-blue/60'
+                  }`}
+                  onClick={() => setSelectedTicket(ticket)}
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-cyber-light font-medium text-sm truncate">
+                          {ticket.subject}
+                        </h4>
+                        <Badge className={getStatusColor(ticket.status)}>
+                          {ticket.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center text-cyber-light/60 text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(ticket.created_at).toLocaleDateString()}
+                      </div>
                     </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+
+          {/* Messages */}
+          <div className="lg:col-span-2">
+            {selectedTicket ? (
+              <Card className="bg-cyber-darker/60 border-cyber-blue/30 h-full">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-cyber-light">{selectedTicket.subject}</CardTitle>
+                      <p className="text-cyber-light/60 text-sm">
+                        Ticket #{selectedTicket.id.slice(0, 8)}
+                      </p>
+                    </div>
+                    <Badge className={getStatusColor(selectedTicket.status)}>
+                      {selectedTicket.status.replace('_', ' ')}
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-cyber-light/60">
-                    <span>Ticket #{ticket.id.slice(0, 8)}</span>
-                    <span>Created: {new Date(ticket.created_at).toLocaleDateString()}</span>
+                <CardContent className="space-y-4">
+                  <div className="max-h-96 overflow-y-auto space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.is_admin ? 'justify-start' : 'justify-end'}`}
+                      >
+                        <div
+                          className={`max-w-xs p-3 rounded-lg ${
+                            message.is_admin
+                              ? 'bg-cyber-gray/30 text-cyber-light'
+                              : 'bg-cyber-blue/20 text-cyber-light border border-cyber-blue/30'
+                          }`}
+                        >
+                          <p className="text-sm">{message.message}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+
+                  {selectedTicket.status === 'open' && (
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder="Type your message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        className="bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={sendMessage}
+                          disabled={isSending || !newMessage.trim()}
+                          className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {isSending ? 'Sending...' : 'Send'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-cyber-blue/30 text-cyber-blue"
+                        >
+                          <Paperclip className="h-4 w-4 mr-2" />
+                          Attach
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              <Card className="bg-cyber-darker/60 border-cyber-blue/30 h-full flex items-center justify-center">
+                <div className="text-center">
+                  <MessageSquare className="h-16 w-16 text-cyber-blue/50 mx-auto mb-4" />
+                  <p className="text-cyber-light/60">Select a ticket to view messages</p>
+                </div>
+              </Card>
+            )}
           </div>
-        )}
+        </div>
       </motion.div>
     </UserDashboardLayout>
   );
