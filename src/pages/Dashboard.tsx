@@ -11,10 +11,12 @@ import {
   Clock, 
   TrendingUp,
   Users,
-  Activity
+  Activity,
+  Shield
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +29,7 @@ interface DashboardStats {
 }
 
 const Dashboard = () => {
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     pendingOrders: 0,
@@ -133,11 +135,30 @@ const Dashboard = () => {
           <h2 className="text-3xl font-cyber text-cyber-blue">
             Welcome back, {profile?.username}!
           </h2>
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center gap-4">
             <Badge variant="outline" className="border-cyber-blue/30 text-cyber-blue px-4 py-2">
               Tier: {profile?.tier}
             </Badge>
+            <Badge variant="outline" className={`px-4 py-2 ${
+              isAdmin() 
+                ? 'border-purple-500/30 text-purple-400' 
+                : 'border-green-500/30 text-green-400'
+            }`}>
+              Role: {profile?.role}
+            </Badge>
           </div>
+          
+          {/* Admin Portal Button */}
+          {isAdmin() && (
+            <div className="mt-6">
+              <Link to="/admin">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white font-tech">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Access Admin Portal
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Stats Overview */}

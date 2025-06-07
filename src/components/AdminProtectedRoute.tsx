@@ -2,13 +2,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, isAdmin } = useAuth();
+  const { toast } = useToast();
 
   if (isLoading) {
     return (
@@ -22,7 +24,15 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
     return <Navigate to="/login" replace />;
   }
 
-  if (profile?.role !== 'admin') {
+  if (!isAdmin()) {
+    // Show unauthorized toast and redirect
+    setTimeout(() => {
+      toast({
+        title: "Unauthorized Access",
+        description: "Admin access required.",
+        variant: "destructive",
+      });
+    }, 100);
     return <Navigate to="/dashboard" replace />;
   }
 
