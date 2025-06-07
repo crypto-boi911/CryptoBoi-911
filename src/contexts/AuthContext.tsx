@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UserProfile {
   id: string;
   username: string;
+  role: string;
   tier: string;
   created_at: string;
   updated_at: string;
@@ -20,6 +20,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
+  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -99,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           data: {
             username,
+            role: 'user',
             tier: 'Tier 1 – Beginner'
           }
         }
@@ -193,6 +195,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isAdmin = () => {
+    return profile?.role === 'admin';
+  };
+
   const value = {
     user,
     session,
@@ -200,7 +206,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
-    isLoading
+    isLoading,
+    isAdmin
   };
 
   return (

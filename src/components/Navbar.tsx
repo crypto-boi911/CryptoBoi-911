@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Shield, LogOut, ShoppingCart, User } from 'lucide-react';
+import { Menu, X, Shield, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
@@ -10,7 +10,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,14 +81,6 @@ const Navbar = () => {
             
             {user ? (
               <div className="flex items-center gap-4">
-                {profile?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="font-tech font-medium text-purple-400 hover:text-purple-300 transition-colors duration-300"
-                  >
-                    Admin
-                  </Link>
-                )}
                 <button 
                   onClick={handleLogout}
                   className="cyber-button flex items-center gap-2"
@@ -159,27 +151,16 @@ const Navbar = () => {
               
               <div className="px-3 py-2">
                 {user ? (
-                  <div className="space-y-2">
-                    {profile?.role === 'admin' && (
-                      <Link 
-                        to="/admin" 
-                        onClick={() => setIsOpen(false)}
-                        className="block w-full text-left cyber-button text-purple-400"
-                      >
-                        Admin Panel
-                      </Link>
-                    )}
-                    <button 
-                      onClick={() => {
-                        handleLogout();
-                        setIsOpen(false);
-                      }}
-                      className="cyber-button w-full flex items-center gap-2 justify-center"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Logout</span>
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="cyber-button w-full flex items-center gap-2 justify-center"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
                 ) : (
                   <div className="space-y-2">
                     <Link 
