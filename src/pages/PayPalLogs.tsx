@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,16 +48,16 @@ const PayPalLogs = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="PayPal Logs" showBackButton>
+      <UserDashboardLayout title="PayPal Logs" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading products...</div>
         </div>
-      </DashboardLayout>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="PayPal Logs" showBackButton>
+    <UserDashboardLayout title="PayPal Logs" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,7 +91,7 @@ const PayPalLogs = () => {
           </div>
         )}
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

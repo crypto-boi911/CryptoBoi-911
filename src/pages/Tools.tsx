@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,16 +48,16 @@ const Tools = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Tools" showBackButton>
+      <UserDashboardLayout title="Tools" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading products...</div>
         </div>
-      </DashboardLayout>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Tools" showBackButton>
+    <UserDashboardLayout title="Tools" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,7 +91,7 @@ const Tools = () => {
           </div>
         )}
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

@@ -8,14 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,8 +23,7 @@ const Login = () => {
     const { error } = await signIn(email, password);
     
     if (!error) {
-      // Redirect will be handled by AuthContext and App.tsx routing
-      navigate('/auth-redirect');
+      navigate('/dashboard');
     }
     
     setIsLoading(false);
@@ -69,7 +66,7 @@ const Login = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-cyber-light">Password</Label>
+                  <Label htmlFor="password" className="text-cyber-light">24-Digit Access Key</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
                     <Input
@@ -78,7 +75,7 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
-                      placeholder="Enter your password"
+                      placeholder="Enter your 24-digit access key"
                       required
                     />
                   </div>

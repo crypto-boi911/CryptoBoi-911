@@ -13,7 +13,6 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -21,7 +20,8 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
+    // Validate 24-digit access key
+    if (password.length !== 24 || !/^\d{24}$/.test(password)) {
       return;
     }
     
@@ -50,7 +50,7 @@ const Signup = () => {
               </div>
               <CardTitle className="text-2xl font-cyber text-cyber-blue">Create Account</CardTitle>
               <CardDescription className="text-cyber-light/70">
-                Join SecureVault today
+                Join HUXLOGS today
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -88,7 +88,7 @@ const Signup = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-cyber-light">Password</Label>
+                  <Label htmlFor="password" className="text-cyber-light">24-Digit Access Key</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
                     <Input
@@ -97,34 +97,24 @@ const Signup = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
-                      placeholder="Create a password"
+                      placeholder="Enter 24-digit access key"
+                      maxLength={24}
+                      pattern="\d{24}"
+                      title="Must be exactly 24 digits"
                       required
                     />
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-cyber-light">Confirm Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-light/50" />
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10 bg-cyber-gray/30 border-cyber-blue/20 text-cyber-light"
-                      placeholder="Confirm your password"
-                      required
-                    />
-                  </div>
-                  {password !== confirmPassword && confirmPassword && (
-                    <p className="text-red-400 text-sm">Passwords do not match</p>
+                  {password && password.length !== 24 && (
+                    <p className="text-red-400 text-sm">Access key must be exactly 24 digits</p>
+                  )}
+                  {password && !/^\d+$/.test(password) && (
+                    <p className="text-red-400 text-sm">Access key must contain only numbers</p>
                   )}
                 </div>
                 
                 <Button
                   type="submit"
-                  disabled={isLoading || password !== confirmPassword}
+                  disabled={isLoading || password.length !== 24 || !/^\d{24}$/.test(password)}
                   className="w-full bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark"
                 >
                   {isLoading ? 'Creating Account...' : 'Create Account'}

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,16 +48,16 @@ const CashAppLogs = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="CashApp Logs" showBackButton>
+      <UserDashboardLayout title="CashApp Logs" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading products...</div>
         </div>
-      </DashboardLayout>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="CashApp Logs" showBackButton>
+    <UserDashboardLayout title="CashApp Logs" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ const CashAppLogs = () => {
           </h2>
           <p className="text-cyber-light/70 max-w-2xl mx-auto">
             Verified CashApp accounts with confirmed balances. All accounts come with 
-            established transaction history and verified identity.
+            full access credentials and transaction history verification.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ const CashAppLogs = () => {
           </div>
         )}
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

@@ -10,14 +10,10 @@ import {
   ShoppingCart, 
   Clock, 
   TrendingUp,
-  Users,
-  Activity,
-  Shield
+  Activity
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,7 +25,7 @@ interface DashboardStats {
 }
 
 const Dashboard = () => {
-  const { profile, isAdmin } = useAuth();
+  const { profile } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     pendingOrders: 0,
@@ -123,44 +119,13 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardLayout title="Dashboard">
+    <UserDashboardLayout title="Dashboard">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="space-y-8"
       >
-        {/* Welcome Section */}
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl font-cyber text-cyber-blue">
-            Welcome back, {profile?.username}!
-          </h2>
-          <div className="flex justify-center items-center gap-4">
-            <Badge variant="outline" className="border-cyber-blue/30 text-cyber-blue px-4 py-2">
-              Tier: {profile?.tier}
-            </Badge>
-            <Badge variant="outline" className={`px-4 py-2 ${
-              isAdmin() 
-                ? 'border-purple-500/30 text-purple-400' 
-                : 'border-green-500/30 text-green-400'
-            }`}>
-              Role: {profile?.role}
-            </Badge>
-          </div>
-          
-          {/* Admin Portal Button */}
-          {isAdmin() && (
-            <div className="mt-6">
-              <Link to="/admin">
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white font-tech">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Access Admin Portal
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-cyber-darker/60 border-cyber-blue/30">
@@ -246,21 +211,8 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
-        {/* Recent Activity */}
-        <Card className="bg-cyber-darker/60 border-cyber-blue/30">
-          <CardHeader>
-            <CardTitle className="text-cyber-light font-tech">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-cyber-light/40 mx-auto mb-4" />
-              <p className="text-cyber-light/60">Your recent orders and activities will appear here</p>
-            </div>
-          </CardContent>
-        </Card>
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

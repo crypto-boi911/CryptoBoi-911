@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,16 +48,16 @@ const CCLinkable = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="CC Linkable" showBackButton>
+      <UserDashboardLayout title="CC Linkable" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading products...</div>
         </div>
-      </DashboardLayout>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="CC Linkable" showBackButton>
+    <UserDashboardLayout title="CC Linkable" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -69,8 +69,8 @@ const CCLinkable = () => {
             Credit Card Linkable Accounts
           </h2>
           <p className="text-cyber-light/70 max-w-2xl mx-auto">
-            Verified credit card accounts ready for linking to various services. 
-            All cards come with confirmed balances and established credit history.
+            Premium credit card accounts with linkable capabilities. Perfect for 
+            secure transactions and verified payment processing.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ const CCLinkable = () => {
           </div>
         )}
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

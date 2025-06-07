@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DashboardLayout from '@/components/DashboardLayout';
+import UserDashboardLayout from '@/components/UserDashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,16 +77,16 @@ const OrderHistory = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Order History" showBackButton>
+      <UserDashboardLayout title="Order History" showBackButton>
         <div className="flex items-center justify-center py-12">
           <div className="text-cyber-blue text-xl">Loading orders...</div>
         </div>
-      </DashboardLayout>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Order History" showBackButton>
+    <UserDashboardLayout title="Order History" showBackButton>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ const OrderHistory = () => {
           </div>
         )}
       </motion.div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 };
 

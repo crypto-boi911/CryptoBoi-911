@@ -7,19 +7,15 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Home = () => {
-  const { user, profile, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is logged in, redirect based on role
-    if (user && profile && !isLoading) {
-      if (profile.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+    // If user is logged in, redirect to dashboard
+    if (user && !isLoading) {
+      navigate('/dashboard');
     }
-  }, [user, profile, isLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
   if (isLoading) {
     return (
@@ -49,7 +45,7 @@ const Home = () => {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-cyber font-bold text-cyber-blue mb-6">
-              SecureVault
+              HUXLOGS
             </h1>
             
             <p className="text-xl md:text-2xl text-cyber-light/80 mb-8 max-w-3xl mx-auto">
@@ -62,16 +58,16 @@ const Home = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/login">
+              <Link to="/signup">
                 <Button className="bg-cyber-blue hover:bg-cyber-blue/80 text-cyber-dark text-lg px-8 py-4 h-auto">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               
-              <Link to="/signup">
+              <Link to="/login">
                 <Button variant="outline" className="border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue/10 text-lg px-8 py-4 h-auto">
-                  Create Account
+                  Login
                 </Button>
               </Link>
             </div>

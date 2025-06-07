@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 interface UserProfile {
   id: string;
   username: string;
-  role: string;
   tier: string;
   created_at: string;
   updated_at: string;
@@ -21,7 +20,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
-  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -91,21 +89,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const getRedirectUrl = () => {
-    // Use production URL for redirects
-    const productionUrl = 'https://krypt-replica-project-637b0c65.vercel.app';
-    const currentUrl = window.location.origin;
-    
-    // Always use production URL for email redirects to ensure consistency
-    return `${productionUrl}/dashboard`;
-  };
-
   const signUp = async (email: string, password: string, username: string) => {
     try {
       setIsLoading(true);
-      
-      // Determine role based on email
-      const role = email === 'michedmondson0204@gmail.com' ? 'admin' : 'user';
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -113,9 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           data: {
             username,
-            role
-          },
-          emailRedirectTo: getRedirectUrl()
+            tier: 'Tier 1 – Beginner'
+          }
         }
       });
 
@@ -208,10 +193,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isAdmin = () => {
-    return profile?.role === 'admin';
-  };
-
   const value = {
     user,
     session,
@@ -219,8 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
-    isLoading,
-    isAdmin
+    isLoading
   };
 
   return (
